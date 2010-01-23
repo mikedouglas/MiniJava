@@ -1,0 +1,9 @@
+#Tue Jan 06 11:26:28 PST 2009
+CLEAR_CONSOLE=false
+JJ_NATURE=true
+JTB_OPTIONS=-p\=minijava.parser
+RUNTIME_JAR=-intern-
+RUNTIME_JTBJAR=-intern-
+SHOW_CONSOLE=true
+SUPPRESS_WARNINGS=true
+eclipse.preferences.version=1

@@ -1,0 +1,14 @@
+<project name="project1" default="handin_zip">
+	<description>
+            CS 411 Project 1: Parsing
+    </description>
+	
+	<target name="handin_zip" description="zip up the assignment source code, excluding the tests">
+		<zip destfile="project1-handin.zip" filesonly="true">
+			<fileset dir="." id="src_dir">
+				<exclude name="minijava/test/parser/*Parse.java"/>
+			</fileset>
+		</zip>
+	</target>
+
+</project>
