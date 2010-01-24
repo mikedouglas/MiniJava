@@ -1,10 +1,14 @@
+options {
+    STATIC = false;
+}
+
 PARSER_BEGIN(JCCMiniJavaParser)
 
 package minijava.parser.jcc;
 
 import minijava.ast.*;
 
-public class JCCMiniJavaParser {}
+public class JCCMiniJavaParser {}
 
 PARSER_END(JCCMiniJavaParser)
 
@@ -13,7 +17,58 @@ SKIP : {
 |   "\t"
 |   "\n"
 |   "\r"
-|   <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+|   < "//" (~["\n","\r"])* ("\n" | "\r" | "\r\n") >
+|   < "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/" >
+}
+
+// keywords
+TOKEN : {
+    < BOOLEAN: "boolean" >
+|   < CLASS: "class" >
+|   < ELSE: "else" >
+|   < EXTENDS: "extends" >
+|   < FALSE: "false" >
+|   < IF: "if" >
+|   < INT: "int" >
+|   < LENGTH: "length" >
+|   < NEW: "new" >
+|   < NULL: "null" >
+|   < PRINT: "System.out.println" >
+|   < PUBLIC: "public" >
+|   < RETURN: "return" >
+|   < STATIC: "static" >
+|   < THIS: "this" >
+|   < TRUE: "true" >
+|   < VOID: "void" >
+|   < WHILE: "while" >
+}
+
+// identifiers
+TOKEN : {
+    < IDENTIFIER: <LETTER> (<LETTER>|<DIGIT>|"_")* >
+|   < INT_LITERAL: "0" | (["1"-"9"] (<DIGIT>)*) >
+|   < LETTER: ["a"-"z"] | ["A"-"Z"] >
+|   < DIGIT: ["0"-"9"] >
+}
+
+// misc
+TOKEN : {
+    < LPAREN: "(" >
+|   < RPAREN: ")" >
+|   < LBRACK: "[" >
+|   < RBRACK: "]" >
+|   < LBRACE: "{" >
+|   < RBRACE: "}" >
+|   < ADD: "+" >
+|   < AND: "&&" >
+|   < ASSIGN: "=" >
+|   < BANG: "!" >
+|   < COMMA: "," >
+|   < DOT: "." >
+|   < LTHAN: "<" >
+|   < MINUS: "-" >
+|   < MULT: "*" >
+|   < SEMICOLON: ";" >
 }
 
 Program Program() : { }
