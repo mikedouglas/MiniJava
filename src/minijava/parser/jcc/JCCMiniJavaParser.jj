@@ -17,7 +17,7 @@ SKIP : {
 |   "\t"
 |   "\n"
 |   "\r"
-|   < "//" (~["\n","\r"])* ("\n" | "\r" | "\r\n") >
+|   < "//" (~["\n","\r"])*  > //("\n" | "\r" | "\r\n") We dont want to force single line comments to end with new lines, because then a comment at the end of the file may fail to parse.
 |   < "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/" >
 }
 
