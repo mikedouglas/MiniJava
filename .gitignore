@@ -1,1 +1,2 @@
 bin/*
+src/minijava/parser/jcc/*.java

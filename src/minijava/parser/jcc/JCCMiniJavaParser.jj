@@ -1,0 +1,23 @@
+PARSER_BEGIN(JCCMiniJavaParser)
+
+package minijava.parser.jcc;
+
+import minijava.ast.*;
+
+public class JCCMiniJavaParser {}
+
+PARSER_END(JCCMiniJavaParser)
+
+SKIP : {
+    " "
+|   "\t"
+|   "\n"
+|   "\r"
+|   <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+}
+
+Program Program() : { }
+{
+    <EOF>
+    { return null; }
+}
