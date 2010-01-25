@@ -119,7 +119,7 @@ MethodDecl MethodDeclaration() :  {Type t;Token id;NodeList<VarDecl> args;ArrayL
              | ( {Statement stm;}  stm = Statement() {body.add(stm);})
 
          )*
-        <RETURN> {Expression rtn;}rtn =Expression() <SEMICOLON>
+        <RETURN> {Expression rtn;}(rtn =Expression()) <SEMICOLON>
     <RBRACE>
     
     {return new MethodDecl(t,id.image,args,new NodeList<VarDecl>(vars),new NodeList(body),rtn);}
@@ -145,13 +145,13 @@ Statement Statement() : {Statement stm;Statement stmLocal; Expression exp; Expre
   (//A block of statements
   {ArrayList<Statement> stms = new ArrayList<Statement>();}  
     <LBRACE> ((stmLocal= Statement()) {stms.add(stmLocal);})* <RBRACE>
-  {  stm = new Block(new NodeList<Statement>(stms));}
+  {  return new Block(new NodeList<Statement>(stms));}
   )
 |   ({Statement thn; Statement els;} <IF> <LPAREN> (tst = Expression()) <RPAREN>
        (thn =  Statement())
       <ELSE>
        (els= Statement())        
-       {stm = new If(tst,thn,els);}
+       {return new If(tst,thn,els);}
        )
 |   ({ Statement body;} <WHILE> <LPAREN> (tst =  Expression()) <RPAREN>
        (body = Statement()) {return new While(tst,body);})
@@ -160,13 +160,12 @@ Statement Statement() : {Statement stm;Statement stmLocal; Expression exp; Expre
     <ASSIGN> (assign = Expression()) <SEMICOLON> 
     
     {if(index!=null)
-        stm =  new ArrayAssign(id.image,index,assign);
+       return new ArrayAssign(id.image,index,assign);
     else
-         stm = new Assign(id.image,assign);
+         return new Assign(id.image,assign);
     }
      )
     
-    {return stm;}
 }
 
 Expression Expression() : {Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
