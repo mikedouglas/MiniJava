@@ -7,7 +7,7 @@ PARSER_BEGIN(JCCMiniJavaParser)
 package minijava.parser.jcc;
 
 import minijava.ast.*;
-
+import java.util.ArrayList;
 public class JCCMiniJavaParser {}
 
 PARSER_END(JCCMiniJavaParser)
@@ -42,6 +42,7 @@ TOKEN : {
 |   < TRUE: "true" >
 |   < VOID: "void" >
 |   < WHILE: "while" >
+|   < LENGTH: "length" >
 }
 
 // identifiers
@@ -72,112 +73,191 @@ TOKEN : {
 |   < SEMICOLON: ";" >
 }
 
-Program Program() : { }
+Program Program() : {MainClass mainClass;ClassDecl curClass; ArrayList<ClassDecl> classes = new ArrayList<ClassDecl>();}
 {
-    MainClass() ( ClassDeclaration() )* <EOF>
-    { return null; }
+    mainClass = MainClass() (    
+     curClass = ClassDeclaration() 
+    {classes.add(curClass);}
+    )* <EOF>
+    { return new Program(mainClass,new NodeList<ClassDecl>(classes)); }
 }
 
-void MainClass() : { }
+MainClass MainClass() : {Token className;Token argName;Statement statement; }
 {
-    <CLASS> <IDENTIFIER> <LBRACE>
+    <CLASS> (className = <IDENTIFIER>) <LBRACE>
         <PUBLIC> <STATIC> <VOID> <MAIN> <LPAREN>
-        <STRING> <LBRACK> <RBRACK> <IDENTIFIER> <RPAREN> <LBRACE>
-            Statement()
+        <STRING> <LBRACK> <RBRACK> (argName=<IDENTIFIER>) <RPAREN> <LBRACE>
+           (statement = Statement())
         <RBRACE>
     <RBRACE>
+    
+    {return new MainClass(className.image,argName.image,statement);}
 }
 
-void ClassDeclaration() : { }
+ClassDecl ClassDeclaration() : {Token id; Token exts = null;ArrayList<VarDecl> vars = new ArrayList<VarDecl>(); 
+ArrayList<MethodDecl> methods = new ArrayList<MethodDecl>();}
 {
-    <CLASS> <IDENTIFIER> ( <EXTENDS> <IDENTIFIER> )? <LBRACE>
-        ( VarDeclaration() | MethodDeclaration() )*
+    <CLASS> id=<IDENTIFIER> ( <EXTENDS> (exts= <IDENTIFIER>) )? <LBRACE>
+        ( ({VarDecl v=null;} v=VarDeclaration(VarDecl.Kind.FIELD) {vars.add(v);}) 
+        | ({MethodDecl d=null;} d=MethodDeclaration(){methods.add(d);}) )*
     <RBRACE>
+    
+    {return new ClassDecl(id.image, (exts==null?"Object":exts.image),vars,methods);}
 }
 
-void VarDeclaration() : { }
+VarDecl VarDeclaration(VarDecl.Kind kind) : {Type t;Token id; }
 {
-    Type() <IDENTIFIER> <SEMICOLON>
+   t= Type() id=<IDENTIFIER> <SEMICOLON>
+   {return new VarDecl(kind,t,id.image);}
 }
 
-void MethodDeclaration() : { }
+MethodDecl MethodDeclaration() :  {Type t;Token id;NodeList<VarDecl> args;ArrayList<Statement> body = new ArrayList<Statement>();ArrayList<VarDecl> vars = new ArrayList<VarDecl>() ;}
 {
+    <PUBLIC> t=Type() id= <IDENTIFIER> <LPAREN> args=FormalList() <RPAREN> <LBRACE>        
+        (LOOKAHEAD(2) 
+               ({VarDecl v;} v= VarDeclaration(VarDecl.Kind.LOCAL) {vars.add(v);})//This doesn't quite match the specification
+             | ( {Statement stm;}  stm = Statement() {body.add(stm);})
 
-    <PUBLIC> Type() <IDENTIFIER> <LPAREN> FormalList() <RPAREN> <LBRACE>
-        ( LOOKAHEAD(2) VarDeclaration() | Statement() )*
-        <RETURN> Expression() <SEMICOLON>
+         )*
+        <RETURN> {Expression rtn;}(rtn =Expression()) <SEMICOLON>
     <RBRACE>
+    
+    {return new MethodDecl(t,id.image,args,new NodeList<VarDecl>(vars),new NodeList(body),rtn);}
 }
 
-void FormalList() : { }
+NodeList<VarDecl> FormalList() : {Type t; Token id; ArrayList<VarDecl> vars = new ArrayList<VarDecl>(); }
 {
-    ( Type() <IDENTIFIER> ( <COMMA> Type() <IDENTIFIER> )* )?
+    ( t=Type() id=<IDENTIFIER> {vars.add(new VarDecl(VarDecl.Kind.FORMAL,t,id.image));}
+     ( <COMMA> t=Type() id=<IDENTIFIER> {vars.add(new VarDecl(VarDecl.Kind.FORMAL,t,id.image));})* )?
+    {return new NodeList<VarDecl>(vars);}
 }
 
-void Type() : { }
+Type Type() : { }
 {
- LOOKAHEAD(2) //Explanation: these lookahead statements can sometimes be used to resolve choice conflicts, but they are tricky.
- //I just dropped them in everywhere there was a conflict, until it compiled. But they may not lead to the grammar behaviour
- //we want in the tests. So we may have to remove them later. See:  https://javacc.dev.java.net/doc/lookahead.html
- //Basically, they mean that for the next choice, this is an LL(2) parser, instead of an LL(1). We can also do this globally,
- //but it is less efficient.
-    ( <INT> <LBRACK> <RBRACK> )
-|   <BOOLEAN>
-|   <INT>
-|   <STRING>
-|   <IDENTIFIER>
+    ( <INT> (<LBRACK> <RBRACK> {return new IntArrayType();})? {return new IntegerType();})
+|  ( <BOOLEAN> {return new BooleanType();})
+| (  <STRING>{return new ObjectType("String");})//is it neccesary to split these two types?
+|  ({Token id;} id= <IDENTIFIER>{return new ObjectType(id.image);})
 }
 
-void Statement() : { }
+Statement Statement() : {Statement stm;Statement stmLocal; Expression exp; Expression tst; }
 {
-    <LBRACE> ( Statement() )* <RBRACE>
-|   ( <IF> <LPAREN> Expression() <RPAREN>
-        Statement()
+  (//A block of statements
+  {ArrayList<Statement> stms = new ArrayList<Statement>();}  
+    <LBRACE> ((stmLocal= Statement()) {stms.add(stmLocal);})* <RBRACE>
+  {  return new Block(new NodeList<Statement>(stms));}
+  )
+|   ({Statement thn; Statement els;} <IF> <LPAREN> (tst = Expression()) <RPAREN>
+       (thn =  Statement())
       <ELSE>
-        Statement() )
-|   ( <WHILE> <LPAREN> Expression() <RPAREN>
-        Statement() )
-|   ( <PRINT> <LPAREN> Expression() <RPAREN> <SEMICOLON> )
-|   ( <IDENTIFIER> ( <LBRACK> Expression() <RBRACK> )?
-    <ASSIGN> Expression() <SEMICOLON> )
+       (els= Statement())        
+       {return new If(tst,thn,els);}
+       )
+|   ({ Statement body;} <WHILE> <LPAREN> (tst =  Expression()) <RPAREN>
+       (body = Statement()) {return new While(tst,body);})
+|   ( <PRINT> <LPAREN> (exp = Expression()) <RPAREN> <SEMICOLON> {return new Print(exp);})
+|   ({Token id; Expression index = null; Expression assign;}(id = <IDENTIFIER> )( <LBRACK> (index = Expression()) <RBRACK> )?
+    <ASSIGN> (assign = Expression()) <SEMICOLON> 
+    
+    {if(index!=null)
+       return new ArrayAssign(id.image,index,assign);
+    else
+         return new Assign(id.image,assign);
+    }
+     )
+    
 }
 
+Expression Expression() : {Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
+{    
+        (exp =LThanTerm() ) (  <AND>  cur = Expression()
+     {exp = new And(exp,cur);})*
+     
+      { return exp;}
+}
 
+Expression LThanTerm() : {Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
+{     
+     (exp =MinusTerm() ) (  <LTHAN>  cur = Expression()
+     {exp = new LessThan(exp,cur);})*
+     
+      { return exp;}
+}
 
-void rightExpression():{}
+Expression MinusTerm() : {Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
+{          
+     (exp =AddTerm() ) (  <MINUS>  cur = Expression()
+     {exp = new Minus(exp,cur);})*
+     
+      { return exp;}
+}
+
+Expression AddTerm() :{Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
 {
-    ( ( <AND> | <LTHAN> | <ADD> | <MINUS> | <MULT> ) Expression() )
-|   ( <LBRACK> Expression() <RBRACK> )
-|   ( <DOT>  dotStatement()) //left factored
+
+     
+         (exp =MultTerm() ) (  <ADD>  cur = Expression()
+     {exp = new Plus(exp,cur);})*
+     
+      { return exp;}
 }
 
-void dotStatement():{}
+Expression MultTerm() :{Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
 {
- LOOKAHEAD(2)
-	(<IDENTIFIER>) //so we have a problem here. The grammaer specifies the string literal "length" here. 
-	//In fact, in java, this should be any valid identifier, because it is just referencing a public field. 
-	//and identifiers are allowed to be called "length", so we can't match length as a non-identifier token... not sure what to do.
-	
-	| (<IDENTIFIER> <LPAREN>  (Expression() ( <COMMA> Expression() )* )? <RPAREN> ) //this pattern wont match the first argument correctly
+       (exp =DotTerm() ) (  <MULT>  cur = Expression()
+     {exp = new Times(exp,cur);})*
+     
+      { return exp;}
+     
+    
 }
-void Expression() : { }
+
+Expression DotTerm() : {Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
 {
-
-
- (  ( <NEW> newExpression()) //left factored
-|   ( <BANG> Expression() )
-|   ( <LPAREN> Expression() <RPAREN> )
-|   <INT_LITERAL>
-|   <TRUE>
-|   <FALSE>
-|   <IDENTIFIER>
-|   <THIS> )
-(  LOOKAHEAD(2) rightExpression())? 
-
+       (exp =ArrayTerm() ) (  <DOT>  cur = DotRHS(exp) 
+     {exp = cur;})*
+     
+      { return exp;}
+     
 }
 
-void newExpression() : {}
+Expression DotRHS(Expression lhs ) : {Expression mthd;ArrayList<Expression> args = new ArrayList<Expression>();}
 {
-	(<INT><LBRACK> Expression() <RBRACK> )
-	| ( <IDENTIFIER> <LPAREN> <RPAREN>)
+    (<LENGTH>{return new ArrayLength(lhs);})//note: this may mean that our grammar does not allow identifiers to be named "length"
+|({Token id;}   id=<IDENTIFIER> <LPAREN> (
+
+ (mthd= Expression()) ({Expression arg =null;} <COMMA> (Expression() {args.add(arg);} ))* )? <RPAREN>
+   { return new Call(lhs,id.image,new NodeList<Expression>(args));}
+ )
 }
+
+Expression ArrayTerm() : { }
+{
+    {Expression term; Expression index = null;}
+    term =TerminalExp() ( <LBRACK>  index=Expression() <RBRACK> )?
+    {if(index!=null)
+       return new ArrayLookup(term,index);
+      else
+       return term; 
+    }
+}
+
+Expression TerminalExp() : {Token id; Expression term; }
+{
+    (id = <INT_LITERAL> {return new IntegerLiteral(String.valueOf(id.image));})
+| ( id= <IDENTIFIER> {return new IdentifierExp(id.image);})
+|   <NEW> (term = NewRHS() {return term;})
+|   <BANG> (term = Expression() {return new Not(term);})
+|   (<LPAREN>( term = Expression() ) <RPAREN>{return term;})
+|  ( <THIS> {return new This();})
+|   (<TRUE>{return new BooleanLiteral(true);})
+|  ( <FALSE>{return new BooleanLiteral(false);})
+}
+
+Expression NewRHS() : { }
+{
+    ({Expression exp;} <INT> <LBRACK> (exp = Expression()) <RBRACK> {return new NewArray(exp);})
+ | ( {Token id;}(id = <IDENTIFIER>) <LPAREN> <RPAREN>{return new NewObject(id.image);})
+}
+
+
