@@ -102,8 +102,9 @@ void VarDeclaration() : { }
 
 void MethodDeclaration() : { }
 {
+
     <PUBLIC> Type() <IDENTIFIER> <LPAREN> FormalList() <RPAREN> <LBRACE>
-        ( VarDeclaration() | Statement() )*
+        ( LOOKAHEAD(2) VarDeclaration() | Statement() )*
         <RETURN> Expression() <SEMICOLON>
     <RBRACE>
 }
@@ -115,6 +116,11 @@ void FormalList() : { }
 
 void Type() : { }
 {
+ LOOKAHEAD(2) //Explanation: these lookahead statements can sometimes be used to resolve choice conflicts, but they are tricky.
+ //I just dropped them in everywhere there was a conflict, until it compiled. But they may not lead to the grammar behaviour
+ //we want in the tests. So we may have to remove them later. See:  https://javacc.dev.java.net/doc/lookahead.html
+ //Basically, they mean that for the next choice, this is an LL(2) parser, instead of an LL(1). We can also do this globally,
+ //but it is less efficient.
     ( <INT> <LBRACK> <RBRACK> )
 |   <BOOLEAN>
 |   <INT>
@@ -136,23 +142,42 @@ void Statement() : { }
     <ASSIGN> Expression() <SEMICOLON> )
 }
 
+
+
+void rightExpression():{}
+{
+    ( ( <AND> | <LTHAN> | <ADD> | <MINUS> | <MULT> ) Expression() )
+|   ( <LBRACK> Expression() <RBRACK> )
+|   ( <DOT>  dotStatement()) //left factored
+}
+
+void dotStatement():{}
+{
+ LOOKAHEAD(2)
+	(<IDENTIFIER>) //so we have a problem here. The grammaer specifies the string literal "length" here. 
+	//In fact, in java, this should be any valid identifier, because it is just referencing a public field. 
+	//and identifiers are allowed to be called "length", so we can't match length as a non-identifier token... not sure what to do.
+	
+	| (<IDENTIFIER> <LPAREN>  ( ( <COMMA> Expression() )+ )? <RPAREN> ) //this pattern wont match the first argument correctly
+}
 void Expression() : { }
 {
-    ( Expression() ( <AND> | <LTHAN> | <ADD> | <MINUS> | <MULT> )
-      Expression() )
-|   ( Expression() <LBRACK> Expression() <RBRACK> )
-|   ( Expression() <DOT> "length" )
-|   ( Expression() <DOT> <IDENTIFIER> <LPAREN>
-      ( Expression() ( <COMMA> Expression() )* )? <RPAREN> )
-|   ( <NEW> <INT> <LBRACK> Expression() <RBRACK> )
-|   ( <NEW> <IDENTIFIER> <LPAREN> <RPAREN> )
+
+
+ (  ( <NEW> newExpression()) //left factored
 |   ( <BANG> Expression() )
 |   ( <LPAREN> Expression() <RPAREN> )
 |   <INT_LITERAL>
 |   <TRUE>
 |   <FALSE>
 |   <IDENTIFIER>
-|   <THIS>
+|   <THIS> )
+(  LOOKAHEAD(2) rightExpression())? 
+
 }
 
-
+void newExpression() : {}
+{
+	(<INT><LBRACK> Expression() <RBRACK> )
+	| ( <IDENTIFIER> <LPAREN> <RPAREN>)
+}
