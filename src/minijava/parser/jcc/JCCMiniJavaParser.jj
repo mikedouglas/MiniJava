@@ -75,6 +75,8 @@ TOKEN : {
 
 Program Program() : {MainClass mainClass;ClassDecl curClass; ArrayList<ClassDecl> classes = new ArrayList<ClassDecl>();}
 {
+{ System.setProperty("line.separator","\n");}//well, this is a hack if there ever was one. On windows boxes, the newlines produced
+//by pretty printer must be unix style.
     mainClass = MainClass() (    
      curClass = ClassDeclaration() 
     {classes.add(curClass);}
