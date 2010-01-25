@@ -42,6 +42,7 @@ TOKEN : {
 |   < TRUE: "true" >
 |   < VOID: "void" >
 |   < WHILE: "while" >
+|   < LENGTH: "length" >
 }
 
 // identifiers
@@ -115,9 +116,8 @@ void FormalList() : { }
 
 void Type() : { }
 {
-    ( <INT> <LBRACK> <RBRACK> )
+    ( <INT> (<LBRACK> <RBRACK>)? )
 |   <BOOLEAN>
-|   <INT>
 |   <STRING>
 |   <IDENTIFIER>
 }
@@ -138,21 +138,61 @@ void Statement() : { }
 
 void Expression() : { }
 {
-    ( Expression() ( <AND> | <LTHAN> | <ADD> | <MINUS> | <MULT> )
-      Expression() )
-|   ( Expression() <LBRACK> Expression() <RBRACK> )
-|   ( Expression() <DOT> "length" )
-|   ( Expression() <DOT> <IDENTIFIER> <LPAREN>
-      ( Expression() ( <COMMA> Expression() )* )? <RPAREN> )
-|   ( <NEW> <INT> <LBRACK> Expression() <RBRACK> )
-|   ( <NEW> <IDENTIFIER> <LPAREN> <RPAREN> )
-|   ( <BANG> Expression() )
-|   ( <LPAREN> Expression() <RPAREN> )
-|   <INT_LITERAL>
+	LThanTerm() ( <AND> Expression() )*
+}
+
+void LThanTerm() : { }
+{
+	MinusTerm() ( <LTHAN> Expression() )*
+}
+
+void MinusTerm() : { }
+{
+    AddTerm() ( <MINUS> Expression() )*
+}
+
+void AddTerm() : { }
+{
+	MultTerm() ( <ADD> Expression() )*
+}
+
+void MultTerm() : { }
+{
+	DotTerm() ( <MULT> Expression() )*
+}
+
+void DotTerm() : { }
+{
+	ArrayTerm() ( <DOT> DotRHS() )?
+}
+
+void DotRHS() : { }
+{
+	<LENGTH>
+|	<IDENTIFIER> <LPAREN> ( Expression() ( <COMMA> Expression() )* )? <RPAREN>
+}
+
+void ArrayTerm() : { }
+{
+	TerminalExp() ( <LBRACK> Expression() <RBRACK> )?
+}
+
+void TerminalExp() : { }
+{
+	<INT_LITERAL>
+|   <IDENTIFIER>
+|   <NEW> NewRHS()
+|   <BANG> Expression()
+|   <LPAREN> Expression() <RPAREN>
+|   <THIS>
 |   <TRUE>
 |   <FALSE>
-|   <IDENTIFIER>
-|   <THIS>
+}
+
+void NewRHS() : { }
+{
+ 	<INT> <LBRACK> Expression() <RBRACK>
+ |  <IDENTIFIER> <LPAREN> <RPAREN>
 }
 
 
