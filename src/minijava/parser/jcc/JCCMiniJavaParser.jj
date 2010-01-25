@@ -229,11 +229,11 @@ Expression DotTerm() : {Expression exp;Expression cur = null; ArrayList<Expressi
      
 }
 
-Expression DotRHS(Expression lhs ) : {Expression mthd;ArrayList<Expression> args = new ArrayList<Expression>();}
+Expression DotRHS(Expression lhs ) : {Expression arg;ArrayList<Expression> args = new ArrayList<Expression>();}
 {
 	(<LENGTH>{return new ArrayLength(lhs);})//note: this may mean that our grammar does not allow identifiers to be named "length"
 |({Token id;}	id=<IDENTIFIER> <LPAREN> (
- (mthd= Expression()) ({Expression arg =null;} <COMMA> (Expression() {args.add(arg);} ))* )? <RPAREN>
+ (arg= Expression() {args.add(arg);}) ( <COMMA> (arg = Expression() {args.add(arg);} ))* )? <RPAREN>
    { return new Call(lhs,id.image,new NodeList<Expression>(args));}
  )
 }
