@@ -169,8 +169,10 @@ Statement Statement() : {Statement stm;Statement stmLocal; Expression exp; Expre
 }
 
 Expression Expression() : {Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
-{    
-        (exp =LThanTerm() ) (  <AND>  cur = Expression()
+
+{	 
+	    (exp =LThanTerm() ) (  <AND>  cur = Expression()
+
      {exp = new And(exp,cur);})*
      
       { return exp;}
@@ -178,7 +180,9 @@ Expression Expression() : {Expression exp;Expression cur = null; ArrayList<Expre
 
 Expression LThanTerm() : {Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
 {     
-     (exp =MinusTerm() ) (  <LTHAN>  cur = Expression()
+
+	 (exp =MinusTerm() ) (  <LTHAN>  cur = Expression()
+
      {exp = new LessThan(exp,cur);})*
      
       { return exp;}
@@ -209,12 +213,14 @@ Expression MultTerm() :{Expression exp;Expression cur = null; ArrayList<Expressi
      
       { return exp;}
      
-    
+
 }
 
 Expression DotTerm() : {Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
 {
-       (exp =ArrayTerm() ) (  <DOT>  cur = DotRHS(exp) 
+
+	   (exp =ArrayTerm() ) (  <DOT>  cur = DotRHS(exp) 
+
      {exp = cur;})*
      
       { return exp;}
@@ -223,9 +229,8 @@ Expression DotTerm() : {Expression exp;Expression cur = null; ArrayList<Expressi
 
 Expression DotRHS(Expression lhs ) : {Expression mthd;ArrayList<Expression> args = new ArrayList<Expression>();}
 {
-    (<LENGTH>{return new ArrayLength(lhs);})//note: this may mean that our grammar does not allow identifiers to be named "length"
-|({Token id;}   id=<IDENTIFIER> <LPAREN> (
-
+	(<LENGTH>{return new ArrayLength(lhs);})//note: this may mean that our grammar does not allow identifiers to be named "length"
+|({Token id;}	id=<IDENTIFIER> <LPAREN> (
  (mthd= Expression()) ({Expression arg =null;} <COMMA> (Expression() {args.add(arg);} ))* )? <RPAREN>
    { return new Call(lhs,id.image,new NodeList<Expression>(args));}
  )
@@ -234,17 +239,18 @@ Expression DotRHS(Expression lhs ) : {Expression mthd;ArrayList<Expression> args
 Expression ArrayTerm() : { }
 {
     {Expression term; Expression index = null;}
-    term =TerminalExp() ( <LBRACK>  index=Expression() <RBRACK> )?
-    {if(index!=null)
-       return new ArrayLookup(term,index);
-      else
-       return term; 
-    }
+	term =TerminalExp() ( <LBRACK>  index=Expression() <RBRACK> )?
+	{if(index!=null)
+	   return new ArrayLookup(term,index);
+	  else
+	   return term;	
+	}
+
 }
 
 Expression TerminalExp() : {Token id; Expression term; }
 {
-    (id = <INT_LITERAL> {return new IntegerLiteral(String.valueOf(id.image));})
+	(id = <INT_LITERAL> {return new IntegerLiteral(String.valueOf(id.image));})
 | ( id= <IDENTIFIER> {return new IdentifierExp(id.image);})
 |   <NEW> (term = NewRHS() {return term;})
 |   <BANG> (term = Expression() {return new Not(term);})
@@ -256,7 +262,8 @@ Expression TerminalExp() : {Token id; Expression term; }
 
 Expression NewRHS() : { }
 {
-    ({Expression exp;} <INT> <LBRACK> (exp = Expression()) <RBRACK> {return new NewArray(exp);})
+ 	({Expression exp;} <INT> <LBRACK> (exp = Expression()) <RBRACK> {return new NewArray(exp);})
+
  | ( {Token id;}(id = <IDENTIFIER>) <LPAREN> <RPAREN>{return new NewObject(id.image);})
 }
 
