@@ -7,7 +7,7 @@ PARSER_BEGIN(JCCMiniJavaParser)
 package minijava.parser.jcc;
 
 import minijava.ast.*;
-
+import java.util.ArrayList;
 public class JCCMiniJavaParser {}
 
 PARSER_END(JCCMiniJavaParser)
@@ -73,23 +73,28 @@ TOKEN : {
 |   < SEMICOLON: ";" >
 }
 
-Program Program() : { }
+Program Program() : {MainClass mainClass;ClassDecl curClass; ArrayList<ClassDecl> classes = new ArrayList<ClassDecl>();}
 {
-    MainClass() ( ClassDeclaration() )* <EOF>
-    { return null; }
+    mainClass = MainClass() (    
+     curClass = ClassDeclaration() 
+    {classes.add(curClass);}
+    )* <EOF>
+    { return new Program(mainClass,new NodeList<ClassDecl>(classes)); }
 }
 
-void MainClass() : { }
+MainClass MainClass() : {Token className;Token argName;Statement statement; }
 {
-    <CLASS> <IDENTIFIER> <LBRACE>
+    <CLASS> (className = <IDENTIFIER>) <LBRACE>
         <PUBLIC> <STATIC> <VOID> <MAIN> <LPAREN>
-        <STRING> <LBRACK> <RBRACK> <IDENTIFIER> <RPAREN> <LBRACE>
-            Statement()
+        <STRING> <LBRACK> <RBRACK> (argName=<IDENTIFIER>) <RPAREN> <LBRACE>
+           (statement = Statement())
         <RBRACE>
     <RBRACE>
+    
+    {return new MainClass(className.image,argName.image,statement);}
 }
 
-void ClassDeclaration() : { }
+ClassDecl ClassDeclaration() : { }
 {
     <CLASS> <IDENTIFIER> ( <EXTENDS> <IDENTIFIER> )? <LBRACE>
         ( VarDeclaration() | MethodDeclaration() )*
@@ -129,77 +134,197 @@ void Type() : { }
 |   <IDENTIFIER>
 }
 
-void Statement() : { }
+Statement Statement() : {Statement stm;Statement stmLocal; Expression exp; Expression tst; }
 {
-    <LBRACE> ( Statement() )* <RBRACE>
-|   ( <IF> <LPAREN> Expression() <RPAREN>
-        Statement()
+  (//A block of statements
+  {ArrayList<Statement> stms = new ArrayList<Statement>();}  
+    <LBRACE> ((stmLocal= Statement()) {stms.add(stmLocal);})* <RBRACE>
+  {  stm = new Block(new NodeList<Statement>(stms));}
+  )
+|   ({Statement thn; Statement els;} <IF> <LPAREN> (tst = Expression()) <RPAREN>
+       (thn =  Statement())
       <ELSE>
-        Statement() )
-|   ( <WHILE> <LPAREN> Expression() <RPAREN>
-        Statement() )
-|   ( <PRINT> <LPAREN> Expression() <RPAREN> <SEMICOLON> )
-|   ( <IDENTIFIER> ( <LBRACK> Expression() <RBRACK> )?
-    <ASSIGN> Expression() <SEMICOLON> )
+       (els= Statement())        
+       {stm = new If(tst,thn,els);}
+       )
+|   ({ Statement body;} <WHILE> <LPAREN> (tst =  Expression()) <RPAREN>
+       (body = Statement()) {return new While(tst,body);})
+|   ( <PRINT> <LPAREN> (exp = Expression()) <RPAREN> <SEMICOLON> {return new Print(exp);})
+|   ({Token id; Expression index = null; Expression assign;}(id = <IDENTIFIER> )( <LBRACK> (index = Expression()) <RBRACK> )?
+    <ASSIGN> (assign = Expression()) <SEMICOLON> 
+    
+    {if(index!=null)
+        stm =  new ArrayAssign(id.image,index,assign);
+    else
+         stm = new Assign(id.image,assign);
+    }
+     )
+    
+    {return stm;}
 }
 
-void Expression() : { }
+Expression Expression() : {Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
 {
-	LThanTerm() ( <AND> Expression() )*
+	(exp = LThanTerm()) ( <AND>  cur = Expression() 
+	 {
+	       exps.add(cur);
+	 })*
+	 
+	 {if(exps.isEmpty())
+	       return exp;
+	    else
+	   {
+	       
+	       //ok, create a set of nested ands in some arbitrary order.
+	       for(Expression e:exps)
+	       {
+	           exp = new And(exp,e);
+	       }
+	       return exp;
+	   }
+	 
+	 }
 }
 
-void LThanTerm() : { }
+Expression LThanTerm() : {Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
 {
-	MinusTerm() ( <LTHAN> Expression() )*
+    (exp =MinusTerm() ) (  <LTHAN>  cur = Expression() 
+     {
+           exps.add(cur);
+     })*
+     
+     {if(exps.isEmpty())
+           return exp;
+        else
+       {
+           
+           //ok, create a set of nested ands in some arbitrary order.
+           for(Expression e:exps)
+           {
+               exp = new LessThan(exp,e);
+           }
+           return exp;
+       }
+     
+     }
+	
 }
 
-void MinusTerm() : { }
+Expression MinusTerm() : {Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
 {
-    AddTerm() ( <MINUS> Expression() )*
+        (exp =AddTerm() ) (  <MINUS>  cur = Expression() 
+     {
+           exps.add(cur);
+     })*
+     
+     {if(exps.isEmpty())
+           return exp;
+        else
+       {
+           
+           //ok, create a set of nested ands in some arbitrary order.
+           for(Expression e:exps)
+           {
+               exp = new MinusTerm(exp,e);
+           }
+           return exp;
+       }
+     
+     }
 }
 
-void AddTerm() : { }
+Expression AddTerm() :{Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
 {
-	MultTerm() ( <ADD> Expression() )*
+	 (exp =MultTerm() ) (  <ADD>  cur = Expression() 
+     {
+           exps.add(cur);
+     })*
+     
+     {if(exps.isEmpty())
+           return exp;
+        else
+       {
+           
+           //ok, create a set of nested ands in some arbitrary order.
+           for(Expression e:exps)
+           {
+               exp = new AddTerm(exp,e);
+           }
+           return exp;
+       }
+     
+     }
 }
 
-void MultTerm() : { }
+Expression MultTerm() :{Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
 {
-	DotTerm() ( <MULT> Expression() )*
+	(exp =DotTerm() ) (  <MULT>  cur = Expression() 
+     {     
+           exps.add(cur);
+     })*
+     
+     {if(exps.isEmpty())
+           return exp;
+        else
+       {
+           
+           //ok, create a set of nested ands in some arbitrary order.
+           for(Expression e:exps)
+           {
+               exp = new MultTerm(exp,e);
+           }
+           return exp;
+       }
+     
+     }
 }
 
-void DotTerm() : { }
+Expression DotTerm() : {Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
 {
-	ArrayTerm() ( <DOT> DotRHS() )*
+	   (exp =ArrayTerm() ) (  <DOT>  cur = DotRHS(exp) 
+     {exp = cur;})*
+     
+      { return exp;}
+     
 }
 
-void DotRHS() : { }
+Expression DotRHS(Expression lhs ) : {Expression mthd;ArrayList<Expression> args = new ArrayList<Expression>();}
 {
-	<LENGTH>
-|	<IDENTIFIER> <LPAREN> ( Expression() ( <COMMA> Expression() )* )? <RPAREN>
+	(<LENGTH>{return new ArrayLength(lhs);})//note: this may mean that our grammar does not allow identifiers to be named "length"
+|({Token id;}	id=<IDENTIFIER> <LPAREN> (
+
+ (mthd= Expression()) ({Expression arg =null;} <COMMA> (Expression() {args.add(arg);} ))* )? <RPAREN>
+   { return new Call(lhs,id.image,new NodeList<Expression>(args));}
+ )
 }
 
-void ArrayTerm() : { }
+Expression ArrayTerm() : { }
 {
-	TerminalExp() ( <LBRACK> Expression() <RBRACK> )?
+    {Expression term; Expression index = null;}
+	term =TerminalExp() ( <LBRACK>  index=Expression() <RBRACK> )?
+	{if(index!=null)
+	   return new ArrayLookup(term,index);
+	  else
+	   return term;	
+	}
 }
 
-void TerminalExp() : { }
+Expression TerminalExp() : {Token id; Expression term; }
 {
-	<INT_LITERAL>
-|   <IDENTIFIER>
-|   <NEW> NewRHS()
-|   <BANG> Expression()
-|   <LPAREN> Expression() <RPAREN>
-|   <THIS>
-|   <TRUE>
-|   <FALSE>
+	(id = <INT_LITERAL> {return new IntegerLiteral(String.valueOf(id.image));})
+| ( id= <IDENTIFIER> {return new IdentifierExp(id.image);})
+|   <NEW> (term = NewRHS() {return term;})
+|   <BANG> (term = Expression() {return new Not(term);})
+|   <LPAREN>( term = Expression() {return term;}) <RPAREN>
+|  ( <THIS> {return new This();})
+|   (<TRUE>{return new BooleanLiteral(true);})
+|  ( <FALSE>{return new BooleanLiteral(false);})
 }
 
-void NewRHS() : { }
+Expression NewRHS() : { }
 {
- 	<INT> <LBRACK> Expression() <RBRACK>
- |  <IDENTIFIER> <LPAREN> <RPAREN>
+ 	({Expression exp;} <INT> <LBRACK> (exp = Expression()) <RBRACK> {return new NewArray(exp);})
+ | ( {Token id;}(id = <IDENTIFIER>) <LPAREN> <RPAREN>{return new NewObject(id.image);})
 }
 
 
