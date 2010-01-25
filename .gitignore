@@ -1,2 +1,3 @@
 bin/*
 src/minijava/parser/jcc/*.java
+.DS_Store

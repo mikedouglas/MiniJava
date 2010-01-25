@@ -104,7 +104,7 @@ ArrayList<MethodDecl> methods = new ArrayList<MethodDecl>();}
         | ({MethodDecl d=null;} d=MethodDeclaration(){methods.add(d);}) )*
     <RBRACE>
     
-    {return new ClassDecl(id.image, (exts==null?"Object":exts.image),vars,methods);}
+    {return new ClassDecl(id.image, (exts==null?null:exts.image),vars,methods);}
 }
 
 VarDecl VarDeclaration(VarDecl.Kind kind) : {Type t;Token id; }
@@ -170,63 +170,76 @@ Statement Statement() : {Statement stm;Statement stmLocal; Expression exp; Expre
     
 }
 
-Expression Expression() : {Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
-
+Expression Expression() :
+{
+    Expression exp, cur;
+}
 {	 
-	    (exp =LThanTerm() ) (  <AND>  cur = Expression()
+    exp = LThanTerm()
+    (LOOKAHEAD(2)
+       <AND> cur = LThanTerm()
+       { exp = new And(exp,cur); }
+    )*
 
-     {exp = new And(exp,cur);})*
-     
-      { return exp;}
+    { return exp; }
 }
 
-Expression LThanTerm() : {Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
+Expression LThanTerm() :
+{
+    Expression exp, cur;
+}
 {     
+    exp = MinusTerm()
+    (LOOKAHEAD(2)
+        <LTHAN> cur = MinusTerm()
+        { exp = new LessThan(exp,cur); }
+    )*
 
-	 (exp =MinusTerm() ) (  <LTHAN>  cur = Expression()
-
-     {exp = new LessThan(exp,cur);})*
-     
-      { return exp;}
+    { return exp; }
 }
 
-Expression MinusTerm() : {Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
+Expression MinusTerm() :
+{
+    Expression exp, cur;
+}
 {          
-     (exp =AddTerm() ) (  <MINUS>  cur = Expression()
-     {exp = new Minus(exp,cur);})*
-     
-      { return exp;}
+    exp = MultTerm()
+    (LOOKAHEAD(2)
+        <MINUS> cur = MultTerm()
+        { exp = new Minus(exp, cur); }
+        | <ADD> cur = MultTerm()
+        { exp = new Plus(exp, cur); }
+    )*
+
+    { return exp; }
 }
 
-Expression AddTerm() :{Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
+Expression MultTerm() :
 {
+    Expression exp, cur;
+}
+{
+    exp = DotTerm()
+    (LOOKAHEAD(2)
+        <MULT> cur = DotTerm()
+        { exp = new Times(exp,cur); }
+    )*
 
-     
-         (exp =MultTerm() ) (  <ADD>  cur = Expression()
-     {exp = new Plus(exp,cur);})*
-     
-      { return exp;}
+    { return exp; }
 }
 
-Expression MultTerm() :{Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
+Expression DotTerm() :
 {
-       (exp =DotTerm() ) (  <MULT>  cur = Expression()
-     {exp = new Times(exp,cur);})*
-     
-      { return exp;}
-     
-
+    Expression exp, cur;
 }
-
-Expression DotTerm() : {Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
 {
+    exp = ArrayTerm()
+    (LOOKAHEAD(2)
+         <DOT> cur = DotRHS(exp)
+         { exp = cur; }
+    )*
 
-	   (exp =ArrayTerm() ) (  <DOT>  cur = DotRHS(exp) 
-
-     {exp = cur;})*
-     
-      { return exp;}
-     
+    { return exp; }
 }
 
 Expression DotRHS(Expression lhs ) : {Expression arg;ArrayList<Expression> args = new ArrayList<Expression>();}
@@ -241,25 +254,39 @@ Expression DotRHS(Expression lhs ) : {Expression arg;ArrayList<Expression> args 
 Expression ArrayTerm() : { }
 {
     {Expression term; Expression index = null;}
-	term =TerminalExp() ( <LBRACK>  index=Expression() <RBRACK> )?
-	{if(index!=null)
-	   return new ArrayLookup(term,index);
-	  else
-	   return term;	
-	}
-
+    term =TerminalExp() (LOOKAHEAD(1) <LBRACK>  index=Expression() <RBRACK> )?
+    {if(index!=null)
+        return new ArrayLookup(term,index);
+    else
+        return term;	
+    }
 }
 
 Expression TerminalExp() : {Token id; Expression term; }
 {
-	(id = <INT_LITERAL> {return new IntegerLiteral(String.valueOf(id.image));})
-| ( id= <IDENTIFIER> {return new IdentifierExp(id.image);})
-|   <NEW> (term = NewRHS() {return term;})
-|   <BANG> (term = Expression() {return new Not(term);})
-|   (<LPAREN>( term = Expression() ) <RPAREN>{return term;})
-|  ( <THIS> {return new This();})
-|   (<TRUE>{return new BooleanLiteral(true);})
-|  ( <FALSE>{return new BooleanLiteral(false);})
+    id = <INT_LITERAL>
+    { return new IntegerLiteral(String.valueOf(id.image)); }
+
+|   id = <IDENTIFIER>
+    { return new IdentifierExp(id.image); }
+
+|   <NEW> term = NewRHS()
+    { return term; }
+
+|   <BANG> term = TerminalExp()
+    { return new Not(term); }
+
+|   <LPAREN> term = Expression() <RPAREN>
+    { return term; }
+
+|   <THIS>
+    { return new This(); }
+
+|   <TRUE>
+    { return new BooleanLiteral(true); }
+
+|   <FALSE>
+    { return new BooleanLiteral(false); }
 }
 
 Expression NewRHS() : { }
