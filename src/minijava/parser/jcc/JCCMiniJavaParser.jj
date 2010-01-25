@@ -104,9 +104,16 @@ void VarDeclaration() : { }
 void MethodDeclaration() : { }
 {
     <PUBLIC> Type() <IDENTIFIER> <LPAREN> FormalList() <RPAREN> <LBRACE>
-        ( VarDeclaration() | Statement() )*
+        ( MethodBody() )*
         <RETURN> Expression() <SEMICOLON>
     <RBRACE>
+}
+
+void MethodBody() : { }
+{
+	LOOKAHEAD(2) 
+	VarDeclaration() 
+| 	Statement()
 }
 
 void FormalList() : { }
