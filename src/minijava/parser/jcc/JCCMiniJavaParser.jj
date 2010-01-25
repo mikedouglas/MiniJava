@@ -163,7 +163,7 @@ void MultTerm() : { }
 
 void DotTerm() : { }
 {
-	ArrayTerm() ( <DOT> DotRHS() )?
+	ArrayTerm() ( <DOT> DotRHS() )*
 }
 
 void DotRHS() : { }
