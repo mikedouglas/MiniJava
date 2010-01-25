@@ -158,7 +158,7 @@ void dotStatement():{}
 	//In fact, in java, this should be any valid identifier, because it is just referencing a public field. 
 	//and identifiers are allowed to be called "length", so we can't match length as a non-identifier token... not sure what to do.
 	
-	| (<IDENTIFIER> <LPAREN>  ( ( <COMMA> Expression() )+ )? <RPAREN> ) //this pattern wont match the first argument correctly
+	| (<IDENTIFIER> <LPAREN>  (Expression() ( <COMMA> Expression() )* )? <RPAREN> ) //this pattern wont match the first argument correctly
 }
 void Expression() : { }
 {
