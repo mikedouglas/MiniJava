@@ -248,7 +248,7 @@ Expression TerminalExp() : {Token id; Expression term; }
 | ( id= <IDENTIFIER> {return new IdentifierExp(id.image);})
 |   <NEW> (term = NewRHS() {return term;})
 |   <BANG> (term = Expression() {return new Not(term);})
-|   <LPAREN>( term = Expression() {return term;}) <RPAREN>
+|   (<LPAREN>( term = Expression() ) <RPAREN>{return term;})
 |  ( <THIS> {return new This();})
 |   (<TRUE>{return new BooleanLiteral(true);})
 |  ( <FALSE>{return new BooleanLiteral(false);})
