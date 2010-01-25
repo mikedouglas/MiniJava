@@ -30,13 +30,14 @@ TOKEN : {
 |   < FALSE: "false" >
 |   < IF: "if" >
 |   < INT: "int" >
-|   < LENGTH: "length" >
+|   < MAIN: "main" >
 |   < NEW: "new" >
 |   < NULL: "null" >
 |   < PRINT: "System.out.println" >
 |   < PUBLIC: "public" >
 |   < RETURN: "return" >
 |   < STATIC: "static" >
+|   < STRING: "String" > // any problem with this being a keyword?
 |   < THIS: "this" >
 |   < TRUE: "true" >
 |   < VOID: "void" >
@@ -73,6 +74,85 @@ TOKEN : {
 
 Program Program() : { }
 {
-    <EOF>
+    MainClass() ( ClassDeclaration() )* <EOF>
     { return null; }
 }
+
+void MainClass() : { }
+{
+    <CLASS> <IDENTIFIER> <LBRACE>
+        <PUBLIC> <STATIC> <VOID> <MAIN> <LPAREN>
+        <STRING> <LBRACK> <RBRACK> <IDENTIFIER> <RPAREN> <LBRACE>
+            Statement()
+        <RBRACE>
+    <RBRACE>
+}
+
+void ClassDeclaration() : { }
+{
+    <CLASS> <IDENTIFIER> ( <EXTENDS> <IDENTIFIER> )? <LBRACE>
+        ( VarDeclaration() | MethodDeclaration() )*
+    <RBRACE>
+}
+
+void VarDeclaration() : { }
+{
+    Type() <IDENTIFIER> <SEMICOLON>
+}
+
+void MethodDeclaration() : { }
+{
+    <PUBLIC> Type() <IDENTIFIER> <LPAREN> FormalList() <RPAREN> <LBRACE>
+        ( VarDeclaration() | Statement() )*
+        <RETURN> Expression() <SEMICOLON>
+    <RBRACE>
+}
+
+void FormalList() : { }
+{
+    ( Type() <IDENTIFIER> ( <COMMA> Type() <IDENTIFIER> )* )?
+}
+
+void Type() : { }
+{
+    ( <INT> <LBRACK> <RBRACK> )
+|   <BOOLEAN>
+|   <INT>
+|   <STRING>
+|   <IDENTIFIER>
+}
+
+void Statement() : { }
+{
+    <LBRACE> ( Statement() )* <RBRACE>
+|   ( <IF> <LPAREN> Expression() <RPAREN>
+        Statement()
+      <ELSE>
+        Statement() )
+|   ( <WHILE> <LPAREN> Expression() <RPAREN>
+        Statement() )
+|   ( <PRINT> <LPAREN> Expression() <RPAREN> <SEMICOLON> )
+|   ( <IDENTIFIER> ( <LBRACK> Expression() <RBRACK> )?
+    <ASSIGN> Expression() <SEMICOLON> )
+}
+
+void Expression() : { }
+{
+    ( Expression() ( <AND> | <LTHAN> | <ADD> | <MINUS> | <MULT> )
+      Expression() )
+|   ( Expression() <LBRACK> Expression() <RBRACK> )
+|   ( Expression() <DOT> "length" )
+|   ( Expression() <DOT> <IDENTIFIER> <LPAREN>
+      ( Expression() ( <COMMA> Expression() )* )? <RPAREN> )
+|   ( <NEW> <INT> <LBRACK> Expression() <RBRACK> )
+|   ( <NEW> <IDENTIFIER> <LPAREN> <RPAREN> )
+|   ( <BANG> Expression() )
+|   ( <LPAREN> Expression() <RPAREN> )
+|   <INT_LITERAL>
+|   <TRUE>
+|   <FALSE>
+|   <IDENTIFIER>
+|   <THIS>
+}
+
+
