@@ -94,44 +94,50 @@ MainClass MainClass() : {Token className;Token argName;Statement statement; }
     {return new MainClass(className.image,argName.image,statement);}
 }
 
-ClassDecl ClassDeclaration() : { }
+ClassDecl ClassDeclaration() : {Token id; Token exts = null;ArrayList<VarDecl> vars = new ArrayList<VarDecl>(); 
+ArrayList<MethodDecl> methods = new ArrayList<MethodDecl>();}
 {
-    <CLASS> <IDENTIFIER> ( <EXTENDS> <IDENTIFIER> )? <LBRACE>
-        ( VarDeclaration() | MethodDeclaration() )*
+    <CLASS> id=<IDENTIFIER> ( <EXTENDS> (exts= <IDENTIFIER>) )? <LBRACE>
+        ( ({VarDecl v=null;} v=VarDeclaration(VarDecl.Kind.FIELD) {vars.add(v);}) 
+        | ({MethodDecl d=null;} d=MethodDeclaration(){methods.add(d);}) )*
     <RBRACE>
+    
+    {return new ClassDecl(id.image, (exts==null?"Object":exts.image),vars,methods);}
 }
 
-void VarDeclaration() : { }
+VarDecl VarDeclaration(VarDecl.Kind kind) : {Type t;Token id; }
 {
-    Type() <IDENTIFIER> <SEMICOLON>
+   t= Type() id=<IDENTIFIER> <SEMICOLON>
+   {return new VarDecl(kind,t,id.image);}
 }
 
-void MethodDeclaration() : { }
+MethodDecl MethodDeclaration() :  {Type t;Token id;NodeList<VarDecl> args;ArrayList<Statement> body = new ArrayList<Statement>();ArrayList<VarDecl> vars = new ArrayList<VarDecl>() ;}
 {
-    <PUBLIC> Type() <IDENTIFIER> <LPAREN> FormalList() <RPAREN> <LBRACE>
-        ( MethodBody() )*
-        <RETURN> Expression() <SEMICOLON>
+    <PUBLIC> t=Type() id= <IDENTIFIER> <LPAREN> args=FormalList() <RPAREN> <LBRACE>        
+        (LOOKAHEAD(2) 
+               ({VarDecl v;} v= VarDeclaration(VarDecl.Kind.LOCAL) {vars.add(v);})//This doesn't quite match the specification
+             | ( {Statement stm;}  stm = Statement() {body.add(stm);})
+
+         )*
+        <RETURN> {Expression rtn;}rtn =Expression() <SEMICOLON>
     <RBRACE>
+    
+    {return new MethodDecl(t,id.image,args,new NodeList<VarDecl>(vars),new NodeList(body),rtn);}
 }
 
-void MethodBody() : { }
+NodeList<VarDecl> FormalList() : {Type t; Token id; ArrayList<VarDecl> vars = new ArrayList<VarDecl>(); }
 {
-	LOOKAHEAD(2) 
-	VarDeclaration() 
-| 	Statement()
+    ( t=Type() id=<IDENTIFIER> {vars.add(new VarDecl(VarDecl.Kind.FORMAL,t,id.image));}
+     ( <COMMA> t=Type() id=<IDENTIFIER> {vars.add(new VarDecl(VarDecl.Kind.FORMAL,t,id.image));})* )?
+    {return new NodeList<VarDecl>(vars);}
 }
 
-void FormalList() : { }
+Type Type() : { }
 {
-    ( Type() <IDENTIFIER> ( <COMMA> Type() <IDENTIFIER> )* )?
-}
-
-void Type() : { }
-{
-    ( <INT> (<LBRACK> <RBRACK>)? )
-|   <BOOLEAN>
-|   <STRING>
-|   <IDENTIFIER>
+    ( <INT> (<LBRACK> <RBRACK> {return new IntArrayType();})? {return new IntegerType();})
+|  ( <BOOLEAN> {return new BooleanType();})
+| (  <STRING>{return new ObjectType("String");})//is it neccesary to split these two types?
+|  ({Token id;} id= <IDENTIFIER>{return new ObjectType(id.image);})
 }
 
 Statement Statement() : {Statement stm;Statement stmLocal; Expression exp; Expression tst; }
@@ -164,119 +170,47 @@ Statement Statement() : {Statement stm;Statement stmLocal; Expression exp; Expre
 }
 
 Expression Expression() : {Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
-{
-	(exp = LThanTerm()) ( <AND>  cur = Expression() 
-	 {
-	       exps.add(cur);
-	 })*
-	 
-	 {if(exps.isEmpty())
-	       return exp;
-	    else
-	   {
-	       
-	       //ok, create a set of nested ands in some arbitrary order.
-	       for(Expression e:exps)
-	       {
-	           exp = new And(exp,e);
-	       }
-	       return exp;
-	   }
-	 
-	 }
+{	 
+	    (exp =LThanTerm() ) (  <AND>  cur = Expression()
+     {exp = new And(exp,cur);})*
+     
+      { return exp;}
 }
 
 Expression LThanTerm() : {Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
-{
-    (exp =MinusTerm() ) (  <LTHAN>  cur = Expression() 
-     {
-           exps.add(cur);
-     })*
+{     
+	 (exp =MinusTerm() ) (  <LTHAN>  cur = Expression()
+     {exp = new LessThan(exp,cur);})*
      
-     {if(exps.isEmpty())
-           return exp;
-        else
-       {
-           
-           //ok, create a set of nested ands in some arbitrary order.
-           for(Expression e:exps)
-           {
-               exp = new LessThan(exp,e);
-           }
-           return exp;
-       }
-     
-     }
-	
+      { return exp;}
 }
 
 Expression MinusTerm() : {Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
-{
-        (exp =AddTerm() ) (  <MINUS>  cur = Expression() 
-     {
-           exps.add(cur);
-     })*
+{          
+     (exp =AddTerm() ) (  <MINUS>  cur = Expression()
+     {exp = new Minus(exp,cur);})*
      
-     {if(exps.isEmpty())
-           return exp;
-        else
-       {
-           
-           //ok, create a set of nested ands in some arbitrary order.
-           for(Expression e:exps)
-           {
-               exp = new MinusTerm(exp,e);
-           }
-           return exp;
-       }
-     
-     }
+      { return exp;}
 }
 
 Expression AddTerm() :{Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
 {
-	 (exp =MultTerm() ) (  <ADD>  cur = Expression() 
-     {
-           exps.add(cur);
-     })*
+
      
-     {if(exps.isEmpty())
-           return exp;
-        else
-       {
-           
-           //ok, create a set of nested ands in some arbitrary order.
-           for(Expression e:exps)
-           {
-               exp = new AddTerm(exp,e);
-           }
-           return exp;
-       }
+         (exp =MultTerm() ) (  <ADD>  cur = Expression()
+     {exp = new Plus(exp,cur);})*
      
-     }
+      { return exp;}
 }
 
 Expression MultTerm() :{Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
 {
-	(exp =DotTerm() ) (  <MULT>  cur = Expression() 
-     {     
-           exps.add(cur);
-     })*
+       (exp =DotTerm() ) (  <MULT>  cur = Expression()
+     {exp = new Times(exp,cur);})*
      
-     {if(exps.isEmpty())
-           return exp;
-        else
-       {
-           
-           //ok, create a set of nested ands in some arbitrary order.
-           for(Expression e:exps)
-           {
-               exp = new MultTerm(exp,e);
-           }
-           return exp;
-       }
+      { return exp;}
      
-     }
+	
 }
 
 Expression DotTerm() : {Expression exp;Expression cur = null; ArrayList<Expression> exps =new ArrayList<Expression>(); }
