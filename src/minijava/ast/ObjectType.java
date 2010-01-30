@@ -16,4 +16,11 @@ public class ObjectType extends Type {
 		return v.visit(this);
 	}
 
+	@Override
+	public boolean equals(Object other) {
+		if (this.getClass()==other.getClass()) {
+			return this.name.equals(((ObjectType)other).name);
+		}
+		return false;
+	}
 }

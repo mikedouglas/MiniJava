@@ -9,4 +9,9 @@ public class BooleanType extends Type {
 		return v.visit(this);
 	}
 
+	@Override
+	public boolean equals(Object other) {
+		return this.getClass()==other.getClass();
+	}
+	
 }
