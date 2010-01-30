@@ -1,3 +1,5 @@
+// MiniJava definition for JavaCC. Based off grammar provided in class.
+
 options {
     STATIC = false;
 }
@@ -17,7 +19,7 @@ SKIP : {
 |   "\t"
 |   "\n"
 |   "\r"
-|   < "//" (~["\n","\r"])*  > //("\n" | "\r" | "\r\n") We dont want to force single line comments to end with new lines, because then a comment at the end of the file may fail to parse.
+|   < "//" (~["\n","\r"])*  > // may be at end of file.
 |   < "/*" (~["*"])* "*" ("*" | (~["*","/"] (~["*"])* "*"))* "/" >
 }
 
@@ -110,7 +112,7 @@ ClassDecl ClassDeclaration() : {
 	ArrayList<MethodDecl> methods = new ArrayList<MethodDecl>();
 } {
     <CLASS> id=<IDENTIFIER> ( <EXTENDS> (exts = <IDENTIFIER>) )? <LBRACE>
-        ( ({ VarDecl v=null; } v=VarDeclaration(VarDecl.Kind.FIELD) { vars.add(v); }) 
+        ( ({ VarDecl v=null; } v=VarDeclaration(VarDecl.Kind.FIELD) { vars.add(v); })
         | ({ MethodDecl d=null; } d=MethodDeclaration(){ methods.add(d); }) )*
     <RBRACE>
     
@@ -119,7 +121,7 @@ ClassDecl ClassDeclaration() : {
 
 VarDecl VarDeclaration(VarDecl.Kind kind) : {
 	Type t;
-	Token id; 
+	Token id;
 } {
    t = Type() id = <IDENTIFIER> <SEMICOLON>
    { return new VarDecl(kind,t,id.image); }
@@ -132,9 +134,10 @@ MethodDecl MethodDeclaration() : {
 	ArrayList<Statement> body = new ArrayList<Statement>();
 	ArrayList<VarDecl> vars = new ArrayList<VarDecl>() ;
 } {
-    <PUBLIC> t=Type() id= <IDENTIFIER> <LPAREN> args=FormalList() <RPAREN> <LBRACE>        
+    <PUBLIC> t=Type() id= <IDENTIFIER> <LPAREN> args=FormalList() <RPAREN> <LBRACE>
         (LOOKAHEAD(2) 
-               ({VarDecl v;} v= VarDeclaration(VarDecl.Kind.LOCAL) {vars.add(v);})//This doesn't quite match the specification
+               // this doesn't quite match the specification.
+               ({VarDecl v;} v= VarDeclaration(VarDecl.Kind.LOCAL) {vars.add(v);})
              | ( {Statement stm;}  stm = Statement() {body.add(stm);})
 
          )*
@@ -165,9 +168,11 @@ NodeList<VarDecl> FormalList() : {
 
 Type Type() : { }
 {
-	( <INT> (<LBRACK> <RBRACK> {return new IntArrayType();})? {return new IntegerType();})
+	( <INT> (<LBRACK> <RBRACK> {return new IntArrayType();})?
+	        {return new IntegerType();})
 |  	( <BOOLEAN> {return new BooleanType();})
-| 	( <STRING>  {return new ObjectType("String");})//is it neccesary to split these two types?
+    // is it neccesary to split these two types?
+| 	( <STRING>  {return new ObjectType("String");})
 |  	( { Token id; } id = <IDENTIFIER> { return new ObjectType(id.image);} )
 }
 
