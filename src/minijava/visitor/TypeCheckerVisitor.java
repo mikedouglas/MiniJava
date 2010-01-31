@@ -24,10 +24,12 @@ import minijava.ast.NodeList;
 import minijava.ast.Not;
 import minijava.ast.ObjectType;
 import minijava.ast.Plus;
+import minijava.ast.Print;
 import minijava.ast.Program;
 import minijava.ast.This;
 import minijava.ast.Times;
 import minijava.ast.Type;
+import minijava.ast.VarDecl;
 import minijava.typechecker.ErrorReport;
 import minijava.typechecker.implementation.ClassEntry;
 import minijava.typechecker.implementation.MethodEntry;
@@ -66,12 +68,16 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 	}
 	
 	public void visit(MainClass n) {
-		visit(n.statement, classTable.lookup(n.className));
+		ClassEntry classEntry = classTable.lookup(n.className);
+		if(classEntry == null)
+			reporter.undefinedId(n.className);
+		visit(n.statement,classEntry);
 	}
 
 	public void visit(ClassDecl n) {
 		ClassEntry classEntry = classTable.lookup(n.name);
-		
+		if(classEntry == null)
+			reporter.undefinedId(n.name);
 		visit(n.vars, classEntry);
 		visit(n.methods, classEntry);
 	}
@@ -80,11 +86,15 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		MethodEntry method = entry.getMethods().lookup(n.name);
 		
 		Type returnedType = (Type) visit(n.returnExp, method);
-		
-		visit(returnedType);
-		
-		if (! returnedType.equals(method.getReturnType())) {
-			reporter.typeError(n.returnExp, method.getReturnType(), returnedType);
+		if(returnedType!=null)
+		{
+			visit(returnedType);//do we need to do this?
+			if (! returnedType.equals(method.getReturnType())) {
+				reporter.typeError(n.returnExp, method.getReturnType(), returnedType);
+			}
+		}else
+		{
+			reporter.typeError(n.returnExp, method.getReturnType(), returnedType);		
 		}
 		
 		visit(n.vars, method);
@@ -121,13 +131,16 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 			//check that this object actually has a corresponding method
 			String className = ((ObjectType)reciever).name;
 			ClassEntry classEntry = classTable.lookup(className);
-			
-			MethodEntry recMethod = classEntry.lookupMethod(exp.name);
-			if(recMethod==null)
-				reporter.undefinedId(exp.name);
+			if(classEntry == null)
+				reporter.undefinedId(className);
 			else{
-				
-				return recMethod.getReturnType();
+				MethodEntry recMethod = classEntry.lookupMethod(exp.name);
+				if(recMethod==null)
+					reporter.undefinedId(exp.name);
+				else{
+					
+					return recMethod.getReturnType();
+				}
 			}
 		}
 		
@@ -228,6 +241,19 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		}
 		return new ObjectType(exp.typeName);
 	}
+	
+	/**
+	 * This visitor is for instance field declarations
+	 * @param exp
+	 * @param method
+	 * @return
+	 */
+	public Type visit(VarDecl exp, ClassEntry method) {
+		
+		visit(exp.type);
+
+		return exp.type;
+	}
 
 	public Type visit(ArrayLookup exp, MethodEntry method) {
 		
@@ -268,10 +294,27 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		//return expectedType; //Do assignments return values in minijava?
 	}
 	
+	public void visit(Print type, MethodEntry method) {
+
+	}
+	
+	//Should we be calling this?
 	public void visit(ObjectType type) {
 		if (classTable.lookup(type.name) == null) {
 			reporter.undefinedId(type.name);
 		}
+	}
+	
+	public void visit(IntegerType type) {
+
+	}
+	
+	public void visit(BooleanType type) {
+
+	}
+	
+	public void visit(IntArrayType type) {
+
 	}
 	
 	public Type visit(This t, MethodEntry method) {
@@ -285,5 +328,6 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 	public Type visit(BooleanLiteral lit) {
 		return new BooleanType();
 	}
+	
 	
 }
