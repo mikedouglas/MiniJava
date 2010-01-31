@@ -8,10 +8,12 @@ import minijava.util.Indentable;
 import minijava.util.IndentingWriter;
 
 public class MethodEntry implements Indentable {
+	ClassEntry parent; 
 	ImpTable<Type> variables;
 	ImpTable<Type> parameters;
 	
-	public MethodEntry() {
+	public MethodEntry(ClassEntry parent) {
+		this.parent = parent;
 		variables = new ImpTable<Type>();
 		parameters = new ImpTable<Type>();
 	}
@@ -20,16 +22,34 @@ public class MethodEntry implements Indentable {
 		return variables;
 	}
 	
-	public ImpTable<Type> getParameters() {
-		return parameters;
-	}
-	
 	public void setVariables(ImpTable<Type> variables) {
 		this.variables = variables;
 	}
 	
+	public ImpTable<Type> getParameters() {
+		return parameters;
+	}
+	
 	public void setParameters(ImpTable<Type> parameters) {
 		this.parameters = parameters;
+	}
+	
+	public Type lookup(String id) {
+		Type type = null;
+		Type type1 = variables.lookup(id);
+		Type type2 = parameters.lookup(id);
+		
+		if (type1 == type2 && type1 == null) {
+			type = parent.lookup(id);
+		}
+		else if (type1 == null) {
+			type = type2;
+		}
+		else if (type2 == null) {
+			type = type1;
+		}
+		
+		return type;
 	}
 	
 	@Override

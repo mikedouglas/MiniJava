@@ -79,7 +79,7 @@ public class ClassBuilderVisitor extends ReflectionVisitor {
 	public void visit(MainClass n) {
 		ClassEntry mainClass = new ClassEntry();
 		
-		MethodEntry mainMethod = new MethodEntry();
+		MethodEntry mainMethod = new MethodEntry(mainClass);
 		try {
 			mainClass.getMethods().put("main", mainMethod);
 		} catch (DuplicateException e2) {
@@ -124,6 +124,11 @@ public class ClassBuilderVisitor extends ReflectionVisitor {
 	
 	public void visit(VarDecl var, MethodEntry entry) {
 		try {
+			// we need to do this because we store parameters separately
+			// for nice pretty printing
+			if (entry.getParameters().lookup(var.name) != null) {
+				reporter.duplicateDefinition(var.name);
+			}
 			entry.getVariables().put(var.name, var.type);
 		} catch (DuplicateException e) {
 			reporter.duplicateDefinition(var.name);
@@ -131,7 +136,7 @@ public class ClassBuilderVisitor extends ReflectionVisitor {
 	}
 
 	public void visit(MethodDecl n, ClassEntry entry) {
-		MethodEntry method = new MethodEntry();
+		MethodEntry method = new MethodEntry(entry);
 		try {
 			entry.getMethods().put(n.name, method);
 		} catch (DuplicateException e) {

@@ -33,6 +33,10 @@ public class ClassEntry implements Indentable {
 	public void setFields(ImpTable<Type> fields) {
 		this.fields = fields;
 	}
+	
+	public Type lookup(String id) {
+		return fields.lookup(id);
+	}
 
 	@Override
 	public void dump(IndentingWriter out) {
