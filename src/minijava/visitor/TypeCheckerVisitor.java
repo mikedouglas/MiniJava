@@ -25,6 +25,7 @@ import minijava.ast.Not;
 import minijava.ast.ObjectType;
 import minijava.ast.Plus;
 import minijava.ast.Program;
+import minijava.ast.This;
 import minijava.ast.Times;
 import minijava.ast.Type;
 import minijava.typechecker.ErrorReport;
@@ -110,14 +111,28 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 	}
 	
 	public Type visit(Call exp, MethodEntry method) {
+		//also need to check the params are the right types
 		
-		Type type = method.lookupMethod(exp.name);
+		Type reciever = (Type) visit(exp.receiver,method);//this should resolve to an id (do we allow static methods?)
 		
-		if (type == null) {
-			reporter.undefinedId(exp.name);
+		if (reciever == null || reciever.getClass()!=ObjectType.class) {
+			reporter.typeErrorExpectObjectType(exp, reciever);
+		}else{
+			//check that this object actually has a corresponding method
+			String className = ((ObjectType)reciever).name;
+			ClassEntry classEntry = classTable.lookup(className);
+			
+			MethodEntry recMethod = classEntry.lookupMethod(exp.name);
+			if(recMethod==null)
+				reporter.undefinedId(exp.name);
+			else{
+				
+				return recMethod.getReturnType();
+			}
 		}
 		
-		return type;
+	
+		return null;
 		
 	}
 	
@@ -126,7 +141,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		//So what we actually have to do here is check that the array expression contains an array
 		
 		Type type = (Type) visit(exp.array,method);
-		if(type==null||type.equals(IntArrayType.instance))
+		if(type==null||!type.equals(IntArrayType.instance))
 		{
 			reporter.typeError(exp.array, IntArrayType.instance, type);
 		}
@@ -244,6 +259,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 			if(actualType==null)
 			{
 				reporter.typeError(assign.value, expectedType, actualType);//null is not correctly caught by the .equals method
+				 visit(assign.value, method);
 			}
 			else if (! expectedType.equals(actualType)) {
 				reporter.typeError(assign.value, expectedType, actualType);
@@ -256,6 +272,10 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		if (classTable.lookup(type.name) == null) {
 			reporter.undefinedId(type.name);
 		}
+	}
+	
+	public Type visit(This t, MethodEntry method) {
+		return new ObjectType(method.getParent().getClassName());
 	}
 	
 	public Type visit(IntegerLiteral lit) {

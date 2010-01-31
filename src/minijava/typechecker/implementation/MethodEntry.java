@@ -9,6 +9,10 @@ import minijava.util.IndentingWriter;
 
 public class MethodEntry implements Indentable {
 	ClassEntry parent; 
+	public ClassEntry getParent() {
+		return parent;
+	}
+
 	ImpTable<Type> variables;
 	ImpTable<Type> parameters;
 	Type returnType;

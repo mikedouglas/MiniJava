@@ -12,10 +12,16 @@ public class ClassEntry implements Indentable {
 	
 	ImpTable<MethodEntry> methods;
 	ImpTable<Type> fields;
+	final String className;
 	
-	public ClassEntry () {
+	public String getClassName() {
+		return className;
+	}
+
+	public ClassEntry (String className) {
 		methods = new ImpTable<MethodEntry>();
 		fields = new ImpTable<Type>();
+		this.className = className;
 	}
 
 	public ImpTable<MethodEntry> getMethods() {
