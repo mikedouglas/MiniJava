@@ -3,7 +3,7 @@ package minijava.ast;
 import minijava.visitor.Visitor;
 
 public class IntArrayType extends Type {
-
+	public static IntArrayType instance = new IntArrayType();
 	@Override
 	public <R> R accept(Visitor<R> v) {
 		return v.visit(this);
@@ -14,5 +14,7 @@ public class IntArrayType extends Type {
 		return this.getClass()==other.getClass();
 	}
 
+	/*private IntArrayType() //allow new instances, for compatibility with the test cases
+	{}*/
 
 }

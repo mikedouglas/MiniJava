@@ -3,7 +3,7 @@ package minijava.ast;
 import minijava.visitor.Visitor;
 
 public class IntegerType extends Type {
-
+	public static IntegerType instance = new IntegerType();
 	@Override
 	public <R> R accept(Visitor<R> v) {
 		return v.visit(this);
@@ -14,4 +14,6 @@ public class IntegerType extends Type {
 		return this.getClass()==other.getClass();
 	}
 
+	/*private IntegerType() //allow new instances, for compatibility with the test cases
+	{}*/
 }

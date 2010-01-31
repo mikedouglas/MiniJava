@@ -168,9 +168,9 @@ NodeList<VarDecl> FormalList() : {
 
 Type Type() : { }
 {
-	( <INT> (<LBRACK> <RBRACK> {return new IntArrayType();})?
-	        {return new IntegerType();})
-|  	( <BOOLEAN> {return new BooleanType();})
+	( <INT> (<LBRACK> <RBRACK> {return IntArrayType.instance;})?
+	        {return IntegerType.instance;})
+|  	( <BOOLEAN> {return BooleanType.instance;})
     // is it neccesary to split these two types?
 | 	( <STRING>  {return new ObjectType("String");})
 |  	( { Token id; } id = <IDENTIFIER> { return new ObjectType(id.image);} )

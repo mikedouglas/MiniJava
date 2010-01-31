@@ -3,7 +3,7 @@ package minijava.ast;
 import minijava.visitor.Visitor;
 
 public class BooleanType extends Type {
-
+	public static BooleanType instance = new BooleanType();
 	@Override
 	public <R> R accept(Visitor<R> v) {
 		return v.visit(this);
@@ -14,4 +14,6 @@ public class BooleanType extends Type {
 		return this.getClass()==other.getClass();
 	}
 	
+	/*private BooleanType() //allow new instances, for compatibility with the test cases
+	{}*/
 }
