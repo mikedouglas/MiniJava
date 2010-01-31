@@ -86,12 +86,12 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 
 	public void visit(MethodDecl n, ClassEntry entry) {	
 		MethodEntry method = entry.getMethods().lookup(n.name);
-		
+		visit(method.getReturnType());
 		Type returnedType = (Type) visit(n.returnExp, method);
 
-		if(returnedType!=null)
+		if (returnedType!=null)
 		{
-			// to check if the return type even exists
+			// check here if the return type even exists
 			visit(returnedType);
 			if (! returnedType.equals(method.getReturnType())) {
 				reporter.typeError(n.returnExp, method.getReturnType(), returnedType);
@@ -162,7 +162,6 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		//So what we actually have to do here is check that the array expression contains an array
 		
 		Type type = (Type) visit(exp.array,method);
-		
 		if (type==null || ! type.equals(IntArrayType.instance))
 		{
 			reporter.typeError(exp.array, IntArrayType.instance, type);
@@ -308,7 +307,6 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 
 	}
 	
-	//Should we be calling this?
 	public void visit(ObjectType type) {
 		if (classTable.lookup(type.name) == null) {
 			reporter.undefinedId(type.name);
