@@ -80,10 +80,12 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		
 		Type returnedType = (Type) visit(n.returnExp, method);
 		
-		visit(returnedType);
+		if (returnedType != null) {
+			visit(returnedType);
 		
-		if (! returnedType.equals(method.getReturnType())) {
-			reporter.typeError(n.returnExp, method.getReturnType(), returnedType);
+			if (! returnedType.equals(method.getReturnType())) {
+				reporter.typeError(n.returnExp, method.getReturnType(), returnedType);
+			}
 		}
 		
 		visit(n.vars, method);
