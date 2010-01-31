@@ -1,6 +1,5 @@
 package minijava.visitor;
 
-import junit.framework.Assert;
 import minijava.ast.AST;
 import minijava.ast.And;
 import minijava.ast.ArrayAssign;
