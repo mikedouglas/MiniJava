@@ -11,11 +11,13 @@ public class MethodEntry implements Indentable {
 	ClassEntry parent; 
 	ImpTable<Type> variables;
 	ImpTable<Type> parameters;
+	Type returnType;
 	
 	public MethodEntry(ClassEntry parent) {
 		this.parent = parent;
 		variables = new ImpTable<Type>();
 		parameters = new ImpTable<Type>();
+		returnType = null;
 	}
 	
 	public ImpTable<Type> getVariables() {
@@ -32,6 +34,14 @@ public class MethodEntry implements Indentable {
 	
 	public void setParameters(ImpTable<Type> parameters) {
 		this.parameters = parameters;
+	}
+	
+	public Type getReturnType() {
+		return returnType;
+	}
+	
+	public void setReturnType(Type returnType) {
+		this.returnType = returnType;
 	}
 	
 	public Type lookup(String id) {

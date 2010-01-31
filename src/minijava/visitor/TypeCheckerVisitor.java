@@ -2,8 +2,12 @@ package minijava.visitor;
 
 import minijava.ast.AST;
 import minijava.ast.Assign;
+import minijava.ast.BooleanLiteral;
+import minijava.ast.BooleanType;
 import minijava.ast.ClassDecl;
 import minijava.ast.IdentifierExp;
+import minijava.ast.IntegerLiteral;
+import minijava.ast.IntegerType;
 import minijava.ast.MainClass;
 import minijava.ast.MethodDecl;
 import minijava.ast.NodeList;
@@ -62,6 +66,15 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 
 	public void visit(MethodDecl n, ClassEntry entry) {	
 		MethodEntry method = entry.getMethods().lookup(n.name);
+		
+		Type returnedType = (Type) visit(n.returnExp, method);
+		
+		visit(returnedType);
+		
+		if (! returnedType.equals(method.getReturnType())) {
+			reporter.typeError(n.returnExp, method.getReturnType(), returnedType);
+		}
+		
 		visit(n.vars, method);
 		visit(n.statements, method);
 	}
@@ -89,5 +102,19 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		if (! expectedType.equals(actualType)) {
 			reporter.typeError(assign.value, expectedType, actualType);
 		}
+	}
+	
+	public void visit(ObjectType type) {
+		if (classTable.lookup(type.name) == null) {
+			reporter.undefinedId(type.name);
+		}
+	}
+	
+	public Type visit(IntegerLiteral lit) {
+		return new IntegerType();
+	}
+	
+	public Type visit(BooleanLiteral lit) {
+		return new BooleanType();
 	}
 }

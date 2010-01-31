@@ -143,6 +143,8 @@ public class ClassBuilderVisitor extends ReflectionVisitor {
 			reporter.duplicateDefinition(n.name);
 		}
 		
+		method.setReturnType(n.returnType);
+		
 		// violates visitor pattern a little, but need to do this to
 		// distinguish declarations in formals and in body
 		for (int i = 0; i < n.formals.size(); i++) {

@@ -18,21 +18,18 @@ public class TypeCheckerImplementation {
 		this.program = program;
 	}
 
+
 	public TypeChecked typeCheck() throws TypeCheckerException{
 		reporter = new ErrorReport();
-		ImpTable<ClassEntry> classTable = buildClassTable();
-		typeCheck(classTable);
+		buildClassTable();
+		TypeCheckerVisitor checker = new TypeCheckerVisitor(classTable, reporter);
+		checker.visit(program);
+		
 		reporter.close();//this will throw the first exception that was reported, if it exists.
 		return null;
 	}
 
-	private void typeCheck(ImpTable<ClassEntry> classTable) {
-		TypeCheckerVisitor builder = new TypeCheckerVisitor(classTable,reporter);
-		 builder.visit(program);
-	
-	}
-
-	public ImpTable<ClassEntry> buildClassTable(){
+	public Object buildClassTable(){
 		ClassBuilderVisitor builder = new ClassBuilderVisitor(reporter);
 		classTable = builder.visit(program);
 		return classTable;
