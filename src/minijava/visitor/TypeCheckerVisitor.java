@@ -27,6 +27,7 @@ import minijava.ast.Plus;
 import minijava.ast.Program;
 import minijava.ast.Times;
 import minijava.ast.Type;
+import minijava.ast.VarDecl;
 import minijava.typechecker.ErrorReport;
 import minijava.typechecker.implementation.ClassEntry;
 import minijava.typechecker.implementation.MethodEntry;
@@ -71,7 +72,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 	public void visit(ClassDecl n) {
 		ClassEntry classEntry = classTable.lookup(n.name);
 		
-		visit(n.vars, classEntry);
+		visit(n.vars);
 		visit(n.methods, classEntry);
 	}
 
@@ -90,6 +91,10 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		
 		visit(n.vars, method);
 		visit(n.statements, method);
+	}
+	
+	public void visit(VarDecl var) {
+		visit(var.type);
 	}
 	
 	public Type visit(IdentifierExp idExp, MethodEntry method) {
