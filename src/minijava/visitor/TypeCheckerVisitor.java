@@ -21,9 +21,9 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 	ImpTable<ClassEntry> classTable;
 	ErrorReport reporter;
 	
-	public TypeCheckerVisitor(ImpTable<ClassEntry> classTable) {
+	public TypeCheckerVisitor(ImpTable<ClassEntry> classTable, ErrorReport reporter) {
 		this.classTable = classTable;
-		reporter = new ErrorReport();
+		this.reporter = reporter;
 	}
 	
 	public <T extends AST> void visit(NodeList<T> nodeList) {

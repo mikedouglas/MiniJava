@@ -47,9 +47,9 @@ public class ClassBuilderVisitor extends ReflectionVisitor {
 	ImpTable<ClassEntry> classTable;
 	ErrorReport reporter;
 	
-	public ClassBuilderVisitor() {
+	public ClassBuilderVisitor(ErrorReport reporter) {
 		classTable = new ImpTable<ClassEntry>();
-		reporter = new ErrorReport();
+		this.reporter = reporter;
 	}
 
 	public ImpTable<ClassEntry> visit(Program n) {
