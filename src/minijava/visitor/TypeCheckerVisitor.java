@@ -98,8 +98,8 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 			reporter.undefinedId(assign.name);
 		}
 		if(actualType==null)
-			System.out.println("no type");
-		if (! expectedType.equals(actualType)) {
+			reporter.typeError(assign.value, expectedType, actualType);//null is not correctly caught by the .equals method
+		else if (! expectedType.equals(actualType)) {
 			reporter.typeError(assign.value, expectedType, actualType);
 		}
 	}
