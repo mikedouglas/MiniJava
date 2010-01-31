@@ -77,7 +77,7 @@ public class ClassBuilderVisitor extends ReflectionVisitor {
 	}
 
 	public void visit(MainClass n) {
-		ClassEntry mainClass = new ClassEntry();
+		ClassEntry mainClass = new ClassEntry("main");
 		
 		MethodEntry mainMethod = new MethodEntry(mainClass);
 		try {
@@ -102,7 +102,7 @@ public class ClassBuilderVisitor extends ReflectionVisitor {
 	}
 
 	public void visit(ClassDecl n) {
-		ClassEntry classEntry = new ClassEntry();
+		ClassEntry classEntry = new ClassEntry(n.name);
 		
 		try {
 			classTable.put(n.name, classEntry);
