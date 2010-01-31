@@ -89,7 +89,8 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 			}
 		}
 		
-		visit(n.vars, method);
+		visit(n.vars);
+		visit(n.formals);
 		visit(n.statements, method);
 	}
 	
