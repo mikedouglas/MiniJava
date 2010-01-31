@@ -8,11 +8,13 @@ import org.junit.Test;
 
 import minijava.ast.BooleanType;
 import minijava.ast.Call;
+import minijava.ast.Expression;
 import minijava.ast.IntArrayType;
 import minijava.ast.IntegerType;
 import minijava.ast.ObjectType;
 import minijava.ast.Type;
 import static minijava.parser.MiniJavaParser.*;
+import minijava.parser.MiniJavaParser;
 import minijava.parser.jcc.ParseException;
 import minijava.test.SampleCode;
 import minijava.typechecker.ErrorMessage;
@@ -822,6 +824,11 @@ public class TypeCheckTest {
 		return ErrorMessage.typeErrorExpectObject(parseExp(exp), actualType);
 	}
 	
+	private Expression parseExp(String exp) {
+	
+		return null;
+	}
+
 	private void accept(File file) throws TypeCheckerException, Exception {
 		MiniJavaTypeChecker.parseAndCheck(file); 
 	}
