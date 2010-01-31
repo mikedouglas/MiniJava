@@ -92,7 +92,7 @@ public class ClassBuilderVisitor extends ReflectionVisitor {
 			// this will never happen due to the parser grammar
 		}
 		
-		//visit(n.statement);
+		visit(n.statement, mainMethod);
 		
 		try {
 			classTable.put(n.className, mainClass);
@@ -124,7 +124,7 @@ public class ClassBuilderVisitor extends ReflectionVisitor {
 	
 	public void visit(VarDecl var, MethodEntry entry) {
 		try {
-			entry.getParameters().put(var.name, var.type);
+			entry.getVariables().put(var.name, var.type);
 		} catch (DuplicateException e) {
 			reporter.duplicateDefinition(var.name);
 		}
@@ -138,97 +138,18 @@ public class ClassBuilderVisitor extends ReflectionVisitor {
 			reporter.duplicateDefinition(n.name);
 		}
 		
-		visit(n.formals, method);
+		// violates visitor pattern a little, but need to do this to
+		// distinguish declarations in formals and in body
+		for (int i = 0; i < n.formals.size(); i++) {
+			VarDecl formal = n.formals.elementAt(i);
+			try {
+				method.getParameters().put(formal.name, formal.type);
+			} catch (DuplicateException e) {
+				reporter.duplicateDefinition(formal.name);
+			}
+		}
+		
 		visit(n.vars, method);
 		visit(n.statements, method);
 	}
-
-	public void visit(IntArrayType n) {
-	}
-
-	public FunTable visit(BooleanType n) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public FunTable visit(IntegerType n) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public FunTable visit(ObjectType n) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public FunTable visit(Block n) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public FunTable visit(If n) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public FunTable visit(While n) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public FunTable visit(Print n) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public FunTable visit(Assign n) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public FunTable visit(ArrayAssign n) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public FunTable visit(And n) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public FunTable visit(LessThan n) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public FunTable visit(Plus n) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public FunTable visit(Minus n) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public FunTable visit(Times n) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public FunTable visit(ArrayLookup n) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public FunTable visit(ArrayLength n) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public FunTable visit(Call n) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }
