@@ -1,6 +1,7 @@
 package minijava.test.typechecker;
 
 import java.io.File;
+import java.io.StringReader;
 
 import junit.framework.Assert;
 
@@ -15,6 +16,7 @@ import minijava.ast.ObjectType;
 import minijava.ast.Type;
 import static minijava.parser.MiniJavaParser.*;
 import minijava.parser.MiniJavaParser;
+import minijava.parser.jcc.JCCMiniJavaParser;
 import minijava.parser.jcc.ParseException;
 import minijava.test.SampleCode;
 import minijava.typechecker.ErrorMessage;
@@ -825,8 +827,16 @@ public class TypeCheckTest {
 	}
 	
 	private Expression parseExp(String exp) {
-	
-		return null;
+		JCCMiniJavaParser parser = new JCCMiniJavaParser(new StringReader(exp));
+		Expression resultExp = null;
+		
+		try {
+			resultExp = parser.Expression();
+		} catch (ParseException e) {
+			// if this happens the test was written wrong
+		}
+		
+		return resultExp;
 	}
 
 	private void accept(File file) throws TypeCheckerException, Exception {
