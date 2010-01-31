@@ -44,6 +44,11 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		}
 	}
 
+	public void visit(Program n) {
+		visit(n.mainClass);
+		visit(n.classes);
+	}
+	
 	public void visit(MainClass n) {
 		visit(n.statement, classTable.lookup(n.className));
 	}
@@ -70,6 +75,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		
 		return type;
 	}
+
 	
 	public void visit(Assign assign, MethodEntry method) {
 		Type expectedType = method.lookup(assign.name);
@@ -78,7 +84,8 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		if (expectedType == null) {
 			reporter.undefinedId(assign.name);
 		}
-		
+		if(actualType==null)
+			System.out.println("no type");
 		if (! expectedType.equals(actualType)) {
 			reporter.typeError(assign.value, expectedType, actualType);
 		}
