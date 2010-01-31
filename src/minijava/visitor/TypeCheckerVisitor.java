@@ -84,11 +84,11 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 
 	public void visit(MethodDecl n, ClassEntry entry) {	
 		MethodEntry method = entry.getMethods().lookup(n.name);
-		
+		visit(method.getReturnType());
 		Type returnedType = (Type) visit(n.returnExp, method);
 		if(returnedType!=null)
 		{
-			visit(returnedType);//do we need to do this?
+			visit(returnedType);
 			if (! returnedType.equals(method.getReturnType())) {
 				reporter.typeError(n.returnExp, method.getReturnType(), returnedType);
 			}
@@ -299,7 +299,6 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 
 	}
 	
-	//Should we be calling this?
 	public void visit(ObjectType type) {
 		if (classTable.lookup(type.name) == null) {
 			reporter.undefinedId(type.name);
