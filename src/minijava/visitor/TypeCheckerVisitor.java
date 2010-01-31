@@ -154,10 +154,11 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		//So what we actually have to do here is check that the array expression contains an array
 		
 		Type type = (Type) visit(exp.array,method);
-		if(type==null||!type.equals(IntArrayType.instance))
+		if (type==null || ! type.equals(IntArrayType.instance))
 		{
 			reporter.typeError(exp.array, IntArrayType.instance, type);
 		}
+		
 		return IntegerType.instance;
 	}
 	
