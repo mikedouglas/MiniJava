@@ -34,10 +34,14 @@ public class ClassEntry implements Indentable {
 		this.fields = fields;
 	}
 	
-	public Type lookup(String id) {
+	public Type lookupVariable(String id) {
 		return fields.lookup(id);
 	}
 
+	public MethodEntry lookupMethod(String id) {
+		return methods.lookup(id);
+	}
+	
 	@Override
 	public void dump(IndentingWriter out) {
 		out.println();

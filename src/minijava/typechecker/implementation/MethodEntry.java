@@ -44,13 +44,13 @@ public class MethodEntry implements Indentable {
 		this.returnType = returnType;
 	}
 	
-	public Type lookup(String id) {
+	public Type lookupVariable(String id) {
 		Type type = null;
 		Type type1 = variables.lookup(id);
 		Type type2 = parameters.lookup(id);
 		
-		if (type1 == type2 && type1 == null) {
-			type = parent.lookup(id);
+		if (type1 == null && type2 == null) {
+			type = parent.lookupVariable(id);
 		}
 		else if (type1 == null) {
 			type = type2;
@@ -59,6 +59,12 @@ public class MethodEntry implements Indentable {
 			type = type1;
 		}
 		
+		return type;
+	}
+	
+	public Type lookupMethod(String id) {
+		Type type = null;	
+		type = parent.lookupMethod(id).getReturnType();
 		return type;
 	}
 	

@@ -4,6 +4,7 @@ import minijava.ast.AST;
 import minijava.ast.Assign;
 import minijava.ast.BooleanLiteral;
 import minijava.ast.BooleanType;
+import minijava.ast.Call;
 import minijava.ast.ClassDecl;
 import minijava.ast.IdentifierExp;
 import minijava.ast.IntegerLiteral;
@@ -14,12 +15,10 @@ import minijava.ast.NodeList;
 import minijava.ast.ObjectType;
 import minijava.ast.Program;
 import minijava.ast.Type;
-import minijava.ast.VarDecl;
 import minijava.typechecker.ErrorReport;
 import minijava.typechecker.implementation.ClassEntry;
 import minijava.typechecker.implementation.MethodEntry;
 import minijava.util.ImpTable;
-import minijava.util.ImpTable.DuplicateException;
 
 public class TypeCheckerVisitor extends ReflectionVisitor {
 	ImpTable<ClassEntry> classTable;
@@ -80,7 +79,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 	}
 	
 	public Type visit(IdentifierExp idExp, MethodEntry method) {
-		Type type = method.lookup(idExp.name);
+		Type type = method.lookupVariable(idExp.name);
 		
 		if (type == null) {
 			reporter.undefinedId(idExp.name);
@@ -90,15 +89,41 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 	}
 
 	
+	public Type visit(IntegerLiteral exp, MethodEntry method) {
+		return new IntegerType();
+	}
+	
+	public Type visit(BooleanLiteral exp, MethodEntry method) {
+		return new BooleanType();
+	}
+	
+	public Type visit(Call exp, MethodEntry method) {
+		
+		Type type = method.lookupMethod(exp.name);
+		
+		if (type == null) {
+			reporter.undefinedId(exp.name);
+		}
+		
+		return type;
+		
+	}
+	
+	
+	
 	public void visit(Assign assign, MethodEntry method) {
-		Type expectedType = method.lookup(assign.name);
+		Type expectedType = method.lookupVariable(assign.name);
 		Type actualType = (Type) visit(assign.value, method);
 		
 		if (expectedType == null) {
 			reporter.undefinedId(assign.name);
+			return;
 		}
 		if(actualType==null)
+		{
 			reporter.typeError(assign.value, expectedType, actualType);//null is not correctly caught by the .equals method
+			 actualType = (Type) visit(assign.value, method);//for testing
+		}
 		else if (! expectedType.equals(actualType)) {
 			reporter.typeError(assign.value, expectedType, actualType);
 		}
