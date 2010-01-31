@@ -5,6 +5,7 @@ import minijava.typechecker.TypeChecked;
 import minijava.util.FunTable;
 import minijava.util.ImpTable;
 import minijava.visitor.ClassBuilderVisitor;
+import minijava.visitor.TypeCheckerVisitor;
 
 public class TypeCheckerImplementation {
 	
@@ -16,7 +17,9 @@ public class TypeCheckerImplementation {
 	}
 
 	public TypeChecked typeCheck() {
-		
+		ClassBuilderVisitor builder = new ClassBuilderVisitor();
+		classTable = builder.visit(program);
+		TypeCheckerVisitor checker = new TypeCheckerVisitor(classTable);
 		return null;
 	}
 
