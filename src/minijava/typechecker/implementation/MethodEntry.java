@@ -68,7 +68,12 @@ public class MethodEntry implements Indentable {
 	
 	public Type lookupMethod(String id) {
 		Type type = null;	
-		type = parent.lookupMethod(id).getReturnType();
+		MethodEntry method = parent.lookupMethod(id);
+		
+		if (method != null) {
+			type = method.getReturnType();
+		}
+		
 		return type;
 	}
 	
