@@ -1,5 +1,8 @@
 package minijava.typechecker.implementation;
 
+import java.util.Iterator;
+import java.util.Map.Entry;
+
 import minijava.ast.Program;
 import minijava.typechecker.ErrorReport;
 import minijava.typechecker.TypeChecked;
@@ -22,6 +25,7 @@ public class TypeCheckerImplementation {
 	public TypeChecked typeCheck() throws TypeCheckerException{
 		reporter = new ErrorReport();
 		buildClassTable();
+		
 		TypeCheckerVisitor checker = new TypeCheckerVisitor(classTable, reporter);
 		checker.visit(program);
 		
@@ -32,6 +36,20 @@ public class TypeCheckerImplementation {
 	public Object buildClassTable(){
 		ClassBuilderVisitor builder = new ClassBuilderVisitor(reporter);
 		classTable = builder.visit(program);
+		
+		// Resolve class inheritance
+		Iterator<Entry<String, ClassEntry>> itr = classTable.iterator();
+		while (itr.hasNext()) {
+			Entry<String, ClassEntry> entry;
+			entry = (Entry<String, ClassEntry>) itr.next();
+			String parentClassName = entry.getValue().getParentName(); 
+			
+			if (parentClassName != null) {
+				ClassEntry parentClass = classTable.lookup(parentClassName);
+				entry.getValue().setParentClass(parentClass);
+			}
+		}
+		
 		return classTable;
 	}
 

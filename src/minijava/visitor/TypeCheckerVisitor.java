@@ -1,5 +1,7 @@
 package minijava.visitor;
 
+import java.util.List;
+
 import minijava.ast.AST;
 import minijava.ast.And;
 import minijava.ast.ArrayAssign;
@@ -83,9 +85,17 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 
 	public void visit(ClassDecl n) {
 		ClassEntry classEntry = classTable.lookup(n.name);
+		String parentName = classEntry.getParentName();
 
-		if(classEntry == null)
+		if (classEntry == null)
 			reporter.undefinedId(n.name);
+		
+		if (parentName != null) {
+			ClassEntry parentEntry = classTable.lookup(parentName);
+			if (parentEntry == null) {
+				reporter.undefinedId(parentName);
+			} 
+		}
 
 		visit(n.vars, classEntry);
 		visit(n.methods, classEntry);
@@ -96,6 +106,36 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		
 		visit(n.vars, method);
 		visit(n.statements, method);
+		
+		// inheritance and overriding
+		if (entry.getParentName() != null) {
+			MethodEntry superMethod = entry.getParentClass().lookupMethod(n.name);
+			
+			if (superMethod != null) {
+				List<Type> superTypes = superMethod.getParamTypes();
+				List<Type> methodTypes = method.getParamTypes();
+				
+				// check method parameter lengths
+				if (superTypes.size() != methodTypes.size()) {
+					reporter.badMethodOverriding(new ObjectType(entry.getClassName()), n.name);
+				} else {
+					// check overloading of method parameter types
+					for (int i = 0; i < method.getParamTypes().size(); i++) {
+						if (! methodTypes.get(i).equals(superTypes.get(i))) {
+							reporter.badMethodOverriding(new ObjectType(entry.getClassName()), n.name);
+						}
+					}
+				}
+				
+				// check overloading of method return types
+				Type superRet = superMethod.getReturnType();
+				Type retType = method.getReturnType();
+				
+				if (!superRet.equals(retType)) {
+					reporter.badMethodOverriding(new ObjectType(entry.getClassName()), n.name);
+				}
+			}
+		}
 		
 		//must check return type after local vars to pass unit tests.
 		
@@ -318,8 +358,18 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 	 * @param method
 	 * @return
 	 */
-	public Type visit(VarDecl exp, ClassEntry method) {
+	public Type visit(VarDecl exp, ClassEntry entry) {
 		
+		// inheritance and overloading of fields
+		if (entry.getParentClass() != null) {
+			Type parentField = entry.getParentClass().lookupVariable(exp.name);
+			
+			if (parentField != null) {
+				reporter.fieldOverriding(new ObjectType(entry.getClassName()), exp.name);
+			}
+		}
+		
+		// check for type existence
 		visit(exp.type);
 
 		return exp.type;

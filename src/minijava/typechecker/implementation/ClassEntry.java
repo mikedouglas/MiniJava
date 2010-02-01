@@ -10,6 +10,8 @@ import minijava.util.List;
 
 public class ClassEntry implements Indentable {
 	
+	String parentName;
+	ClassEntry parentClass;
 	ImpTable<MethodEntry> methods;
 	ImpTable<Type> fields;
 	final String className;
@@ -17,11 +19,13 @@ public class ClassEntry implements Indentable {
 	public String getClassName() {
 		return className;
 	}
-
-	public ClassEntry (String className) {
+	
+	public ClassEntry (String className, String parentName) {
 		methods = new ImpTable<MethodEntry>();
 		fields = new ImpTable<Type>();
 		this.className = className;
+		this.parentName = parentName;
+		this.parentClass = null;
 	}
 
 	public ImpTable<MethodEntry> getMethods() {
@@ -40,12 +44,36 @@ public class ClassEntry implements Indentable {
 		this.fields = fields;
 	}
 	
+	public String getParentName() {
+		return parentName;
+	}
+	
+	public ClassEntry getParentClass() {
+		return parentClass;
+	}
+	
+	public void setParentClass(ClassEntry parentClass) {
+		this.parentClass = parentClass;
+	}
+	
 	public Type lookupVariable(String id) {
-		return fields.lookup(id);
+		Type field = fields.lookup(id);
+		
+		if (field == null && parentClass != null) {
+			field = parentClass.lookupVariable(id);
+		}
+		
+		return field;
 	}
 
 	public MethodEntry lookupMethod(String id) {
-		return methods.lookup(id);
+		MethodEntry method = methods.lookup(id);
+		
+		if (method == null && parentClass != null) {
+			method = parentClass.lookupMethod(id);
+		}
+		
+		return method;
 	}
 	
 	@Override
