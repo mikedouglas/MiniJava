@@ -6,12 +6,14 @@ import minijava.ast.ArrayAssign;
 import minijava.ast.ArrayLength;
 import minijava.ast.ArrayLookup;
 import minijava.ast.Assign;
+import minijava.ast.Block;
 import minijava.ast.BooleanLiteral;
 import minijava.ast.BooleanType;
 import minijava.ast.Call;
 import minijava.ast.ClassDecl;
 import minijava.ast.Expression;
 import minijava.ast.IdentifierExp;
+import minijava.ast.If;
 import minijava.ast.IntArrayType;
 import minijava.ast.IntegerLiteral;
 import minijava.ast.IntegerType;
@@ -31,6 +33,7 @@ import minijava.ast.This;
 import minijava.ast.Times;
 import minijava.ast.Type;
 import minijava.ast.VarDecl;
+import minijava.ast.While;
 import minijava.typechecker.ErrorReport;
 import minijava.typechecker.implementation.ClassEntry;
 import minijava.typechecker.implementation.MethodEntry;
@@ -189,6 +192,8 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		return IntegerType.instance;
 	}
 
+
+	
 	public Type visit(Minus exp, MethodEntry method) {		
 		checkMathBinop(exp.e1,exp.e2,method);	
 		return IntegerType.instance;
@@ -290,7 +295,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		return exp.type;
 	}
 	
-	public Type visit(ArrayAssign exp, MethodEntry method) {
+	public void visit(ArrayAssign exp, MethodEntry method) {
 		Type arrayType = method.lookupVariable(exp.name);
 		
 		if(arrayType==null)
@@ -315,7 +320,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 			reporter.typeError(exp.value, IntegerType.instance, valType);
 		}
 		
-		return IntegerType.instance;
+	//	return IntegerType.instance;
 	}
 	
 	public Type visit(ArrayLookup exp, MethodEntry method) {
@@ -337,6 +342,14 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 	}
 
 
+	public void visit(If stm, MethodEntry method) {		
+		Type tst = (Type) visit(stm.tst,method);
+		visit(stm.els,method);
+		visit(stm.thn,method);
+		if(tst == null || ! tst.equals(BooleanType.instance))
+			reporter.typeError(stm.tst, BooleanType.instance, tst);
+	}
+	
 	public void visit(Assign assign, MethodEntry method) {
 		Type expectedType = method.lookupVariable(assign.name);
 		Type actualType = (Type) visit(assign.value, method);
@@ -356,12 +369,25 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		}
 		//return expectedType; //Do assignments return values in minijava?
 	}
+
+	public void visit(Block stm, MethodEntry method) {
+		visit(stm.statements,method);
+	}
+
+	public void visit(While stm, MethodEntry method) {
+		
+		Type tst =(Type) visit(stm.tst,method);
+		if(tst == null || ! tst.equals(BooleanType.instance))
+			reporter.typeError(stm.tst, BooleanType.instance, tst);
+			
+		visit(stm.body,method);
+	}
 	
-	public void visit(Print exp, MethodEntry method) {
+	public void visit(Print stm, MethodEntry method) {
 		//apparently, print is only allowed to print integer variables, not booleans
-		Type type = (Type) visit(exp.exp,method);
+		Type type = (Type) visit(stm.exp,method);
 		if(type == null || ! type.equals(IntegerType.instance))
-			reporter.typeError(exp.exp, IntegerType.instance, type);
+			reporter.typeError(stm.exp, IntegerType.instance, type);
 	}
 	
 	public void visit(ObjectType type) {
