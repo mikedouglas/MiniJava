@@ -365,7 +365,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		Type arrayType = (Type) visit(exp.array,method);
 		if(arrayType==null|| ! arrayType.equals(IntArrayType.instance))
 		{
-			reporter.typeError(exp.index, IntegerType.instance, arrayType);
+			reporter.typeError(exp.array, IntArrayType.instance, arrayType);
 		}
 		
 		
