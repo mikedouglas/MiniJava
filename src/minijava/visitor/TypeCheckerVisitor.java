@@ -2,6 +2,7 @@ package minijava.visitor;
 
 import minijava.ast.AST;
 import minijava.ast.And;
+import minijava.ast.ArrayAssign;
 import minijava.ast.ArrayLength;
 import minijava.ast.ArrayLookup;
 import minijava.ast.Assign;
@@ -71,7 +72,10 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		ClassEntry classEntry = classTable.lookup(n.className);
 		if(classEntry == null)
 			reporter.undefinedId(n.className);
-		visit(n.statement,classEntry);
+		
+		MethodEntry mainMethod = classEntry.lookupMethod("main");
+		
+		visit(n.statement,mainMethod);
 	}
 
 	public void visit(ClassDecl n) {
@@ -86,6 +90,12 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 
 	public void visit(MethodDecl n, ClassEntry entry) {	
 		MethodEntry method = entry.getMethods().lookup(n.name);
+		
+		visit(n.vars, method);
+		visit(n.statements, method);
+		
+		//must check return type after local vars to pass unit tests.
+		
 		visit(method.getReturnType());
 		Type returnedType = (Type) visit(n.returnExp, method);
 
@@ -99,10 +109,9 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		} else {
 			reporter.typeError(n.returnExp, method.getReturnType(), returnedType);		
 		}
-		
-		visit(n.vars);
-		visit(n.formals);
-		visit(n.statements, method);
+
+		for(Type t:method.getParamTypes())
+			visit(t);
 	}
 	
 	public void visit(VarDecl var) {
@@ -147,11 +156,28 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 					reporter.undefinedId(exp.name);
 				else{
 					
+					
+					NodeList<Expression> args = exp.rands;
+					for(int i = 0;i<Math.min(args.size(), method.getParamTypes().size());i++)
+					{
+						Type expectedType = recMethod.getParamTypes().get(i);
+						Expression e = args.elementAt(i);
+						Type argType = (Type) visit(e,method);
+						visit(argType);
+						if(argType==null || ! argType.equals(expectedType))
+						{
+							reporter.typeError(e, expectedType, argType);
+						}
+					}
+					
+					if(args.size()!=recMethod.getParamTypes().size())
+						reporter.wrongNumberOfArguments(exp, method.getParamTypes().size());
+					
+					
 					return recMethod.getReturnType();
 				}
 			}
 		}
-		
 	
 		return null;
 		
@@ -169,7 +195,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		
 		return IntegerType.instance;
 	}
-	
+
 	public Type visit(Minus exp, MethodEntry method) {		
 		checkMathBinop(exp.e1,exp.e2,method);	
 		return IntegerType.instance;
@@ -263,7 +289,42 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 
 		return exp.type;
 	}
+	
+	public Type visit(VarDecl exp, MethodEntry method) {
+		
+		visit(exp.type);
 
+		return exp.type;
+	}
+	
+	public Type visit(ArrayAssign exp, MethodEntry method) {
+		Type arrayType = method.lookupVariable(exp.name);
+		
+		if(arrayType==null)
+		{
+			reporter.undefinedId(exp.name);
+		}else if (! arrayType.equals(IntArrayType.instance))
+		{
+			//create an expression to pass to the error report.
+			reporter.typeError(new IdentifierExp(exp.name), IntArrayType.instance, arrayType);
+		}
+		
+		
+		Type type = (Type) visit(exp.index,method);
+		if(type==null|| ! type.equals(IntegerType.instance))
+		{
+			reporter.typeError(exp.index, IntegerType.instance, type);
+		}
+		
+		Type valType = (Type) visit(exp.value,method);
+		if(valType==null|| ! valType.equals(IntegerType.instance))
+		{
+			reporter.typeError(exp.value, IntegerType.instance, valType);
+		}
+		
+		return IntegerType.instance;
+	}
+	
 	public Type visit(ArrayLookup exp, MethodEntry method) {
 		
 		Type arrayType = (Type) visit(exp.array,method);
@@ -303,8 +364,11 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		//return expectedType; //Do assignments return values in minijava?
 	}
 	
-	public void visit(Print type, MethodEntry method) {
-
+	public void visit(Print exp, MethodEntry method) {
+		//apparently, print is only allowed to print integer variables, not booleans
+		Type type = (Type) visit(exp.exp,method);
+		if(type == null || ! type.equals(IntegerType.instance))
+			reporter.typeError(exp.exp, IntegerType.instance, type);
 	}
 	
 	public void visit(ObjectType type) {

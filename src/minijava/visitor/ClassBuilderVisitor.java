@@ -88,6 +88,7 @@ public class ClassBuilderVisitor extends ReflectionVisitor {
 		
 		try {
 			mainMethod.getParameters().put(n.argName, new ObjectType("String"));
+			mainMethod.getParamTypes().add( new ObjectType("String"));//actually, this should be a string array.
 		} catch (DuplicateException e1) {
 			// this will never happen due to the parser grammar
 		}
@@ -151,6 +152,7 @@ public class ClassBuilderVisitor extends ReflectionVisitor {
 			VarDecl formal = n.formals.elementAt(i);
 			try {
 				method.getParameters().put(formal.name, formal.type);
+				method.getParamTypes().add(formal.type);
 			} catch (DuplicateException e) {
 				reporter.duplicateDefinition(formal.name);
 			}
