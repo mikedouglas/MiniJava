@@ -71,7 +71,10 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		ClassEntry classEntry = classTable.lookup(n.className);
 		if(classEntry == null)
 			reporter.undefinedId(n.className);
-		visit(n.statement,classEntry);
+		
+		MethodEntry mainMethod = classEntry.lookupMethod("main");
+		
+		visit(n.statement,mainMethod);
 	}
 
 	public void visit(ClassDecl n) {
@@ -325,8 +328,11 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		//return expectedType; //Do assignments return values in minijava?
 	}
 	
-	public void visit(Print type, MethodEntry method) {
-
+	public void visit(Print exp, MethodEntry method) {
+		//apparently, print is only allowed to print integer variables, not booleans
+		Type type = (Type) visit(exp.exp,method);
+		if(type == null || ! type.equals(IntegerType.instance))
+			reporter.typeError(exp.exp, IntegerType.instance, type);
 	}
 	
 	public void visit(ObjectType type) {
