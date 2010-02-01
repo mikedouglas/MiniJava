@@ -185,7 +185,9 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		return null;
 		
 	}
-	
+
+
+
 	public void visit(If exp, MethodEntry method) {
 		Type actualType = (Type) visit(exp.tst, method);
 		
@@ -374,13 +376,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 	}
 
 
-	public void visit(If stm, MethodEntry method) {		
-		Type tst = (Type) visit(stm.tst,method);
-		visit(stm.els,method);
-		visit(stm.thn,method);
-		if(tst == null || ! tst.equals(BooleanType.instance))
-			reporter.typeError(stm.tst, BooleanType.instance, tst);
-	}
+
 	
 	public void visit(Assign assign, MethodEntry method) {
 		Type expectedType = method.lookupVariable(assign.name);
@@ -402,18 +398,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		//return expectedType; //Do assignments return values in minijava?
 	}
 
-	public void visit(Block stm, MethodEntry method) {
-		visit(stm.statements,method);
-	}
 
-	public void visit(While stm, MethodEntry method) {
-		
-		Type tst =(Type) visit(stm.tst,method);
-		if(tst == null || ! tst.equals(BooleanType.instance))
-			reporter.typeError(stm.tst, BooleanType.instance, tst);
-			
-		visit(stm.body,method);
-	}
 	
 	public void visit(Print stm, MethodEntry method) {
 		//apparently, print is only allowed to print integer variables, not booleans
