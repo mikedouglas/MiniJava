@@ -84,6 +84,12 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 
 	public void visit(MethodDecl n, ClassEntry entry) {	
 		MethodEntry method = entry.getMethods().lookup(n.name);
+		
+		visit(n.vars, method);
+		visit(n.statements, method);
+		
+		//must check return type after local vars to pass unit tests.
+		
 		visit(method.getReturnType());
 		Type returnedType = (Type) visit(n.returnExp, method);
 		if(returnedType!=null)
@@ -98,8 +104,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		}
 		for(Type t:method.getParamTypes())
 			visit(t);
-		visit(n.vars, method);
-		visit(n.statements, method);
+
 	}
 	
 	public Type visit(IdentifierExp idExp, MethodEntry method) {
@@ -268,6 +273,13 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 	 * @return
 	 */
 	public Type visit(VarDecl exp, ClassEntry method) {
+		
+		visit(exp.type);
+
+		return exp.type;
+	}
+	
+	public Type visit(VarDecl exp, MethodEntry method) {
 		
 		visit(exp.type);
 
