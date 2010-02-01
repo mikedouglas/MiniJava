@@ -12,6 +12,7 @@ import minijava.ast.Call;
 import minijava.ast.ClassDecl;
 import minijava.ast.Expression;
 import minijava.ast.IdentifierExp;
+import minijava.ast.If;
 import minijava.ast.IntArrayType;
 import minijava.ast.IntegerLiteral;
 import minijava.ast.IntegerType;
@@ -181,6 +182,17 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 	
 		return null;
 		
+	}
+	
+	public void visit(If exp, MethodEntry method) {
+		Type actualType = (Type) visit(exp.tst, method);
+		
+		if (actualType == null || !actualType.equals(BooleanType.instance)) {
+			reporter.typeError(exp.tst, BooleanType.instance, actualType);
+		}
+		
+		visit(exp.els, method);
+		visit(exp.thn, method);
 	}
 	
 	public Type visit(ArrayLength exp, MethodEntry method) {
