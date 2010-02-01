@@ -2,6 +2,7 @@ package minijava.visitor;
 
 import minijava.ast.AST;
 import minijava.ast.And;
+import minijava.ast.ArrayAssign;
 import minijava.ast.ArrayLength;
 import minijava.ast.ArrayLookup;
 import minijava.ast.Assign;
@@ -187,7 +188,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		
 		return IntegerType.instance;
 	}
-	
+
 	public Type visit(Minus exp, MethodEntry method) {		
 		checkMathBinop(exp.e1,exp.e2,method);	
 		return IntegerType.instance;
@@ -288,7 +289,35 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 
 		return exp.type;
 	}
-
+	
+	public Type visit(ArrayAssign exp, MethodEntry method) {
+		Type arrayType = method.lookupVariable(exp.name);
+		
+		if(arrayType==null)
+		{
+			reporter.undefinedId(exp.name);
+		}else if (! arrayType.equals(IntArrayType.instance))
+		{
+			//create an expression to pass to the error report.
+			reporter.typeError(new IdentifierExp(exp.name), IntArrayType.instance, arrayType);
+		}
+		
+		
+		Type type = (Type) visit(exp.index,method);
+		if(type==null|| ! type.equals(IntegerType.instance))
+		{
+			reporter.typeError(exp.index, IntegerType.instance, type);
+		}
+		
+		Type valType = (Type) visit(exp.value,method);
+		if(valType==null|| ! valType.equals(IntegerType.instance))
+		{
+			reporter.typeError(exp.value, IntegerType.instance, valType);
+		}
+		
+		return IntegerType.instance;
+	}
+	
 	public Type visit(ArrayLookup exp, MethodEntry method) {
 		
 		Type arrayType = (Type) visit(exp.array,method);
