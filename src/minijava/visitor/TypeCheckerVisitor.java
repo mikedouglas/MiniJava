@@ -83,8 +83,10 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 
 	public void visit(ClassDecl n) {
 		ClassEntry classEntry = classTable.lookup(n.name);
+
 		if(classEntry == null)
 			reporter.undefinedId(n.name);
+
 		visit(n.vars, classEntry);
 		visit(n.methods, classEntry);
 	}
@@ -99,19 +101,24 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		
 		visit(method.getReturnType());
 		Type returnedType = (Type) visit(n.returnExp, method);
-		if(returnedType!=null)
+
+		if (returnedType!=null)
 		{
+			// check here if the return type even exists
 			visit(returnedType);
 			if (! returnedType.equals(method.getReturnType())) {
 				reporter.typeError(n.returnExp, method.getReturnType(), returnedType);
 			}
-		}else
-		{
+		} else {
 			reporter.typeError(n.returnExp, method.getReturnType(), returnedType);		
 		}
+
 		for(Type t:method.getParamTypes())
 			visit(t);
-
+	}
+	
+	public void visit(VarDecl var) {
+		visit(var.type);
 	}
 	
 	public Type visit(IdentifierExp idExp, MethodEntry method) {
@@ -177,6 +184,31 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 	
 		return null;
 		
+	}
+	
+	public void visit(If exp, MethodEntry method) {
+		Type actualType = (Type) visit(exp.tst, method);
+		
+		if (actualType == null || !actualType.equals(BooleanType.instance)) {
+			reporter.typeError(exp.tst, BooleanType.instance, actualType);
+		}
+		
+		visit(exp.els, method);
+		visit(exp.thn, method);
+	}
+	
+	public void visit(While exp, MethodEntry method) {
+		Type actualType = (Type) visit(exp.tst, method);
+		
+		if (actualType == null || !actualType.equals(BooleanType.instance)) {
+			reporter.typeError(exp.tst, BooleanType.instance, actualType);
+		}
+		
+		visit(exp.body, method);
+	}
+	
+	public void visit(Block exp, MethodEntry method) {
+		visit(exp.statements, method);
 	}
 	
 	public Type visit(ArrayLength exp, MethodEntry method) {
