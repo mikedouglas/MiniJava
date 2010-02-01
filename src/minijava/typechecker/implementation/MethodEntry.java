@@ -1,5 +1,7 @@
 package minijava.typechecker.implementation;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map.Entry;
 
 import minijava.ast.Type;
@@ -12,7 +14,7 @@ public class MethodEntry implements Indentable {
 	public ClassEntry getParent() {
 		return parent;
 	}
-
+	List<Type> paramTypes = new ArrayList<Type>();
 	ImpTable<Type> variables;
 	ImpTable<Type> parameters;
 	Type returnType;
@@ -35,11 +37,12 @@ public class MethodEntry implements Indentable {
 	public ImpTable<Type> getParameters() {
 		return parameters;
 	}
+
 	
-	public void setParameters(ImpTable<Type> parameters) {
-		this.parameters = parameters;
+	public List<Type> getParamTypes() {
+		return paramTypes;
 	}
-	
+
 	public Type getReturnType() {
 		return returnType;
 	}

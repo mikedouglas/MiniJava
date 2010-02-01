@@ -96,7 +96,8 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		{
 			reporter.typeError(n.returnExp, method.getReturnType(), returnedType);		
 		}
-		
+		for(Type t:method.getParamTypes())
+			visit(t);
 		visit(n.vars, method);
 		visit(n.statements, method);
 	}
@@ -139,11 +140,28 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 					reporter.undefinedId(exp.name);
 				else{
 					
+					
+					NodeList<Expression> args = exp.rands;
+					for(int i = 0;i<Math.min(args.size(), method.getParamTypes().size());i++)
+					{
+						Type expectedType = recMethod.getParamTypes().get(i);
+						Expression e = args.elementAt(i);
+						Type argType = (Type) visit(e,method);
+						visit(argType);
+						if(argType==null || ! argType.equals(expectedType))
+						{
+							reporter.typeError(e, expectedType, argType);
+						}
+					}
+					
+					if(args.size()!=recMethod.getParamTypes().size())
+						reporter.wrongNumberOfArguments(exp, method.getParamTypes().size());
+					
+					
 					return recMethod.getReturnType();
 				}
 			}
 		}
-		
 	
 		return null;
 		
