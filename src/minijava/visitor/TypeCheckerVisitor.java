@@ -6,6 +6,7 @@ import minijava.ast.ArrayAssign;
 import minijava.ast.ArrayLength;
 import minijava.ast.ArrayLookup;
 import minijava.ast.Assign;
+import minijava.ast.Block;
 import minijava.ast.BooleanLiteral;
 import minijava.ast.BooleanType;
 import minijava.ast.Call;
@@ -32,6 +33,7 @@ import minijava.ast.This;
 import minijava.ast.Times;
 import minijava.ast.Type;
 import minijava.ast.VarDecl;
+import minijava.ast.While;
 import minijava.typechecker.ErrorReport;
 import minijava.typechecker.implementation.ClassEntry;
 import minijava.typechecker.implementation.MethodEntry;
@@ -193,6 +195,20 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		
 		visit(exp.els, method);
 		visit(exp.thn, method);
+	}
+	
+	public void visit(While exp, MethodEntry method) {
+		Type actualType = (Type) visit(exp.tst, method);
+		
+		if (actualType == null || !actualType.equals(BooleanType.instance)) {
+			reporter.typeError(exp.tst, BooleanType.instance, actualType);
+		}
+		
+		visit(exp.body, method);
+	}
+	
+	public void visit(Block exp, MethodEntry method) {
+		visit(exp.statements, method);
 	}
 	
 	public Type visit(ArrayLength exp, MethodEntry method) {
