@@ -209,7 +209,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 						if(argType!=null)
 							visit(argType);
 						
-						if(argType==null || ! argType.equals(expectedType))
+						if(argType==null || ! matchesObjectType(expectedType, argType))
 						{
 							reporter.typeError(e, expectedType, argType);
 						}
@@ -228,8 +228,32 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		return null;
 		
 	}
-
-
+	
+	// check if this class, or any parent, matches the expected type
+	private boolean matchesObjectType(Type expected, Type actual) {
+		if (expected instanceof BooleanType ||
+			expected instanceof IntegerType ||
+			expected instanceof IntArrayType ||
+			actual instanceof BooleanType ||
+			actual instanceof IntegerType ||
+			actual instanceof IntArrayType) {
+			return expected.equals(actual);
+		} else {
+			ClassEntry expectedCls = classTable.lookup(((ObjectType) expected).name);
+			ClassEntry actualCls   = classTable.lookup(((ObjectType) actual).name);
+			
+			if (actualCls != null && expectedCls != null) {
+				if (actualCls.getParentName() == null) {
+					return (expectedCls.getClassName().equals(actualCls.getClassName()));
+				} else {
+					return expectedCls.getClassName().equals(actualCls.getClassName()) ||
+						matchesObjectType(expected, new ObjectType(actualCls.getParentName()));
+				}
+			}
+		}
+		
+		return false;
+	}
 
 	public void visit(If exp, MethodEntry method) {
 		Type actualType = (Type) visit(exp.tst, method);
@@ -444,7 +468,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 				reporter.typeError(assign.value, expectedType, actualType);//null is not correctly caught by the .equals method
 				 visit(assign.value, method);
 			}
-			else if (! expectedType.equals(actualType)) {
+			else if (! matchesObjectType(expectedType, actualType)) {
 				reporter.typeError(assign.value, expectedType, actualType);
 			}
 		}
