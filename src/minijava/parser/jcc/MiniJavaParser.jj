@@ -273,15 +273,23 @@ Expression AdditionTerm() : {
 Expression MultTerm() : {
     Expression exp, cur;
 } {
-    exp = DotTerm()
+    exp = NotTerm()
     
     (
     	LOOKAHEAD(2)
-        <MULT> cur = DotTerm()
+        <MULT> cur = NotTerm()
         { exp = new Times(exp,cur); }
     )*
 
     { return exp; }
+}
+
+Expression NotTerm() : {
+    Expression exp;
+} {
+    LOOKAHEAD(2)
+    ( <BANG> exp = NotTerm() { return new Not(exp); } )
+    | ( exp = DotTerm() { return exp; } )
 }
 
 Expression DotTerm() : {
@@ -344,10 +352,6 @@ Expression TerminalExp() : {
 	/* Allocation with new */
 |   <NEW> term = NewRHS()
     { return term; }
-
-	/* Logical negation */
-|   <BANG> term = TerminalExp()
-    { return new Not(term); }
 
 	/* Grouping */
 |   <LPAREN> term = Expression() <RPAREN>
