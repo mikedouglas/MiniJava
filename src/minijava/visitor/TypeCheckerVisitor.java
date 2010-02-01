@@ -146,7 +146,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		Type reciever = (Type) visit(exp.receiver,method);//this should resolve to an id (do we allow static methods?)
 		
 		if (reciever == null || reciever.getClass()!=ObjectType.class) {
-			reporter.typeErrorExpectObjectType(exp, reciever);
+			reporter.typeErrorExpectObjectType(exp.receiver, reciever);
 		}else{
 			//check that this object actually has a corresponding method
 			String className = ((ObjectType)reciever).name;
@@ -161,12 +161,14 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 					
 					
 					NodeList<Expression> args = exp.rands;
-					for(int i = 0;i<Math.min(args.size(), method.getParamTypes().size());i++)
+					for(int i = 0;i<Math.min(args.size(), recMethod.getParamTypes().size());i++)
 					{
 						Type expectedType = recMethod.getParamTypes().get(i);
 						Expression e = args.elementAt(i);
 						Type argType = (Type) visit(e,method);
-						visit(argType);
+						if(argType!=null)
+							visit(argType);
+						
 						if(argType==null || ! argType.equals(expectedType))
 						{
 							reporter.typeError(e, expectedType, argType);
@@ -174,8 +176,9 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 					}
 					
 					if(args.size()!=recMethod.getParamTypes().size())
-						reporter.wrongNumberOfArguments(exp, method.getParamTypes().size());
+						reporter.wrongNumberOfArguments(exp, recMethod.getParamTypes().size());
 					
+					visit(exp.rands,method);
 					
 					return recMethod.getReturnType();
 				}
@@ -185,7 +188,9 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		return null;
 		
 	}
-	
+
+
+
 	public void visit(If exp, MethodEntry method) {
 		Type actualType = (Type) visit(exp.tst, method);
 		
@@ -224,6 +229,8 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		return IntegerType.instance;
 	}
 
+
+	
 	public Type visit(Minus exp, MethodEntry method) {		
 		checkMathBinop(exp.e1,exp.e2,method);	
 		return IntegerType.instance;
@@ -325,7 +332,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		return exp.type;
 	}
 	
-	public Type visit(ArrayAssign exp, MethodEntry method) {
+	public void visit(ArrayAssign exp, MethodEntry method) {
 		Type arrayType = method.lookupVariable(exp.name);
 		
 		if(arrayType==null)
@@ -350,7 +357,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 			reporter.typeError(exp.value, IntegerType.instance, valType);
 		}
 		
-		return IntegerType.instance;
+	//	return IntegerType.instance;
 	}
 	
 	public Type visit(ArrayLookup exp, MethodEntry method) {
@@ -358,7 +365,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		Type arrayType = (Type) visit(exp.array,method);
 		if(arrayType==null|| ! arrayType.equals(IntArrayType.instance))
 		{
-			reporter.typeError(exp.index, IntegerType.instance, arrayType);
+			reporter.typeError(exp.array, IntArrayType.instance, arrayType);
 		}
 		
 		
@@ -372,6 +379,8 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 	}
 
 
+
+	
 	public void visit(Assign assign, MethodEntry method) {
 		Type expectedType = method.lookupVariable(assign.name);
 		Type actualType = (Type) visit(assign.value, method);
@@ -391,12 +400,14 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		}
 		//return expectedType; //Do assignments return values in minijava?
 	}
+
+
 	
-	public void visit(Print exp, MethodEntry method) {
+	public void visit(Print stm, MethodEntry method) {
 		//apparently, print is only allowed to print integer variables, not booleans
-		Type type = (Type) visit(exp.exp,method);
+		Type type = (Type) visit(stm.exp,method);
 		if(type == null || ! type.equals(IntegerType.instance))
-			reporter.typeError(exp.exp, IntegerType.instance, type);
+			reporter.typeError(stm.exp, IntegerType.instance, type);
 	}
 	
 	public void visit(ObjectType type) {
