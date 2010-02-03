@@ -10,8 +10,13 @@ Team member 3: Sam Bayless
 If you changed any code outside of minijava.typechecker.implementation, please include 
 a *brief* explanation here what you changed and why:
 
-  XXX
+  We didn't modify any of the default classes, but we did add a few classes in
+  minijava.visitor that implement the typechecking/classtable functionality.
   
 Additional comments to the TA (if any): 
 
-  XXX
+  We used a reflection-based modification to the Visitor class that is
+  inspired by the Walkabout pattern from this paper by Palsberg and Jay:
+    http://www.cs.ucla.edu/~palsberg/paper/compsac98.pdf
+  Our Walkabout pattern also supports multiple arguments to the Visitor in
+  order to pass environment data around between visits.
