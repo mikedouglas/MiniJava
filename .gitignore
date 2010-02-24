@@ -1,3 +1,4 @@
-bin/*
-src/minijava/parser/jcc/*.java
+classes
+lib
+src/java/minijava/parser/jcc/*.java
 .DS_Store
