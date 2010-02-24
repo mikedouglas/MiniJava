@@ -1,0 +1,35 @@
+<project name="minijava" default="compile" basedir=".">
+  <property name="src" location="src/java" />
+  <property name="build" location="classes" />
+  <property name="lib" location="lib" />
+
+  <target name="init">
+    <mkdir dir="${build}" />
+    <mkdir dir="${lib}" />
+    <get src="http://github.com/downloads/KentBeck/junit/junit-4.8.1.jar"
+         dest="${lib}/junit.jar" />
+    <get src="https://javacc.dev.java.net/files/documents/17/138912/javacc-5.0.zip"
+         dest="${lib}/javacc.zip" />
+    <unzip src="${lib}/javacc.zip" dest="${lib}" />
+    <delete file="${lib}/javacc.zip" />
+  </target>
+
+  <target name="compile" depends="init">
+    <delete>
+      <fileset dir="${src}/minijava/parser/jcc/" includes="*.java" />
+    </delete>
+    <javacc target="${src}/minijava/parser/jcc/MiniJavaParser.jj"
+            outputdirectory="${src}/minijava/parser/jcc"
+            javacchome="${lib}/javacc-5.0" />
+    
+    <javac srcdir="${src}" destdir="${build}" classpath="${lib}/junit.jar">
+      <exclude name="**/interp/**" />
+      <exclude name="**/test/**" />
+    </javac>
+  </target>
+  
+  <target name="clean">
+    <delete dir="${build}" />
+    <delete dir="${lib}/javacc-5.0" />
+  </target>
+</project>

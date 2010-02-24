@@ -1,0 +1,23 @@
+MiniJava - the eponymous compiler.
+
+A modified version of the project three starter is available at
+src/java/. The clojure code automatically loads class files from
+classes/ folder.
+
+To build the java code and download deps:
+$ ant
+$ lein deps
+
+To start a slime server:
+$ lein swank
+
+To run the tests:
+$ lein test
+
+Don't use `lein repl`.
+
+Leiningen is available at http://github.com/technomancy/leiningen/.
+
+Team member 1: Sam Bayless
+Team member 2: Asumu Takikawa
+Team member 3: Mike Douglas

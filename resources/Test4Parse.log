@@ -1,0 +1,2265 @@
+### BEG # TEST 1 ###
+---------------
+class SomeName { 
+   public static void main(String[] args) {
+       {}
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      {
+      }
+   }
+}
+
+### END # TEST 1 ###
+### BEG # TEST 2 ###
+---------------
+class SomeName { 
+   public static void main(String[] args) {
+       System.out.println(0);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(0);
+   }
+}
+
+### END # TEST 2 ###
+### BEG # TEST 3 ###
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(true);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(true);
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(false);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(false);
+   }
+}
+
+### END # TEST 3 ###
+### BEG # TEST 4 ###
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(x);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(x);
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(y);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(y);
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(xy123);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(xy123);
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(x_y_123);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(x_y_123);
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(x_y_123);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(x_y_123);
+   }
+}
+
+### END # TEST 4 ###
+### BEG # TEST 5 ###
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(this);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(this);
+   }
+}
+
+### END # TEST 5 ###
+### BEG # TEST 6 ###
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(!true);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(!true);
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(!!!!!!true);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(!!!!!!true);
+   }
+}
+
+### END # TEST 6 ###
+### BEG # TEST 7 ###
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(new SomeClassName());
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(new SomeClassName());
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(new int[10]);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(new int [10]);
+   }
+}
+
+### END # TEST 7 ###
+### BEG # TEST 8 ###
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(someArray[10]);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(someArray[10]);
+   }
+}
+
+### END # TEST 8 ###
+### BEG # TEST 9 ###
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(someArray.length);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(someArray.length);
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(someObject.doSomeThing());
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(someObject.doSomeThing());
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(someObject.doSomeThing(1));
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(someObject.doSomeThing(1));
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(someObject.doSomeThing(1, 2));
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(someObject.doSomeThing(1, 2));
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(someObject.doSomeThing(1, 2, 3, 4, 5));
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(someObject.doSomeThing(1, 2, 3, 4, 5));
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(someObject.doSomeThing(this.getInfo(), this.getMoreInfo()));
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(someObject.doSomeThing(this.getInfo(), this.getMoreInfo()));
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(new SomeClass().runIt());
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(new SomeClass().runIt());
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(someObject.flub().flub().flub());
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(someObject.flub().flub().flub());
+   }
+}
+
+### END # TEST 9 ###
+### BEG # TEST 10 ###
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println((1));
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(1);
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(((((((1)))))));
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(1);
+   }
+}
+
+### END # TEST 10 ###
+### BEG # TEST 11 ###
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(10*9);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println((10 * 9));
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(10*9*8);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(((10 * 9) * 8));
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(foo.length*foo.length);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println((foo.length * foo.length));
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(foo[x]*foo[y]);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println((foo[x] * foo[y]));
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(foo.getSize()*foo.getFlubs());
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println((foo.getSize() * foo.getFlubs()));
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(10*9*8*7*x*foo.length*foo.getSize()*array[x*2]);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println((((((((10 * 9) * 8) * 7) * x) * foo.length) * foo.getSize()) * array[(x * 2)]));
+   }
+}
+
+### END # TEST 11 ###
+### BEG # TEST 12 ###
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(10+9);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println((10 + 9));
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(10-9);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println((10 - 9));
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(10+9+8);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(((10 + 9) + 8));
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(10-9-8);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(((10 - 9) - 8));
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(foo.length+foo.length);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println((foo.length + foo.length));
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(foo.length-foo.length);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println((foo.length - foo.length));
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(foo[x]+foo[y]);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println((foo[x] + foo[y]));
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(foo.getSize()+foo.getFlubs());
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println((foo.getSize() + foo.getFlubs()));
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(10+9+x*foo.length-foo.getSize()+array[x+2]);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(((((10 + 9) + (x * foo.length)) - foo.getSize()) + array[(x + 2)]));
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println((a-b)*(a+b));
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(((a - b) * (a + b)));
+   }
+}
+
+### END # TEST 12 ###
+### BEG # TEST 13 ###
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(10<9);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println((10 < 9));
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(10+a*3<9-4+2);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println(((10 + (a * 3)) < ((9 - 4) + 2)));
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(foo.length<1);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println((foo.length < 1));
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(i<foo.getSize());
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println((i < foo.getSize()));
+   }
+}
+
+### END # TEST 13 ###
+### BEG # TEST 14 ###
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(a&&b);
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println((a && b));
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+       System.out.println(low<x && x<hi && !(x<0));
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      System.out.println((((low < x) && (x < hi)) && !(x < 0)));
+   }
+}
+
+### END # TEST 14 ###
+### BEG # TEST 15 ###
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+numbers[x] = numbers[x+1];
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      numbers[x] = numbers[(x + 1)];
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+foo = foo+1;
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      foo = (foo + 1);
+   }
+}
+
+### END # TEST 15 ###
+### BEG # TEST 16 ###
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+if (x < y) largest = y; else largest = x;
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      if ((x < y)) largest = y;
+      else largest = x;
+   }
+}
+
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+if (x < y) {
+   largest = y;
+   smallest = x;
+} else {    largest = x;   smallest = y;}
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      if ((x < y)) {
+         largest = y;
+         smallest = x;
+      }
+      else {
+         largest = x;
+         smallest = y;
+      }
+   }
+}
+
+### END # TEST 16 ###
+### BEG # TEST 17 ###
+---------------
+class SomeName { 
+    public static void main(String[] args) {
+while (x < y) {
+   System.out.println(x);
+   x = x+1;
+}
+   }
+}
+vvvvvvvvvvvvvvv
+class SomeName {
+   public static void main (String [] args) {
+      while ((x < y)) {
+         System.out.println(x);
+         x = (x + 1);
+      }
+   }
+}
+
+### END # TEST 17 ###
+### BEG # TEST 18 ###
+---------------
+class SomeMainClass { 
+    public static void main(String[] args) {
+      {}
+   }
+}
+class SomeClassName {}
+vvvvvvvvvvvvvvv
+class SomeMainClass {
+   public static void main (String [] args) {
+      {
+      }
+   }
+}
+
+class SomeClassName { 
+}
+
+### END # TEST 18 ###
+### BEG # TEST 19 ###
+---------------
+class SomeMainClass { 
+    public static void main(String[] args) {
+      {}
+   }
+}
+class SomeClassName extends SomeSuperClass {}
+vvvvvvvvvvvvvvv
+class SomeMainClass {
+   public static void main (String [] args) {
+      {
+      }
+   }
+}
+
+class SomeClassName extends SomeSuperClass { 
+}
+
+### END # TEST 19 ###
+### BEG # TEST 20 ###
+---------------
+class SomeMainClass { 
+    public static void main(String[] args) {
+      {}
+   }
+}
+class AxisPoint {
+  int x;
+}
+vvvvvvvvvvvvvvv
+class SomeMainClass {
+   public static void main (String [] args) {
+      {
+      }
+   }
+}
+
+class AxisPoint { 
+   int x;
+}
+
+---------------
+class SomeMainClass { 
+    public static void main(String[] args) {
+      {}
+   }
+}
+class Point {
+  int x;
+  int y;
+}
+vvvvvvvvvvvvvvv
+class SomeMainClass {
+   public static void main (String [] args) {
+      {
+      }
+   }
+}
+
+class Point { 
+   int x;
+   int y;
+}
+
+---------------
+class SomeMainClass { 
+    public static void main(String[] args) {
+      {}
+   }
+}
+class FlipFlop {
+  boolean value;
+}
+vvvvvvvvvvvvvvv
+class SomeMainClass {
+   public static void main (String [] args) {
+      {
+      }
+   }
+}
+
+class FlipFlop { 
+   boolean value;
+}
+
+---------------
+class SomeMainClass { 
+    public static void main(String[] args) {
+      {}
+   }
+}
+class Vector {
+  int[] nums;
+}
+vvvvvvvvvvvvvvv
+class SomeMainClass {
+   public static void main (String [] args) {
+      {
+      }
+   }
+}
+
+class Vector { 
+   int [] nums;
+}
+
+---------------
+class SomeMainClass { 
+    public static void main(String[] args) {
+      {}
+   }
+}
+class LinkedList {
+  int value;
+  LinkedList next;
+}
+vvvvvvvvvvvvvvv
+class SomeMainClass {
+   public static void main (String [] args) {
+      {
+      }
+   }
+}
+
+class LinkedList { 
+   int value;
+   LinkedList next;
+}
+
+### END # TEST 20 ###
+### BEG # TEST 21 ###
+---------------
+class SomeMainClass { 
+    public static void main(String[] args) {
+      {}
+   }
+}
+class Box {
+    int x;
+    public int getX() {
+       return x;    }}
+vvvvvvvvvvvvvvv
+class SomeMainClass {
+   public static void main (String [] args) {
+      {
+      }
+   }
+}
+
+class Box { 
+   int x;
+
+   public int getX () { 
+      return x;
+   }
+}
+
+---------------
+class SomeMainClass { 
+    public static void main(String[] args) {
+      {}
+   }
+}
+class Box {
+    public int getX() {
+       return x;    }    int x;
+}
+vvvvvvvvvvvvvvv
+class SomeMainClass {
+   public static void main (String [] args) {
+      {
+      }
+   }
+}
+
+class Box { 
+   int x;
+
+   public int getX () { 
+      return x;
+   }
+}
+
+---------------
+class SomeMainClass { 
+    public static void main(String[] args) {
+      {}
+   }
+}
+class Box {
+    public int getX() {
+       return x;    }    int x;
+    public int get2X() {
+       return 2*x;    }}
+vvvvvvvvvvvvvvv
+class SomeMainClass {
+   public static void main (String [] args) {
+      {
+      }
+   }
+}
+
+class Box { 
+   int x;
+
+   public int getX () { 
+      return x;
+   }
+
+   public int get2X () { 
+      return (2 * x);
+   }
+}
+
+---------------
+class SomeMainClass { 
+    public static void main(String[] args) {
+      {}
+   }
+}
+class Point {
+    int x;
+    int y;
+    public int getX() {
+       return x;    }    public int getY() {
+       return y;    }}
+vvvvvvvvvvvvvvv
+class SomeMainClass {
+   public static void main (String [] args) {
+      {
+      }
+   }
+}
+
+class Point { 
+   int x;
+   int y;
+
+   public int getX () { 
+      return x;
+   }
+
+   public int getY () { 
+      return y;
+   }
+}
+
+---------------
+class SomeMainClass { 
+    public static void main(String[] args) {
+      {}
+   }
+}
+class Foo {
+    public int params(int i, int[] nums, Foo foo) {
+       Bar bar;
+       int local;
+       local = nums.length;
+       if (i < local)
+          local = nums[i];
+       else          local = 0;
+       return local;    }}
+vvvvvvvvvvvvvvv
+class SomeMainClass {
+   public static void main (String [] args) {
+      {
+      }
+   }
+}
+
+class Foo { 
+
+   public int params (int i, int [] nums, Foo foo) { 
+      Bar bar;
+      int local;
+      local = nums.length;
+      if ((i < local)) local = nums[i];
+      else local = 0;
+      return local;
+   }
+}
+
+### END # TEST 21 ###
+### BEG # TEST 22 ###
+---------------
+File: input
+vvvvvvvvvvvvvvv
+class BinarySearch {
+   public static void main (String [] a) {
+      System.out.println(new BS().Start(20));
+   }
+}
+
+class BS { 
+   int [] number;
+   int size;
+
+   public int Start (int sz) { 
+      int aux01;
+      int aux02;
+      aux01 = this.Init(sz);
+      aux02 = this.Print();
+      if (this.Search(8)) System.out.println(1);
+      else System.out.println(0);
+      if (this.Search(19)) System.out.println(1);
+      else System.out.println(0);
+      if (this.Search(20)) System.out.println(1);
+      else System.out.println(0);
+      if (this.Search(21)) System.out.println(1);
+      else System.out.println(0);
+      if (this.Search(37)) System.out.println(1);
+      else System.out.println(0);
+      if (this.Search(38)) System.out.println(1);
+      else System.out.println(0);
+      if (this.Search(39)) System.out.println(1);
+      else System.out.println(0);
+      if (this.Search(50)) System.out.println(1);
+      else System.out.println(0);
+      return 999;
+   }
+
+   public boolean Search (int num) { 
+      boolean bs01;
+      int right;
+      int left;
+      boolean var_cont;
+      int medium;
+      int aux01;
+      int nt;
+      aux01 = 0;
+      bs01 = false;
+      right = number.length;
+      right = (right - 1);
+      left = 0;
+      var_cont = true;
+      while (var_cont) {
+         medium = (left + right);
+         medium = this.Div(medium);
+         aux01 = number[medium];
+         if ((num < aux01)) right = (medium - 1);
+         else left = (medium + 1);
+         if (this.Compare(aux01, num)) var_cont = false;
+         else var_cont = true;
+         if ((right < left)) var_cont = false;
+         else nt = 0;
+      }
+      if (this.Compare(aux01, num)) bs01 = true;
+      else bs01 = false;
+      return bs01;
+   }
+
+   public int Div (int num) { 
+      int count01;
+      int count02;
+      int aux03;
+      count01 = 0;
+      count02 = 0;
+      aux03 = (num - 1);
+      while ((count02 < aux03)) {
+         count01 = (count01 + 1);
+         count02 = (count02 + 2);
+      }
+      return count01;
+   }
+
+   public boolean Compare (int num1, int num2) { 
+      boolean retval;
+      int aux02;
+      retval = false;
+      aux02 = (num2 + 1);
+      if ((num1 < num2)) retval = false;
+      else if (!(num1 < aux02)) retval = false;
+      else retval = true;
+      return retval;
+   }
+
+   public int Print () { 
+      int j;
+      j = 1;
+      while ((j < size)) {
+         System.out.println(number[j]);
+         j = (j + 1);
+      }
+      System.out.println(99999);
+      return 0;
+   }
+
+   public int Init (int sz) { 
+      int j;
+      int k;
+      int aux02;
+      int aux01;
+      size = sz;
+      number = new int [sz];
+      j = 1;
+      k = (size + 1);
+      while ((j < size)) {
+         aux01 = (2 * j);
+         aux02 = (k - 3);
+         number[j] = (aux01 + aux02);
+         j = (j + 1);
+         k = (k - 1);
+      }
+      return 0;
+   }
+}
+
+---------------
+File: input
+vvvvvvvvvvvvvvv
+class BinaryTree {
+   public static void main (String [] a) {
+      System.out.println(new BT().Start());
+   }
+}
+
+class BT { 
+
+   public int Start () { 
+      Tree root;
+      boolean ntb;
+      int nti;
+      root = new Tree();
+      ntb = root.Init(16);
+      ntb = root.Print();
+      System.out.println(100000000);
+      ntb = root.Insert(8);
+      ntb = root.Print();
+      ntb = root.Insert(24);
+      ntb = root.Insert(4);
+      ntb = root.Insert(12);
+      ntb = root.Insert(20);
+      ntb = root.Insert(28);
+      ntb = root.Insert(14);
+      ntb = root.Print();
+      System.out.println(root.Search(24));
+      System.out.println(root.Search(12));
+      System.out.println(root.Search(16));
+      System.out.println(root.Search(50));
+      System.out.println(root.Search(12));
+      ntb = root.Delete(12);
+      ntb = root.Print();
+      System.out.println(root.Search(12));
+      return 0;
+   }
+}
+
+class Tree { 
+   Tree left;
+   Tree right;
+   int key;
+   boolean has_left;
+   boolean has_right;
+   Tree my_null;
+
+   public boolean Init (int v_key) { 
+      key = v_key;
+      has_left = false;
+      has_right = false;
+      return true;
+   }
+
+   public boolean SetRight (Tree rn) { 
+      right = rn;
+      return true;
+   }
+
+   public boolean SetLeft (Tree ln) { 
+      left = ln;
+      return true;
+   }
+
+   public Tree GetRight () { 
+      return right;
+   }
+
+   public Tree GetLeft () { 
+      return left;
+   }
+
+   public int GetKey () { 
+      return key;
+   }
+
+   public boolean SetKey (int v_key) { 
+      key = v_key;
+      return true;
+   }
+
+   public boolean GetHas_Right () { 
+      return has_right;
+   }
+
+   public boolean GetHas_Left () { 
+      return has_left;
+   }
+
+   public boolean SetHas_Left (boolean val) { 
+      has_left = val;
+      return true;
+   }
+
+   public boolean SetHas_Right (boolean val) { 
+      has_right = val;
+      return true;
+   }
+
+   public boolean Compare (int num1, int num2) { 
+      boolean ntb;
+      int nti;
+      ntb = false;
+      nti = (num2 + 1);
+      if ((num1 < num2)) ntb = false;
+      else if (!(num1 < nti)) ntb = false;
+      else ntb = true;
+      return ntb;
+   }
+
+   public boolean Insert (int v_key) { 
+      Tree new_node;
+      boolean ntb;
+      boolean cont;
+      int key_aux;
+      Tree current_node;
+      new_node = new Tree();
+      ntb = new_node.Init(v_key);
+      current_node = this;
+      cont = true;
+      while (cont) {
+         key_aux = current_node.GetKey();
+         if ((v_key < key_aux)) {
+            if (current_node.GetHas_Left()) current_node = current_node.GetLeft();
+            else {
+               cont = false;
+               ntb = current_node.SetHas_Left(true);
+               ntb = current_node.SetLeft(new_node);
+            }
+         }
+         else {
+            if (current_node.GetHas_Right()) current_node = current_node.GetRight();
+            else {
+               cont = false;
+               ntb = current_node.SetHas_Right(true);
+               ntb = current_node.SetRight(new_node);
+            }
+         }
+      }
+      return true;
+   }
+
+   public boolean Delete (int v_key) { 
+      Tree current_node;
+      Tree parent_node;
+      boolean cont;
+      boolean found;
+      boolean is_root;
+      int key_aux;
+      boolean ntb;
+      current_node = this;
+      parent_node = this;
+      cont = true;
+      found = false;
+      is_root = true;
+      while (cont) {
+         key_aux = current_node.GetKey();
+         if ((v_key < key_aux)) if (current_node.GetHas_Left()) {
+            parent_node = current_node;
+            current_node = current_node.GetLeft();
+         }
+         else cont = false;
+         else if ((key_aux < v_key)) if (current_node.GetHas_Right()) {
+            parent_node = current_node;
+            current_node = current_node.GetRight();
+         }
+         else cont = false;
+         else {
+            if (is_root) if ((!current_node.GetHas_Right() && !current_node.GetHas_Left())) ntb = true;
+            else ntb = this.Remove(parent_node, current_node);
+            else ntb = this.Remove(parent_node, current_node);
+            found = true;
+            cont = false;
+         }
+         is_root = false;
+      }
+      return found;
+   }
+
+   public boolean Remove (Tree p_node, Tree c_node) { 
+      boolean ntb;
+      int auxkey1;
+      int auxkey2;
+      if (c_node.GetHas_Left()) ntb = this.RemoveLeft(p_node, c_node);
+      else if (c_node.GetHas_Right()) ntb = this.RemoveRight(p_node, c_node);
+      else {
+         auxkey1 = c_node.GetKey();
+         auxkey2 = p_node.GetLeft().GetKey();
+         if (this.Compare(auxkey1, auxkey2)) {
+            ntb = p_node.SetLeft(my_null);
+            ntb = p_node.SetHas_Left(false);
+         }
+         else {
+            ntb = p_node.SetRight(my_null);
+            ntb = p_node.SetHas_Right(false);
+         }
+      }
+      return true;
+   }
+
+   public boolean RemoveRight (Tree p_node, Tree c_node) { 
+      boolean ntb;
+      while (c_node.GetHas_Right()) {
+         ntb = c_node.SetKey(c_node.GetRight().GetKey());
+         p_node = c_node;
+         c_node = c_node.GetRight();
+      }
+      ntb = p_node.SetRight(my_null);
+      ntb = p_node.SetHas_Right(false);
+      return true;
+   }
+
+   public boolean RemoveLeft (Tree p_node, Tree c_node) { 
+      boolean ntb;
+      while (c_node.GetHas_Left()) {
+         ntb = c_node.SetKey(c_node.GetLeft().GetKey());
+         p_node = c_node;
+         c_node = c_node.GetLeft();
+      }
+      ntb = p_node.SetLeft(my_null);
+      ntb = p_node.SetHas_Left(false);
+      return true;
+   }
+
+   public int Search (int v_key) { 
+      boolean cont;
+      int ifound;
+      Tree current_node;
+      int key_aux;
+      current_node = this;
+      cont = true;
+      ifound = 0;
+      while (cont) {
+         key_aux = current_node.GetKey();
+         if ((v_key < key_aux)) if (current_node.GetHas_Left()) current_node = current_node.GetLeft();
+         else cont = false;
+         else if ((key_aux < v_key)) if (current_node.GetHas_Right()) current_node = current_node.GetRight();
+         else cont = false;
+         else {
+            ifound = 1;
+            cont = false;
+         }
+      }
+      return ifound;
+   }
+
+   public boolean Print () { 
+      Tree current_node;
+      boolean ntb;
+      current_node = this;
+      ntb = this.RecPrint(current_node);
+      return true;
+   }
+
+   public boolean RecPrint (Tree node) { 
+      boolean ntb;
+      if (node.GetHas_Left()) {
+         ntb = this.RecPrint(node.GetLeft());
+      }
+      else ntb = true;
+      System.out.println(node.GetKey());
+      if (node.GetHas_Right()) {
+         ntb = this.RecPrint(node.GetRight());
+      }
+      else ntb = true;
+      return true;
+   }
+}
+
+---------------
+File: input
+vvvvvvvvvvvvvvv
+class BubbleSort {
+   public static void main (String [] a) {
+      System.out.println(new BBS().Start(10));
+   }
+}
+
+class BBS { 
+   int [] number;
+   int size;
+
+   public int Start (int sz) { 
+      int aux01;
+      aux01 = this.Init(sz);
+      aux01 = this.Print();
+      System.out.println(99999);
+      aux01 = this.Sort();
+      aux01 = this.Print();
+      return 0;
+   }
+
+   public int Sort () { 
+      int nt;
+      int i;
+      int aux02;
+      int aux04;
+      int aux05;
+      int aux06;
+      int aux07;
+      int j;
+      int t;
+      i = (size - 1);
+      aux02 = (0 - 1);
+      while ((aux02 < i)) {
+         j = 1;
+         while ((j < (i + 1))) {
+            aux07 = (j - 1);
+            aux04 = number[aux07];
+            aux05 = number[j];
+            if ((aux05 < aux04)) {
+               aux06 = (j - 1);
+               t = number[aux06];
+               number[aux06] = number[j];
+               number[j] = t;
+            }
+            else nt = 0;
+            j = (j + 1);
+         }
+         i = (i - 1);
+      }
+      return 0;
+   }
+
+   public int Print () { 
+      int j;
+      j = 0;
+      while ((j < size)) {
+         System.out.println(number[j]);
+         j = (j + 1);
+      }
+      return 0;
+   }
+
+   public int Init (int sz) { 
+      size = sz;
+      number = new int [sz];
+      number[0] = 20;
+      number[1] = 7;
+      number[2] = 12;
+      number[3] = 18;
+      number[4] = 2;
+      number[5] = 11;
+      number[6] = 6;
+      number[7] = 9;
+      number[8] = 19;
+      number[9] = 5;
+      return 0;
+   }
+}
+
+---------------
+File: input
+vvvvvvvvvvvvvvv
+class Factorial {
+   public static void main (String [] a) {
+      System.out.println(new Fac().ComputeFac(10));
+   }
+}
+
+class Fac { 
+
+   public int ComputeFac (int num) { 
+      int num_aux;
+      if ((num < 1)) num_aux = 1;
+      else num_aux = (num * this.ComputeFac((num - 1)));
+      return num_aux;
+   }
+}
+
+---------------
+File: input
+vvvvvvvvvvvvvvv
+class LinearSearch {
+   public static void main (String [] a) {
+      System.out.println(new LS().Start(10));
+   }
+}
+
+class LS { 
+   int [] number;
+   int size;
+
+   public int Start (int sz) { 
+      int aux01;
+      int aux02;
+      aux01 = this.Init(sz);
+      aux02 = this.Print();
+      System.out.println(9999);
+      System.out.println(this.Search(8));
+      System.out.println(this.Search(12));
+      System.out.println(this.Search(17));
+      System.out.println(this.Search(50));
+      return 55;
+   }
+
+   public int Print () { 
+      int j;
+      j = 1;
+      while ((j < size)) {
+         System.out.println(number[j]);
+         j = (j + 1);
+      }
+      return 0;
+   }
+
+   public int Search (int num) { 
+      int j;
+      boolean ls01;
+      int ifound;
+      int aux01;
+      int aux02;
+      int nt;
+      j = 1;
+      ls01 = false;
+      ifound = 0;
+      while ((j < size)) {
+         aux01 = number[j];
+         aux02 = (num + 1);
+         if ((aux01 < num)) nt = 0;
+         else if (!(aux01 < aux02)) nt = 0;
+         else {
+            ls01 = true;
+            ifound = 1;
+            j = size;
+         }
+         j = (j + 1);
+      }
+      return ifound;
+   }
+
+   public int Init (int sz) { 
+      int j;
+      int k;
+      int aux01;
+      int aux02;
+      size = sz;
+      number = new int [sz];
+      j = 1;
+      k = (size + 1);
+      while ((j < size)) {
+         aux01 = (2 * j);
+         aux02 = (k - 3);
+         number[j] = (aux01 + aux02);
+         j = (j + 1);
+         k = (k - 1);
+      }
+      return 0;
+   }
+}
+
+---------------
+File: input
+vvvvvvvvvvvvvvv
+class LinkedList {
+   public static void main (String [] a) {
+      System.out.println(new LL().Start());
+   }
+}
+
+class Element { 
+   int Age;
+   int Salary;
+   boolean Married;
+
+   public boolean Init (int v_Age, int v_Salary, boolean v_Married) { 
+      Age = v_Age;
+      Salary = v_Salary;
+      Married = v_Married;
+      return true;
+   }
+
+   public int GetAge () { 
+      return Age;
+   }
+
+   public int GetSalary () { 
+      return Salary;
+   }
+
+   public boolean GetMarried () { 
+      return Married;
+   }
+
+   public boolean Equal (Element other) { 
+      boolean ret_val;
+      int aux01;
+      int aux02;
+      int nt;
+      ret_val = true;
+      aux01 = other.GetAge();
+      if (!this.Compare(aux01, Age)) ret_val = false;
+      else {
+         aux02 = other.GetSalary();
+         if (!this.Compare(aux02, Salary)) ret_val = false;
+         else if (Married) if (!other.GetMarried()) ret_val = false;
+         else nt = 0;
+         else if (other.GetMarried()) ret_val = false;
+         else nt = 0;
+      }
+      return ret_val;
+   }
+
+   public boolean Compare (int num1, int num2) { 
+      boolean retval;
+      int aux02;
+      retval = false;
+      aux02 = (num2 + 1);
+      if ((num1 < num2)) retval = false;
+      else if (!(num1 < aux02)) retval = false;
+      else retval = true;
+      return retval;
+   }
+}
+
+class List { 
+   Element elem;
+   List next;
+   boolean end;
+
+   public boolean Init () { 
+      end = true;
+      return true;
+   }
+
+   public boolean InitNew (Element v_elem, List v_next, boolean v_end) { 
+      end = v_end;
+      elem = v_elem;
+      next = v_next;
+      return true;
+   }
+
+   public List Insert (Element new_elem) { 
+      boolean ret_val;
+      List aux03;
+      List aux02;
+      aux03 = this;
+      aux02 = new List();
+      ret_val = aux02.InitNew(new_elem, aux03, false);
+      return aux02;
+   }
+
+   public boolean SetNext (List v_next) { 
+      next = v_next;
+      return true;
+   }
+
+   public List Delete (Element e) { 
+      List my_head;
+      boolean ret_val;
+      boolean aux05;
+      List aux01;
+      List prev;
+      boolean var_end;
+      Element var_elem;
+      int aux04;
+      int nt;
+      my_head = this;
+      ret_val = false;
+      aux04 = (0 - 1);
+      aux01 = this;
+      prev = this;
+      var_end = end;
+      var_elem = elem;
+      while ((!var_end && !ret_val)) {
+         if (e.Equal(var_elem)) {
+            ret_val = true;
+            if ((aux04 < 0)) {
+               my_head = aux01.GetNext();
+            }
+            else {
+               System.out.println((0 - 555));
+               aux05 = prev.SetNext(aux01.GetNext());
+               System.out.println((0 - 555));
+            }
+         }
+         else nt = 0;
+         if (!ret_val) {
+            prev = aux01;
+            aux01 = aux01.GetNext();
+            var_end = aux01.GetEnd();
+            var_elem = aux01.GetElem();
+            aux04 = 1;
+         }
+         else nt = 0;
+      }
+      return my_head;
+   }
+
+   public int Search (Element e) { 
+      int int_ret_val;
+      List aux01;
+      Element var_elem;
+      boolean var_end;
+      int nt;
+      int_ret_val = 0;
+      aux01 = this;
+      var_end = end;
+      var_elem = elem;
+      while (!var_end) {
+         if (e.Equal(var_elem)) {
+            int_ret_val = 1;
+         }
+         else nt = 0;
+         aux01 = aux01.GetNext();
+         var_end = aux01.GetEnd();
+         var_elem = aux01.GetElem();
+      }
+      return int_ret_val;
+   }
+
+   public boolean GetEnd () { 
+      return end;
+   }
+
+   public Element GetElem () { 
+      return elem;
+   }
+
+   public List GetNext () { 
+      return next;
+   }
+
+   public boolean Print () { 
+      List aux01;
+      boolean var_end;
+      Element var_elem;
+      aux01 = this;
+      var_end = end;
+      var_elem = elem;
+      while (!var_end) {
+         System.out.println(var_elem.GetAge());
+         aux01 = aux01.GetNext();
+         var_end = aux01.GetEnd();
+         var_elem = aux01.GetElem();
+      }
+      return true;
+   }
+}
+
+class LL { 
+
+   public int Start () { 
+      List head;
+      List last_elem;
+      boolean aux01;
+      Element el01;
+      Element el02;
+      Element el03;
+      last_elem = new List();
+      aux01 = last_elem.Init();
+      head = last_elem;
+      aux01 = head.Init();
+      aux01 = head.Print();
+      el01 = new Element();
+      aux01 = el01.Init(25, 37000, false);
+      head = head.Insert(el01);
+      aux01 = head.Print();
+      System.out.println(10000000);
+      el01 = new Element();
+      aux01 = el01.Init(39, 42000, true);
+      el02 = el01;
+      head = head.Insert(el01);
+      aux01 = head.Print();
+      System.out.println(10000000);
+      el01 = new Element();
+      aux01 = el01.Init(22, 34000, false);
+      head = head.Insert(el01);
+      aux01 = head.Print();
+      el03 = new Element();
+      aux01 = el03.Init(27, 34000, false);
+      System.out.println(head.Search(el02));
+      System.out.println(head.Search(el03));
+      System.out.println(10000000);
+      el01 = new Element();
+      aux01 = el01.Init(28, 35000, false);
+      head = head.Insert(el01);
+      aux01 = head.Print();
+      System.out.println(2220000);
+      head = head.Delete(el02);
+      aux01 = head.Print();
+      System.out.println(33300000);
+      head = head.Delete(el01);
+      aux01 = head.Print();
+      System.out.println(44440000);
+      return 0;
+   }
+}
+
+---------------
+File: input
+vvvvvvvvvvvvvvv
+class QuickSort {
+   public static void main (String [] a) {
+      System.out.println(new QS().Start(10));
+   }
+}
+
+class QS { 
+   int [] number;
+   int size;
+
+   public int Start (int sz) { 
+      int aux01;
+      aux01 = this.Init(sz);
+      aux01 = this.Print();
+      System.out.println(9999);
+      aux01 = (size - 1);
+      aux01 = this.Sort(0, aux01);
+      aux01 = this.Print();
+      return 0;
+   }
+
+   public int Sort (int left, int right) { 
+      int v;
+      int i;
+      int j;
+      int nt;
+      int t;
+      boolean cont01;
+      boolean cont02;
+      int aux03;
+      t = 0;
+      if ((left < right)) {
+         v = number[right];
+         i = (left - 1);
+         j = right;
+         cont01 = true;
+         while (cont01) {
+            cont02 = true;
+            while (cont02) {
+               i = (i + 1);
+               aux03 = number[i];
+               if (!(aux03 < v)) cont02 = false;
+               else cont02 = true;
+            }
+            cont02 = true;
+            while (cont02) {
+               j = (j - 1);
+               aux03 = number[j];
+               if (!(v < aux03)) cont02 = false;
+               else cont02 = true;
+            }
+            t = number[i];
+            number[i] = number[j];
+            number[j] = t;
+            if ((j < (i + 1))) cont01 = false;
+            else cont01 = true;
+         }
+         number[j] = number[i];
+         number[i] = number[right];
+         number[right] = t;
+         nt = this.Sort(left, (i - 1));
+         nt = this.Sort((i + 1), right);
+      }
+      else nt = 0;
+      return 0;
+   }
+
+   public int Print () { 
+      int j;
+      j = 0;
+      while ((j < size)) {
+         System.out.println(number[j]);
+         j = (j + 1);
+      }
+      return 0;
+   }
+
+   public int Init (int sz) { 
+      size = sz;
+      number = new int [sz];
+      number[0] = 20;
+      number[1] = 7;
+      number[2] = 12;
+      number[3] = 18;
+      number[4] = 2;
+      number[5] = 11;
+      number[6] = 6;
+      number[7] = 9;
+      number[8] = 19;
+      number[9] = 5;
+      return 0;
+   }
+}
+
+---------------
+File: input
+vvvvvvvvvvvvvvv
+class TreeVisitor {
+   public static void main (String [] a) {
+      System.out.println(new TV().Start());
+   }
+}
+
+class TV { 
+
+   public int Start () { 
+      Tree root;
+      boolean ntb;
+      int nti;
+      MyVisitor v;
+      root = new Tree();
+      ntb = root.Init(16);
+      ntb = root.Print();
+      System.out.println(100000000);
+      ntb = root.Insert(8);
+      ntb = root.Insert(24);
+      ntb = root.Insert(4);
+      ntb = root.Insert(12);
+      ntb = root.Insert(20);
+      ntb = root.Insert(28);
+      ntb = root.Insert(14);
+      ntb = root.Print();
+      System.out.println(100000000);
+      v = new MyVisitor();
+      System.out.println(50000000);
+      nti = root.accept(v);
+      System.out.println(100000000);
+      System.out.println(root.Search(24));
+      System.out.println(root.Search(12));
+      System.out.println(root.Search(16));
+      System.out.println(root.Search(50));
+      System.out.println(root.Search(12));
+      ntb = root.Delete(12);
+      ntb = root.Print();
+      System.out.println(root.Search(12));
+      return 0;
+   }
+}
+
+class Tree { 
+   Tree left;
+   Tree right;
+   int key;
+   boolean has_left;
+   boolean has_right;
+   Tree my_null;
+
+   public boolean Init (int v_key) { 
+      key = v_key;
+      has_left = false;
+      has_right = false;
+      return true;
+   }
+
+   public boolean SetRight (Tree rn) { 
+      right = rn;
+      return true;
+   }
+
+   public boolean SetLeft (Tree ln) { 
+      left = ln;
+      return true;
+   }
+
+   public Tree GetRight () { 
+      return right;
+   }
+
+   public Tree GetLeft () { 
+      return left;
+   }
+
+   public int GetKey () { 
+      return key;
+   }
+
+   public boolean SetKey (int v_key) { 
+      key = v_key;
+      return true;
+   }
+
+   public boolean GetHas_Right () { 
+      return has_right;
+   }
+
+   public boolean GetHas_Left () { 
+      return has_left;
+   }
+
+   public boolean SetHas_Left (boolean val) { 
+      has_left = val;
+      return true;
+   }
+
+   public boolean SetHas_Right (boolean val) { 
+      has_right = val;
+      return true;
+   }
+
+   public boolean Compare (int num1, int num2) { 
+      boolean ntb;
+      int nti;
+      ntb = false;
+      nti = (num2 + 1);
+      if ((num1 < num2)) ntb = false;
+      else if (!(num1 < nti)) ntb = false;
+      else ntb = true;
+      return ntb;
+   }
+
+   public boolean Insert (int v_key) { 
+      Tree new_node;
+      boolean ntb;
+      Tree current_node;
+      boolean cont;
+      int key_aux;
+      new_node = new Tree();
+      ntb = new_node.Init(v_key);
+      current_node = this;
+      cont = true;
+      while (cont) {
+         key_aux = current_node.GetKey();
+         if ((v_key < key_aux)) {
+            if (current_node.GetHas_Left()) current_node = current_node.GetLeft();
+            else {
+               cont = false;
+               ntb = current_node.SetHas_Left(true);
+               ntb = current_node.SetLeft(new_node);
+            }
+         }
+         else {
+            if (current_node.GetHas_Right()) current_node = current_node.GetRight();
+            else {
+               cont = false;
+               ntb = current_node.SetHas_Right(true);
+               ntb = current_node.SetRight(new_node);
+            }
+         }
+      }
+      return true;
+   }
+
+   public boolean Delete (int v_key) { 
+      Tree current_node;
+      Tree parent_node;
+      boolean cont;
+      boolean found;
+      boolean ntb;
+      boolean is_root;
+      int key_aux;
+      current_node = this;
+      parent_node = this;
+      cont = true;
+      found = false;
+      is_root = true;
+      while (cont) {
+         key_aux = current_node.GetKey();
+         if ((v_key < key_aux)) if (current_node.GetHas_Left()) {
+            parent_node = current_node;
+            current_node = current_node.GetLeft();
+         }
+         else cont = false;
+         else if ((key_aux < v_key)) if (current_node.GetHas_Right()) {
+            parent_node = current_node;
+            current_node = current_node.GetRight();
+         }
+         else cont = false;
+         else {
+            if (is_root) if ((!current_node.GetHas_Right() && !current_node.GetHas_Left())) ntb = true;
+            else ntb = this.Remove(parent_node, current_node);
+            else ntb = this.Remove(parent_node, current_node);
+            found = true;
+            cont = false;
+         }
+         is_root = false;
+      }
+      return found;
+   }
+
+   public boolean Remove (Tree p_node, Tree c_node) { 
+      boolean ntb;
+      int auxkey1;
+      int auxkey2;
+      if (c_node.GetHas_Left()) ntb = this.RemoveLeft(p_node, c_node);
+      else if (c_node.GetHas_Right()) ntb = this.RemoveRight(p_node, c_node);
+      else {
+         auxkey1 = c_node.GetKey();
+         auxkey2 = p_node.GetLeft().GetKey();
+         if (this.Compare(auxkey1, auxkey2)) {
+            ntb = p_node.SetLeft(my_null);
+            ntb = p_node.SetHas_Left(false);
+         }
+         else {
+            ntb = p_node.SetRight(my_null);
+            ntb = p_node.SetHas_Right(false);
+         }
+      }
+      return true;
+   }
+
+   public boolean RemoveRight (Tree p_node, Tree c_node) { 
+      boolean ntb;
+      while (c_node.GetHas_Right()) {
+         ntb = c_node.SetKey(c_node.GetRight().GetKey());
+         p_node = c_node;
+         c_node = c_node.GetRight();
+      }
+      ntb = p_node.SetRight(my_null);
+      ntb = p_node.SetHas_Right(false);
+      return true;
+   }
+
+   public boolean RemoveLeft (Tree p_node, Tree c_node) { 
+      boolean ntb;
+      while (c_node.GetHas_Left()) {
+         ntb = c_node.SetKey(c_node.GetLeft().GetKey());
+         p_node = c_node;
+         c_node = c_node.GetLeft();
+      }
+      ntb = p_node.SetLeft(my_null);
+      ntb = p_node.SetHas_Left(false);
+      return true;
+   }
+
+   public int Search (int v_key) { 
+      Tree current_node;
+      int ifound;
+      boolean cont;
+      int key_aux;
+      current_node = this;
+      cont = true;
+      ifound = 0;
+      while (cont) {
+         key_aux = current_node.GetKey();
+         if ((v_key < key_aux)) if (current_node.GetHas_Left()) current_node = current_node.GetLeft();
+         else cont = false;
+         else if ((key_aux < v_key)) if (current_node.GetHas_Right()) current_node = current_node.GetRight();
+         else cont = false;
+         else {
+            ifound = 1;
+            cont = false;
+         }
+      }
+      return ifound;
+   }
+
+   public boolean Print () { 
+      boolean ntb;
+      Tree current_node;
+      current_node = this;
+      ntb = this.RecPrint(current_node);
+      return true;
+   }
+
+   public boolean RecPrint (Tree node) { 
+      boolean ntb;
+      if (node.GetHas_Left()) {
+         ntb = this.RecPrint(node.GetLeft());
+      }
+      else ntb = true;
+      System.out.println(node.GetKey());
+      if (node.GetHas_Right()) {
+         ntb = this.RecPrint(node.GetRight());
+      }
+      else ntb = true;
+      return true;
+   }
+
+   public int accept (Visitor v) { 
+      int nti;
+      System.out.println(333);
+      nti = v.visit(this);
+      return 0;
+   }
+}
+
+class Visitor { 
+   Tree l;
+   Tree r;
+
+   public int visit (Tree n) { 
+      int nti;
+      if (n.GetHas_Right()) {
+         r = n.GetRight();
+         nti = r.accept(this);
+      }
+      else nti = 0;
+      if (n.GetHas_Left()) {
+         l = n.GetLeft();
+         nti = l.accept(this);
+      }
+      else nti = 0;
+      return 0;
+   }
+}
+
+class MyVisitor extends Visitor { 
+
+   public int visit (Tree n) { 
+      int nti;
+      if (n.GetHas_Right()) {
+         r = n.GetRight();
+         nti = r.accept(this);
+      }
+      else nti = 0;
+      System.out.println(n.GetKey());
+      if (n.GetHas_Left()) {
+         l = n.GetLeft();
+         nti = l.accept(this);
+      }
+      else nti = 0;
+      return 0;
+   }
+}
+
+### END # TEST 22 ###

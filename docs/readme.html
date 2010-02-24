@@ -1,0 +1,186 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>CS411 - MiniJava Project</title>
+
+<style type="text/css">
+p, table, li, h1, h2, h3 {
+font-family: verdana,arial,'sans serif';
+}
+p, h1, h2, h3, table, li, hr {
+margin-left: 10pt;
+}
+body {
+}
+p, li {
+font-size: smaller;
+}
+pre {
+margin-left: 30pt;
+}
+</style></head>
+<body>
+<h1>CPSC 411 - MiniJava</h1>
+<p>The course project for CPSC 411 is implementing a compiler for a
+subset of the Java language called MiniJava. This document provides
+some general information about the project and the MiniJava language.</p><p>The
+project will proceed in several stages. Each stage corresponds to work
+described in a number of Chapters from the textbook. Tentatively the
+stages are planned as follows:&nbsp;</p><ol><li><a href="readme-project-1.html">Syntax analysis</a>: Using JavaCC implement a Scanner and a Parser that creates an AST. (Chapters 2, 3, 4)</li><li><a href="readme-project-2.html">Semantic Analysis</a> (Type Checking and Scope Checking): Chapter 5</li><li><a href="readme-project-3.html">Intermediate Code Generation</a>: Chapters 6, 7, 8.</li><li><a href="readme-project-4.html">Instruction Selection</a>: Chapter 9.</li><li><a href="readme-project-5.html">Control Flow and Data Flow Analysis</a>: Chapter 10.</li><li><a href="readme-project-6.html">Register Allocation and Code Emission</a>: Chapters 11, 12.</li></ol><p>Links providing details for each stage will be added above as the project progresses.&nbsp;</p><h2>The MiniJava Language</h2><p>The language that you will implement is a subset of Java called MiniJava. MiniJava is described in the<a href="http://www.cambridge.org/resources/052182060X/"> textbook's online material</a>) and in the appendix of the textbook. We repeat the most important information here.</p><p>MiniJava is a subset of Java. The meaning of a MiniJava program 
+              is given by its meaning as a Java program. Overloading is not allowed 
+              in MiniJava. The MiniJava statement <span style="font-family: monospace;">System.out.println( ... )</span>; can 
+              only print integers. The MiniJava expression <span style="font-family: monospace;">e.length</span> only applies 
+              to expressions of type <span style="font-family: monospace;">int[] </span>and only arrays of type <span style="font-family: monospace;">int[]</span> are supported. </p><p>When in doubt about the semantics of a given construct, you should consult the<a href="http://java.sun.com/docs/books/jls/"> Java Language Specification</a> for details.&nbsp;The <a href="http://java.sun.com/docs/books/jls/first_edition/html/index.html">first edition of the Java Language Specification</a>
+will be the most useful since MiniJava does not support any of the
+features added in later editions of the Java specification such as
+inner classes and generics.</p><p><span style="font-family: verdana,arial,'sans serif';"></span>The
+grammar in EBNF notation for MiniJava is given below. Note that this is
+an abstract grammar. For example, the grammar is ambiguous about the precedence
+and associativity of operators. You will have to resolve these
+ambiguities when developing your parser. Consult the&nbsp;<a href="http://java.sun.com/docs/books/jls/">Java Language Specification</a> when in doubt.</p><table><tbody><tr><td align="right" valign="baseline"><p>Goal</p></td>
+<td align="center" valign="baseline"><p>::=</p></td>
+<td align="left" valign="baseline"><p>MainClass ( ClassDeclaration )* &lt;EOF&gt;</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p>MainClass</p></td>
+<td align="center" valign="baseline"><p>::=</p></td>
+<td align="left" valign="baseline"><p>"class" Identifier "{" "public" "static" "void" "main" "(" "String" "[" "]" Identifier ")" "{" Statement "}" "}"</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p>ClassDeclaration</p></td>
+<td align="center" valign="baseline"><p>::=</p></td>
+<td align="left" valign="baseline"><p>"class" Identifier ( "extends" Identifier )? "{" ( VarDeclaration | MethodDeclaration )* "}"</p>  </td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p>VarDeclaration</p></td>
+<td align="center" valign="baseline"><p>::=</p></td>
+<td align="left" valign="baseline"><p>Type Identifier ";"</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p>MethodDeclaration</p></td>
+<td align="center" valign="baseline"><p>::=</p></td>
+<td align="left" valign="baseline"><p>"public" Type Identifier "(" FormalList ) "{&nbsp;VarDeclaration*&nbsp;Statement )* "return" Expression ";" "}"</p>  </td>
+</tr>
+<tr><td><p>FormalList</p></td><td><p>::=</p></td><td><p>( Type Identifier ( "," Type Identifier )* )?</p></td></tr><tr>
+<td align="right" valign="baseline"><p>Type</p></td>
+<td align="center" valign="baseline"><p>::=</p></td>
+<td align="left" valign="baseline"><p>"int" "[" "]"</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p></p></td>
+<td align="center" valign="baseline"><p>|</p></td>
+<td align="left" valign="baseline"><p>"boolean"</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p></p></td>
+<td align="center" valign="baseline"><p>|</p></td>
+<td align="left" valign="baseline"><p>"int"</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p></p></td>
+<td align="center" valign="baseline"><p>|</p></td>
+<td align="left" valign="baseline"><p>Identifier</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p>Statement</p></td>
+<td align="center" valign="baseline"><p>::=</p></td>
+<td align="left" valign="baseline"><p>"{" ( Statement )* "}"</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p></p></td>
+<td align="center" valign="baseline"><p>|</p></td>
+<td align="left" valign="baseline"><p>"if" "(" Expression ")" Statement "else" Statement</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p></p></td>
+<td align="center" valign="baseline"><p>|</p></td>
+<td align="left" valign="baseline"><p>"while" "(" Expression ")" Statement</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p></p></td>
+<td align="center" valign="baseline"><p>|</p></td>
+<td align="left" valign="baseline"><p>"System.out.println" "(" Expression ")" ";"</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p></p></td>
+<td align="center" valign="baseline"><p>|</p></td>
+<td align="left" valign="baseline"><p>Identifier "=" Expression ";"</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p></p></td>
+<td align="center" valign="baseline"><p>|</p></td>
+<td align="left" valign="baseline"><p>Identifier "[" Expression "]" "=" Expression ";"</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p>Expression</p></td>
+<td align="center" valign="baseline"><p>::=</p></td>
+<td align="left" valign="baseline"><p>Expression ( "&amp;&amp;" | "&lt;" | "+" | "-" | "*" ) Expression</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p></p></td>
+<td align="center" valign="baseline"><p>|</p></td>
+<td align="left" valign="baseline"><p>Expression "[" Expression "]"</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p></p></td>
+<td align="center" valign="baseline"><p>|</p></td>
+<td align="left" valign="baseline"><p>Expression "." "length"</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p></p></td>
+<td align="center" valign="baseline"><p>|</p></td>
+<td align="left" valign="baseline"><p>Expression "." Identifier "(" ( Expression ( "," Expression )* )? ")"</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p></p></td>
+<td align="center" valign="baseline"><p>|</p></td>
+<td align="left" valign="baseline"><p>&lt;INTEGER_LITERAL&gt;</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p></p></td>
+<td align="center" valign="baseline"><p>|</p></td>
+<td align="left" valign="baseline"><p>"true"</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p></p></td>
+<td align="center" valign="baseline"><p>|</p></td>
+<td align="left" valign="baseline"><p>"false"</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p></p></td>
+<td align="center" valign="baseline"><p>|</p></td>
+<td align="left" valign="baseline"><p>Identifier</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p></p></td>
+<td align="center" valign="baseline"><p>|</p></td>
+<td align="left" valign="baseline"><p>"this"</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p></p></td>
+<td align="center" valign="baseline"><p>|</p></td>
+<td align="left" valign="baseline"><p>"new" "int" "[" Expression "]"</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p></p></td>
+<td align="center" valign="baseline"><p>|</p></td>
+<td align="left" valign="baseline"><p>"new" Identifier "(" ")"</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p></p></td>
+<td align="center" valign="baseline"><p>|</p></td>
+<td align="left" valign="baseline"><p>"!" Expression</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p></p></td>
+<td align="center" valign="baseline"><p>|</p></td>
+<td align="left" valign="baseline"><p>"(" Expression ")"</p></td>
+</tr>
+<tr>
+<td align="right" valign="baseline"><p>Identifier</p></td>
+<td align="center" valign="baseline"><p>::=</p></td>
+<td align="left" valign="baseline"><p>&lt;IDENTIFIER&gt;</p></td></tr></tbody></table><br><h2>Lateness Policy and Penalties</h2><p>The
+following table shows the late penalties.
+</p><ul><li>
+1 Day -- 10%</li><li>
+2 Days -- 30%</li><li>
+3 Days -- 50%</li><li>
+More than 3 days late - don't bother</li></ul><span style="font-family: verdana,arial,'sans serif';"><span style="font-weight: bold;"></span></span></body></html>

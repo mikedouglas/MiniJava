@@ -1,0 +1,1154 @@
+### BEG # TEST 1 ###
+Class Table for File: sample/BinarySearch.java
+Table {
+   BinarySearch = class BinarySearch extends null {
+      fields Table {
+      }
+      methods Table {
+         main = MethodInfo {
+            returnType null
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+      }
+   }
+   BS = class BS extends null {
+      fields Table {
+         number = VarInfo { FIELD int []}
+         size = VarInfo { FIELD int}
+      }
+      methods Table {
+         Search = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL int}]
+            formals Table {
+               num = VarInfo { FORMAL int}
+            }
+            locals Table {
+               nt = VarInfo { LOCAL int}
+               var_cont = VarInfo { LOCAL boolean}
+               aux01 = VarInfo { LOCAL int}
+               left = VarInfo { LOCAL int}
+               bs01 = VarInfo { LOCAL boolean}
+               right = VarInfo { LOCAL int}
+               medium = VarInfo { LOCAL int}
+            }
+         }
+         Start = MethodInfo {
+            returnType int
+            formalsList [VarInfo { FORMAL int}]
+            formals Table {
+               sz = VarInfo { FORMAL int}
+            }
+            locals Table {
+               aux02 = VarInfo { LOCAL int}
+               aux01 = VarInfo { LOCAL int}
+            }
+         }
+         Init = MethodInfo {
+            returnType int
+            formalsList [VarInfo { FORMAL int}]
+            formals Table {
+               sz = VarInfo { FORMAL int}
+            }
+            locals Table {
+               aux02 = VarInfo { LOCAL int}
+               aux01 = VarInfo { LOCAL int}
+               j = VarInfo { LOCAL int}
+               k = VarInfo { LOCAL int}
+            }
+         }
+         Compare = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL int}, VarInfo { FORMAL int}]
+            formals Table {
+               num2 = VarInfo { FORMAL int}
+               num1 = VarInfo { FORMAL int}
+            }
+            locals Table {
+               retval = VarInfo { LOCAL boolean}
+               aux02 = VarInfo { LOCAL int}
+            }
+         }
+         Print = MethodInfo {
+            returnType int
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+               j = VarInfo { LOCAL int}
+            }
+         }
+         Div = MethodInfo {
+            returnType int
+            formalsList [VarInfo { FORMAL int}]
+            formals Table {
+               num = VarInfo { FORMAL int}
+            }
+            locals Table {
+               count02 = VarInfo { LOCAL int}
+               count01 = VarInfo { LOCAL int}
+               aux03 = VarInfo { LOCAL int}
+            }
+         }
+      }
+   }
+}
+Class Table for File: sample/BinaryTree.java
+Table {
+   Tree = class Tree extends null {
+      fields Table {
+         my_null = VarInfo { FIELD Tree}
+         has_right = VarInfo { FIELD boolean}
+         left = VarInfo { FIELD Tree}
+         right = VarInfo { FIELD Tree}
+         has_left = VarInfo { FIELD boolean}
+         key = VarInfo { FIELD int}
+      }
+      methods Table {
+         GetRight = MethodInfo {
+            returnType Tree
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+         GetLeft = MethodInfo {
+            returnType Tree
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+         Search = MethodInfo {
+            returnType int
+            formalsList [VarInfo { FORMAL int}]
+            formals Table {
+               v_key = VarInfo { FORMAL int}
+            }
+            locals Table {
+               ifound = VarInfo { LOCAL int}
+               key_aux = VarInfo { LOCAL int}
+               cont = VarInfo { LOCAL boolean}
+               current_node = VarInfo { LOCAL Tree}
+            }
+         }
+         RemoveRight = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL Tree}, VarInfo { FORMAL Tree}]
+            formals Table {
+               p_node = VarInfo { FORMAL Tree}
+               c_node = VarInfo { FORMAL Tree}
+            }
+            locals Table {
+               ntb = VarInfo { LOCAL boolean}
+            }
+         }
+         Insert = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL int}]
+            formals Table {
+               v_key = VarInfo { FORMAL int}
+            }
+            locals Table {
+               ntb = VarInfo { LOCAL boolean}
+               new_node = VarInfo { LOCAL Tree}
+               key_aux = VarInfo { LOCAL int}
+               cont = VarInfo { LOCAL boolean}
+               current_node = VarInfo { LOCAL Tree}
+            }
+         }
+         SetLeft = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL Tree}]
+            formals Table {
+               ln = VarInfo { FORMAL Tree}
+            }
+            locals Table {
+            }
+         }
+         Compare = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL int}, VarInfo { FORMAL int}]
+            formals Table {
+               num2 = VarInfo { FORMAL int}
+               num1 = VarInfo { FORMAL int}
+            }
+            locals Table {
+               ntb = VarInfo { LOCAL boolean}
+               nti = VarInfo { LOCAL int}
+            }
+         }
+         Print = MethodInfo {
+            returnType boolean
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+               ntb = VarInfo { LOCAL boolean}
+               current_node = VarInfo { LOCAL Tree}
+            }
+         }
+         GetHas_Left = MethodInfo {
+            returnType boolean
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+         RemoveLeft = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL Tree}, VarInfo { FORMAL Tree}]
+            formals Table {
+               p_node = VarInfo { FORMAL Tree}
+               c_node = VarInfo { FORMAL Tree}
+            }
+            locals Table {
+               ntb = VarInfo { LOCAL boolean}
+            }
+         }
+         SetHas_Left = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL boolean}]
+            formals Table {
+               val = VarInfo { FORMAL boolean}
+            }
+            locals Table {
+            }
+         }
+         GetHas_Right = MethodInfo {
+            returnType boolean
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+         GetKey = MethodInfo {
+            returnType int
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+         Init = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL int}]
+            formals Table {
+               v_key = VarInfo { FORMAL int}
+            }
+            locals Table {
+            }
+         }
+         SetKey = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL int}]
+            formals Table {
+               v_key = VarInfo { FORMAL int}
+            }
+            locals Table {
+            }
+         }
+         RecPrint = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL Tree}]
+            formals Table {
+               node = VarInfo { FORMAL Tree}
+            }
+            locals Table {
+               ntb = VarInfo { LOCAL boolean}
+            }
+         }
+         Remove = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL Tree}, VarInfo { FORMAL Tree}]
+            formals Table {
+               p_node = VarInfo { FORMAL Tree}
+               c_node = VarInfo { FORMAL Tree}
+            }
+            locals Table {
+               ntb = VarInfo { LOCAL boolean}
+               auxkey1 = VarInfo { LOCAL int}
+               auxkey2 = VarInfo { LOCAL int}
+            }
+         }
+         Delete = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL int}]
+            formals Table {
+               v_key = VarInfo { FORMAL int}
+            }
+            locals Table {
+               is_root = VarInfo { LOCAL boolean}
+               parent_node = VarInfo { LOCAL Tree}
+               ntb = VarInfo { LOCAL boolean}
+               key_aux = VarInfo { LOCAL int}
+               cont = VarInfo { LOCAL boolean}
+               found = VarInfo { LOCAL boolean}
+               current_node = VarInfo { LOCAL Tree}
+            }
+         }
+         SetRight = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL Tree}]
+            formals Table {
+               rn = VarInfo { FORMAL Tree}
+            }
+            locals Table {
+            }
+         }
+         SetHas_Right = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL boolean}]
+            formals Table {
+               val = VarInfo { FORMAL boolean}
+            }
+            locals Table {
+            }
+         }
+      }
+   }
+   BT = class BT extends null {
+      fields Table {
+      }
+      methods Table {
+         Start = MethodInfo {
+            returnType int
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+               ntb = VarInfo { LOCAL boolean}
+               root = VarInfo { LOCAL Tree}
+               nti = VarInfo { LOCAL int}
+            }
+         }
+      }
+   }
+   BinaryTree = class BinaryTree extends null {
+      fields Table {
+      }
+      methods Table {
+         main = MethodInfo {
+            returnType null
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+      }
+   }
+}
+Class Table for File: sample/BubbleSort.java
+Table {
+   BBS = class BBS extends null {
+      fields Table {
+         number = VarInfo { FIELD int []}
+         size = VarInfo { FIELD int}
+      }
+      methods Table {
+         Sort = MethodInfo {
+            returnType int
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+               nt = VarInfo { LOCAL int}
+               t = VarInfo { LOCAL int}
+               aux07 = VarInfo { LOCAL int}
+               aux06 = VarInfo { LOCAL int}
+               aux05 = VarInfo { LOCAL int}
+               aux04 = VarInfo { LOCAL int}
+               aux02 = VarInfo { LOCAL int}
+               j = VarInfo { LOCAL int}
+               i = VarInfo { LOCAL int}
+            }
+         }
+         Start = MethodInfo {
+            returnType int
+            formalsList [VarInfo { FORMAL int}]
+            formals Table {
+               sz = VarInfo { FORMAL int}
+            }
+            locals Table {
+               aux01 = VarInfo { LOCAL int}
+            }
+         }
+         Init = MethodInfo {
+            returnType int
+            formalsList [VarInfo { FORMAL int}]
+            formals Table {
+               sz = VarInfo { FORMAL int}
+            }
+            locals Table {
+            }
+         }
+         Print = MethodInfo {
+            returnType int
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+               j = VarInfo { LOCAL int}
+            }
+         }
+      }
+   }
+   BubbleSort = class BubbleSort extends null {
+      fields Table {
+      }
+      methods Table {
+         main = MethodInfo {
+            returnType null
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+      }
+   }
+}
+Class Table for File: sample/Factorial.java
+Table {
+   Fac = class Fac extends null {
+      fields Table {
+      }
+      methods Table {
+         ComputeFac = MethodInfo {
+            returnType int
+            formalsList [VarInfo { FORMAL int}]
+            formals Table {
+               num = VarInfo { FORMAL int}
+            }
+            locals Table {
+               num_aux = VarInfo { LOCAL int}
+            }
+         }
+      }
+   }
+   Factorial = class Factorial extends null {
+      fields Table {
+      }
+      methods Table {
+         main = MethodInfo {
+            returnType null
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+      }
+   }
+}
+Class Table for File: sample/LinearSearch.java
+Table {
+   LinearSearch = class LinearSearch extends null {
+      fields Table {
+      }
+      methods Table {
+         main = MethodInfo {
+            returnType null
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+      }
+   }
+   LS = class LS extends null {
+      fields Table {
+         number = VarInfo { FIELD int []}
+         size = VarInfo { FIELD int}
+      }
+      methods Table {
+         Search = MethodInfo {
+            returnType int
+            formalsList [VarInfo { FORMAL int}]
+            formals Table {
+               num = VarInfo { FORMAL int}
+            }
+            locals Table {
+               nt = VarInfo { LOCAL int}
+               ls01 = VarInfo { LOCAL boolean}
+               ifound = VarInfo { LOCAL int}
+               aux02 = VarInfo { LOCAL int}
+               aux01 = VarInfo { LOCAL int}
+               j = VarInfo { LOCAL int}
+            }
+         }
+         Start = MethodInfo {
+            returnType int
+            formalsList [VarInfo { FORMAL int}]
+            formals Table {
+               sz = VarInfo { FORMAL int}
+            }
+            locals Table {
+               aux02 = VarInfo { LOCAL int}
+               aux01 = VarInfo { LOCAL int}
+            }
+         }
+         Init = MethodInfo {
+            returnType int
+            formalsList [VarInfo { FORMAL int}]
+            formals Table {
+               sz = VarInfo { FORMAL int}
+            }
+            locals Table {
+               aux02 = VarInfo { LOCAL int}
+               aux01 = VarInfo { LOCAL int}
+               j = VarInfo { LOCAL int}
+               k = VarInfo { LOCAL int}
+            }
+         }
+         Print = MethodInfo {
+            returnType int
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+               j = VarInfo { LOCAL int}
+            }
+         }
+      }
+   }
+}
+Class Table for File: sample/LinkedList.java
+Table {
+   LinkedList = class LinkedList extends null {
+      fields Table {
+      }
+      methods Table {
+         main = MethodInfo {
+            returnType null
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+      }
+   }
+   LL = class LL extends null {
+      fields Table {
+      }
+      methods Table {
+         Start = MethodInfo {
+            returnType int
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+               last_elem = VarInfo { LOCAL List}
+               aux01 = VarInfo { LOCAL boolean}
+               head = VarInfo { LOCAL List}
+               el03 = VarInfo { LOCAL Element}
+               el02 = VarInfo { LOCAL Element}
+               el01 = VarInfo { LOCAL Element}
+            }
+         }
+      }
+   }
+   List = class List extends null {
+      fields Table {
+         elem = VarInfo { FIELD Element}
+         next = VarInfo { FIELD List}
+         end = VarInfo { FIELD boolean}
+      }
+      methods Table {
+         GetNext = MethodInfo {
+            returnType List
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+         Search = MethodInfo {
+            returnType int
+            formalsList [VarInfo { FORMAL Element}]
+            formals Table {
+               e = VarInfo { FORMAL Element}
+            }
+            locals Table {
+               var_elem = VarInfo { LOCAL Element}
+               nt = VarInfo { LOCAL int}
+               var_end = VarInfo { LOCAL boolean}
+               aux01 = VarInfo { LOCAL List}
+               int_ret_val = VarInfo { LOCAL int}
+            }
+         }
+         Insert = MethodInfo {
+            returnType List
+            formalsList [VarInfo { FORMAL Element}]
+            formals Table {
+               new_elem = VarInfo { FORMAL Element}
+            }
+            locals Table {
+               aux03 = VarInfo { LOCAL List}
+               aux02 = VarInfo { LOCAL List}
+               ret_val = VarInfo { LOCAL boolean}
+            }
+         }
+         InitNew = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL Element}, VarInfo { FORMAL List}, VarInfo { FORMAL boolean}]
+            formals Table {
+               v_end = VarInfo { FORMAL boolean}
+               v_elem = VarInfo { FORMAL Element}
+               v_next = VarInfo { FORMAL List}
+            }
+            locals Table {
+            }
+         }
+         Init = MethodInfo {
+            returnType boolean
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+         GetElem = MethodInfo {
+            returnType Element
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+         Delete = MethodInfo {
+            returnType List
+            formalsList [VarInfo { FORMAL Element}]
+            formals Table {
+               e = VarInfo { FORMAL Element}
+            }
+            locals Table {
+               var_elem = VarInfo { LOCAL Element}
+               nt = VarInfo { LOCAL int}
+               var_end = VarInfo { LOCAL boolean}
+               aux05 = VarInfo { LOCAL boolean}
+               aux04 = VarInfo { LOCAL int}
+               aux01 = VarInfo { LOCAL List}
+               ret_val = VarInfo { LOCAL boolean}
+               my_head = VarInfo { LOCAL List}
+               prev = VarInfo { LOCAL List}
+            }
+         }
+         SetNext = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL List}]
+            formals Table {
+               v_next = VarInfo { FORMAL List}
+            }
+            locals Table {
+            }
+         }
+         Print = MethodInfo {
+            returnType boolean
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+               var_elem = VarInfo { LOCAL Element}
+               var_end = VarInfo { LOCAL boolean}
+               aux01 = VarInfo { LOCAL List}
+            }
+         }
+         GetEnd = MethodInfo {
+            returnType boolean
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+      }
+   }
+   Element = class Element extends null {
+      fields Table {
+         Age = VarInfo { FIELD int}
+         Married = VarInfo { FIELD boolean}
+         Salary = VarInfo { FIELD int}
+      }
+      methods Table {
+         GetAge = MethodInfo {
+            returnType int
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+         Init = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL int}, VarInfo { FORMAL int}, VarInfo { FORMAL boolean}]
+            formals Table {
+               v_Salary = VarInfo { FORMAL int}
+               v_Age = VarInfo { FORMAL int}
+               v_Married = VarInfo { FORMAL boolean}
+            }
+            locals Table {
+            }
+         }
+         Equal = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL Element}]
+            formals Table {
+               other = VarInfo { FORMAL Element}
+            }
+            locals Table {
+               nt = VarInfo { LOCAL int}
+               aux02 = VarInfo { LOCAL int}
+               aux01 = VarInfo { LOCAL int}
+               ret_val = VarInfo { LOCAL boolean}
+            }
+         }
+         Compare = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL int}, VarInfo { FORMAL int}]
+            formals Table {
+               num2 = VarInfo { FORMAL int}
+               num1 = VarInfo { FORMAL int}
+            }
+            locals Table {
+               retval = VarInfo { LOCAL boolean}
+               aux02 = VarInfo { LOCAL int}
+            }
+         }
+         GetMarried = MethodInfo {
+            returnType boolean
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+         GetSalary = MethodInfo {
+            returnType int
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+      }
+   }
+}
+Class Table for File: sample/QuickSort.java
+Table {
+   QuickSort = class QuickSort extends null {
+      fields Table {
+      }
+      methods Table {
+         main = MethodInfo {
+            returnType null
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+      }
+   }
+   QS = class QS extends null {
+      fields Table {
+         number = VarInfo { FIELD int []}
+         size = VarInfo { FIELD int}
+      }
+      methods Table {
+         Sort = MethodInfo {
+            returnType int
+            formalsList [VarInfo { FORMAL int}, VarInfo { FORMAL int}]
+            formals Table {
+               left = VarInfo { FORMAL int}
+               right = VarInfo { FORMAL int}
+            }
+            locals Table {
+               nt = VarInfo { LOCAL int}
+               v = VarInfo { LOCAL int}
+               cont01 = VarInfo { LOCAL boolean}
+               t = VarInfo { LOCAL int}
+               cont02 = VarInfo { LOCAL boolean}
+               aux03 = VarInfo { LOCAL int}
+               j = VarInfo { LOCAL int}
+               i = VarInfo { LOCAL int}
+            }
+         }
+         Start = MethodInfo {
+            returnType int
+            formalsList [VarInfo { FORMAL int}]
+            formals Table {
+               sz = VarInfo { FORMAL int}
+            }
+            locals Table {
+               aux01 = VarInfo { LOCAL int}
+            }
+         }
+         Init = MethodInfo {
+            returnType int
+            formalsList [VarInfo { FORMAL int}]
+            formals Table {
+               sz = VarInfo { FORMAL int}
+            }
+            locals Table {
+            }
+         }
+         Print = MethodInfo {
+            returnType int
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+               j = VarInfo { LOCAL int}
+            }
+         }
+      }
+   }
+}
+Class Table for File: sample/TreeVisitor.java
+Table {
+   Visitor = class Visitor extends null {
+      fields Table {
+         r = VarInfo { FIELD Tree}
+         l = VarInfo { FIELD Tree}
+      }
+      methods Table {
+         visit = MethodInfo {
+            returnType int
+            formalsList [VarInfo { FORMAL Tree}]
+            formals Table {
+               n = VarInfo { FORMAL Tree}
+            }
+            locals Table {
+               nti = VarInfo { LOCAL int}
+            }
+         }
+      }
+   }
+   Tree = class Tree extends null {
+      fields Table {
+         my_null = VarInfo { FIELD Tree}
+         has_right = VarInfo { FIELD boolean}
+         left = VarInfo { FIELD Tree}
+         right = VarInfo { FIELD Tree}
+         has_left = VarInfo { FIELD boolean}
+         key = VarInfo { FIELD int}
+      }
+      methods Table {
+         GetRight = MethodInfo {
+            returnType Tree
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+         GetLeft = MethodInfo {
+            returnType Tree
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+         Search = MethodInfo {
+            returnType int
+            formalsList [VarInfo { FORMAL int}]
+            formals Table {
+               v_key = VarInfo { FORMAL int}
+            }
+            locals Table {
+               ifound = VarInfo { LOCAL int}
+               key_aux = VarInfo { LOCAL int}
+               cont = VarInfo { LOCAL boolean}
+               current_node = VarInfo { LOCAL Tree}
+            }
+         }
+         RemoveRight = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL Tree}, VarInfo { FORMAL Tree}]
+            formals Table {
+               p_node = VarInfo { FORMAL Tree}
+               c_node = VarInfo { FORMAL Tree}
+            }
+            locals Table {
+               ntb = VarInfo { LOCAL boolean}
+            }
+         }
+         Insert = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL int}]
+            formals Table {
+               v_key = VarInfo { FORMAL int}
+            }
+            locals Table {
+               ntb = VarInfo { LOCAL boolean}
+               new_node = VarInfo { LOCAL Tree}
+               key_aux = VarInfo { LOCAL int}
+               cont = VarInfo { LOCAL boolean}
+               current_node = VarInfo { LOCAL Tree}
+            }
+         }
+         accept = MethodInfo {
+            returnType int
+            formalsList [VarInfo { FORMAL Visitor}]
+            formals Table {
+               v = VarInfo { FORMAL Visitor}
+            }
+            locals Table {
+               nti = VarInfo { LOCAL int}
+            }
+         }
+         SetLeft = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL Tree}]
+            formals Table {
+               ln = VarInfo { FORMAL Tree}
+            }
+            locals Table {
+            }
+         }
+         Compare = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL int}, VarInfo { FORMAL int}]
+            formals Table {
+               num2 = VarInfo { FORMAL int}
+               num1 = VarInfo { FORMAL int}
+            }
+            locals Table {
+               ntb = VarInfo { LOCAL boolean}
+               nti = VarInfo { LOCAL int}
+            }
+         }
+         Print = MethodInfo {
+            returnType boolean
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+               ntb = VarInfo { LOCAL boolean}
+               current_node = VarInfo { LOCAL Tree}
+            }
+         }
+         GetHas_Left = MethodInfo {
+            returnType boolean
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+         RemoveLeft = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL Tree}, VarInfo { FORMAL Tree}]
+            formals Table {
+               p_node = VarInfo { FORMAL Tree}
+               c_node = VarInfo { FORMAL Tree}
+            }
+            locals Table {
+               ntb = VarInfo { LOCAL boolean}
+            }
+         }
+         SetHas_Left = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL boolean}]
+            formals Table {
+               val = VarInfo { FORMAL boolean}
+            }
+            locals Table {
+            }
+         }
+         GetHas_Right = MethodInfo {
+            returnType boolean
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+         GetKey = MethodInfo {
+            returnType int
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+         Init = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL int}]
+            formals Table {
+               v_key = VarInfo { FORMAL int}
+            }
+            locals Table {
+            }
+         }
+         SetKey = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL int}]
+            formals Table {
+               v_key = VarInfo { FORMAL int}
+            }
+            locals Table {
+            }
+         }
+         RecPrint = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL Tree}]
+            formals Table {
+               node = VarInfo { FORMAL Tree}
+            }
+            locals Table {
+               ntb = VarInfo { LOCAL boolean}
+            }
+         }
+         Remove = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL Tree}, VarInfo { FORMAL Tree}]
+            formals Table {
+               p_node = VarInfo { FORMAL Tree}
+               c_node = VarInfo { FORMAL Tree}
+            }
+            locals Table {
+               ntb = VarInfo { LOCAL boolean}
+               auxkey1 = VarInfo { LOCAL int}
+               auxkey2 = VarInfo { LOCAL int}
+            }
+         }
+         Delete = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL int}]
+            formals Table {
+               v_key = VarInfo { FORMAL int}
+            }
+            locals Table {
+               is_root = VarInfo { LOCAL boolean}
+               parent_node = VarInfo { LOCAL Tree}
+               ntb = VarInfo { LOCAL boolean}
+               key_aux = VarInfo { LOCAL int}
+               cont = VarInfo { LOCAL boolean}
+               found = VarInfo { LOCAL boolean}
+               current_node = VarInfo { LOCAL Tree}
+            }
+         }
+         SetRight = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL Tree}]
+            formals Table {
+               rn = VarInfo { FORMAL Tree}
+            }
+            locals Table {
+            }
+         }
+         SetHas_Right = MethodInfo {
+            returnType boolean
+            formalsList [VarInfo { FORMAL boolean}]
+            formals Table {
+               val = VarInfo { FORMAL boolean}
+            }
+            locals Table {
+            }
+         }
+      }
+   }
+   MyVisitor = class MyVisitor extends Visitor {
+      fields Table {
+      }
+      methods Table {
+         visit = MethodInfo {
+            returnType int
+            formalsList [VarInfo { FORMAL Tree}]
+            formals Table {
+               n = VarInfo { FORMAL Tree}
+            }
+            locals Table {
+               nti = VarInfo { LOCAL int}
+            }
+         }
+      }
+   }
+   TreeVisitor = class TreeVisitor extends null {
+      fields Table {
+      }
+      methods Table {
+         main = MethodInfo {
+            returnType null
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+      }
+   }
+   TV = class TV extends null {
+      fields Table {
+      }
+      methods Table {
+         Start = MethodInfo {
+            returnType int
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+               v = VarInfo { LOCAL MyVisitor}
+               ntb = VarInfo { LOCAL boolean}
+               root = VarInfo { LOCAL Tree}
+               nti = VarInfo { LOCAL int}
+            }
+         }
+      }
+   }
+}
+### END # TEST 1 ###
+### BEG # TEST 2 ###
+Class Table for program: 
+class Main { 
+   public static void main(String[] args) {
+       {}
+   }
+}
+class Bar extends SuperBar {
+}
+class SuperBar {
+}
+Table {
+   Main = class Main extends null {
+      fields Table {
+      }
+      methods Table {
+         main = MethodInfo {
+            returnType null
+            formalsList []
+            formals Table {
+            }
+            locals Table {
+            }
+         }
+      }
+   }
+   SuperBar = class SuperBar extends null {
+      fields Table {
+      }
+      methods Table {
+      }
+   }
+   Bar = class Bar extends SuperBar {
+      fields Table {
+      }
+      methods Table {
+      }
+   }
+}
+### END # TEST 2 ###
