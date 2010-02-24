@@ -1,8 +1,5 @@
 (ns minijava.typechecker
-  (:import (minijava.typechecker
-            TypeChecked
-            MiniJavaTypeChecker
-            TypeCheckerException)))
+  (:import minijava.typechecker.MiniJavaTypeChecker))
 
 (defn types?
   "Returns true if program types correctly."
