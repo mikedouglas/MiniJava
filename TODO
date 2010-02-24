@@ -2,11 +2,11 @@
 #+TODO: TODO | INPROGRESS | DONE
 
 * Part Three
-** TODO hook up the junit tests :mike:
-** TODO tests for x86 frame
+** TODO hook up the junit tests
+** INPROGRESS tests for x86 frame                                      :mike:
+** INPROGRESS implement (create-x86frame) & etc                        :mike:
 ** TODO tests for translate
 ** TODO fix the interpreter
-** TODO implement minijava.ir.frame.x86
 ** TODO implement minijava.translate.implementation
 ** Optional
 *** TODO reimplement the minijava.ir.canon algorithms

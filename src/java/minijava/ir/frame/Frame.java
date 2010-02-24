@@ -11,7 +11,7 @@ import minijava.ir.tree.IRExp;
 import minijava.ir.tree.IRStm;
 import minijava.util.DefaultIndentable;
 //import minijava.util.IndentingWriter;
-import minijava.util.List;
+import java.util.List;
 
 
 public abstract class Frame extends DefaultIndentable {
