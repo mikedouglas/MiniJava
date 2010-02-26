@@ -1,12 +1,14 @@
 (ns minijava.x86
-  (:import (minijava.ir.frame Access Frame)
-           minijava.ir.temp.Temp))
+  (:import (minijava.ir.frame Access InFrame Frame)
+           minijava.ir.temp.Temp)
+  (:use clojure.contrib.str-utils))
 
 (defn in-frame
   "A placeholder in the frame."
   [offset]
-  (proxy [Access] []
-    (toString [] (pr-str "Frame at offset" offset))
+  (proxy [InFrame] []
+    (toString [] (print-str "Frame at offset" offset))
+    (getOffset [] offset)
     (exp [fp] nil)))
 
 (defn in-reg

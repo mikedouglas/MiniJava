@@ -2,29 +2,28 @@
   (:use clojure.test
         (minijava label x86)))
 
-(deftest tests-no-formals
+(deftest tests-uni-no-formals
   (let [frame (create-x86frame (label "empty") [])
-        vars  (vec (for [i (range 4)] (.allocLocal frame (= (mod i 2) 0))))]
+        vars  (for [i (range 4)] (.allocLocal frame (= (mod i 2) 0)))]
     (is (zero? (count (.getFormals frame))) "No formals allocated")
-    (testing "Locals are unique"
-      (dorun
-       (for [i (range (count vars))
-             j (range (count vars))]
-         (if (= i j)
-           (is (= (vars i) (vars j)))
-           (is (not (= (vars i) (vars j))))))))))
+    (is (apply distinct? vars) "Locals are unique")))
 
-(deftest tests-several-formals
+(deftest tests-uni-several-formals
   (let [escapes [true, false, true, false]
         frame   (create-x86frame (label "four") escapes)
         formals (.getFormals frame)
-        locals  (for [i (range 4)] (.allocLocal frame true))
-        vars    (vec (concat formals locals))]
+        locals  (for [_ (range 4)] (.allocLocal frame true))
+        vars    (concat formals locals)]
     (is (= (count escapes) (count formals)))
-    (testing "Formals are unique"
-      (dorun
-       (for [i (range (count vars))
-             j (range (count vars))]
-         (if (= i j)
-           (is (= (vars i) (vars j)))
-           (is (not (= (vars i) (vars j))))))))))
+    (is (apply distinct? vars) "Formals and locals are unique")))
+
+(deftest tests-spacing-of-formals
+  (let [frame   (create-x86frame (label) [false, false, false])
+        spacing (for [f (.getFormals frame)] (.getOffset f))]
+    (is (= [8, 12, 16] spacing) "Formals are properly spaced")))
+
+(deftest tests-spacing-of-locals
+  (let [frame   (create-x86frame (label) [])
+        locals  (for [_ (range 3)] (.allocLocal frame true))
+        spacing (for [l locals] (.getOffset l))]
+    (is (= [-4, -8, -12] spacing) "Locals are properly spaced")))
