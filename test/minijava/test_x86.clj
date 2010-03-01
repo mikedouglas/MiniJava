@@ -6,7 +6,7 @@
   (let [frame (create-x86frame (label "empty") [])
         vars  (for [i (range 4)] (.allocLocal frame (= (mod i 2) 0)))]
     (is (zero? (count (.getFormals frame))) "No formals allocated")
-    (is (apply distinct? vars) "Locals are unique")))
+    (is (apply distinct? vars) "Locls are unique")))
 
 (deftest tests-uni-several-formals
   (let [escapes [true, false, true, false]
@@ -19,11 +19,11 @@
 
 (deftest tests-spacing-of-formals
   (let [frame   (create-x86frame (label) [false, false, false])
-        spacing (for [f (.getFormals frame)] (.getOffset f))]
+        spacing (for [f (.getFormals frame)] (:offset f))]
     (is (= [8, 12, 16] spacing) "Formals are properly spaced")))
 
 (deftest tests-spacing-of-locals
   (let [frame   (create-x86frame (label) [])
         locals  (for [_ (range 3)] (.allocLocal frame true))
-        spacing (for [l locals] (.getOffset l))]
+        spacing (for [l locals] (:offset l))]
     (is (= [-4, -8, -12] spacing) "Locals are properly spaced")))

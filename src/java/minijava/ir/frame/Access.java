@@ -13,7 +13,7 @@ import minijava.ir.tree.IRExp;
  * Second, each architecture can provide its own concrete implementation (which can be 
  * dependent on specifics of the target machine or assembly language).
  */
-public abstract class Access {
+public interface Access {
 	
 	/**
 	 * Convert into some convenient String representation.

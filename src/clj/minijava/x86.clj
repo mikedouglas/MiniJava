@@ -1,22 +1,17 @@
 (ns minijava.x86
-  (:import (minijava.ir.frame Access InFrame Frame)
+  (:import (minijava.ir.frame Access Frame)
            minijava.ir.temp.Temp)
   (:use clojure.contrib.str-utils))
 
-(defn in-frame
-  "A placeholder in the frame."
-  [offset]
-  (proxy [InFrame] []
-    (toString [] (print-str "Frame at offset" offset))
-    (getOffset [] offset)
-    (exp [fp] nil)))
+(deftype InFrame [offset]
+  Access
+  (toString [] (print-str "Frame at offset" offset))
+  (exp [fp])) ;; TODO
 
-(defn in-reg
-  "A register for locals."
-  [temp]
-  (proxy [Access] []
-    (toString [] (str "Register at Temp(" temp ")"))
-    (exp [fp] nil)))
+(deftype InReg [temp]
+  Access
+  (toString [] (str "Register at Temp(" temp ")"))
+  (exp [fp])) ;; TODO
 
 (let [word 4]
   (defn create-x86frame
@@ -24,13 +19,13 @@
     (let [fp      (atom 0)
           locals  (atom [])
           formals (for [i (range (count formals-escape))]
-                    (in-frame (* word (+ i 2))))] ;; 8, 12, 16, ...
+                    (InFrame (* word (+ i 2))))] ;; 8, 12, 16, ...
       (proxy [Frame] [name formals]
         (allocLocal [escapes]
           ;; allocating nonescaped locals to registers for now
           (let [loc (if escapes
-                      (in-frame (swap! fp - 4))
-                      (in-reg (Temp.)))]
+                      (InFrame (swap! fp - 4))
+                      (InReg (Temp.)))]
             (swap! locals conj loc)
             loc))
         (FP [] @fp)
