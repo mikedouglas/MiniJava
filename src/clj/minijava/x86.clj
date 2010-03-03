@@ -5,12 +5,10 @@
 
 (deftype InFrame [offset]
   Access
-  (toString [] (print-str "Frame at offset" offset))
   (exp [fp])) ;; TODO
 
 (deftype InReg [temp]
   Access
-  (toString [] (str "Register at Temp(" temp ")"))
   (exp [fp])) ;; TODO
 
 (let [word 4]
