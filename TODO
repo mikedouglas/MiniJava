@@ -3,10 +3,11 @@
 
 * Part Three
 ** TODO hook up the junit tests
-** INPROGRESS tests for x86 frame                                      :mike:
-** INPROGRESS implement (create-x86frame) & etc                        :mike:
+** DONE tests for x86 frame                                            :mike:
+** DONE implement (create-x86frame) & etc                              :mike:
+** INPROGRESS basic structure of translator                            :mike:
 ** TODO tests for translate
-** TODO fix the interpreter
+** INPROGRESS fix the interpreter                                     :asumu:
 ** TODO implement minijava.translate.implementation
 ** Optional
 *** TODO reimplement the minijava.ir.canon algorithms

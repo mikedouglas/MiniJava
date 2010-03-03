@@ -6,7 +6,7 @@
   (let [frame (create-x86frame (label "empty") [])
         vars  (for [i (range 4)] (.allocLocal frame (= (mod i 2) 0)))]
     (is (zero? (count (.getFormals frame))) "No formals allocated")
-    (is (apply distinct? vars) "Locls are unique")))
+    (is (apply distinct? vars) "Locals are unique")))
 
 (deftest tests-uni-several-formals
   (let [escapes [true, false, true, false]
