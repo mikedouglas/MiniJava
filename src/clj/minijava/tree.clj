@@ -1,33 +1,85 @@
 (ns minijava.tree
   "Converting the AST to IR as directly as possible."
-  (:use (minijava ir exp)))
+  (:use (minijava ir exp label)))
 
 (defmulti tree type)
-
-(defmethod tree minijava.ast.IntegerLiteral
-  [x] (Const (.value x)))
 
 (defn binop [op x]
   (BinaryOp op (unEx (tree (.e1 x))) (unEx (tree (.e2 x)))))
 
-(defmethod tree minijava.ast.Plus
-  [x] (binop :+ x))
-
-(defmethod tree minijava.ast.Times
-  [x] (binop :* x))
-
 (defmethod tree minijava.ast.And
   [x] (binop :& x))
+
+;;; NOTE: stubs have been commented out to make testing easier.
+
+;; (defmethod tree minijava.ast.ArrayAssign
+;;   [x] )
+
+;; (defmethod tree minijava.ast.ArrayLength
+;;   [x] )
+
+;; (defmethod tree minijava.ast.Assign
+;;   [x] )
 
 (defmethod tree minijava.ast.Block
   [x] (Seq (for [s (.statements x)] (tree s))))
 
+(defmethod tree minijava.ast.BooleanLiteral
+  [x] (if (.value x) (Const 1) (Const 0)))
+
+;; (defmethod tree minijava.ast.Call
+;;   [x] )
+
+;; (defmethod tree minijava.ast.ClassDecl
+;;   [x] )
+
+;; (defmethod tree minijava.ast.IdentifierExp
+;;   [x] )
+
 (defmethod tree minijava.ast.If
-  [x] (let [t (Label (gensym))
-            f (Label (gensym))]
-        (Seq [(unCx (.tst x) (Name t) (Name f))
-              t
+  [x] (let [t (label)
+            f (label)]
+        (Seq [(unCx (tree (.tst x)) (Name t) (Name f))
+              (Label t)
               (unNx (tree (.then x)))
-              f
+              (Label f)
               (unNx (tree (.then x)))])))
 
+(defmethod tree minijava.ast.IntegerLiteral
+  [x] (Const (.value x)))
+
+(defmethod tree minijava.ast.LessThan
+  [x] (binop :< x))
+
+;; (defmethod tree minijava.ast.MainClass
+;;   [x] )
+
+;; (defmethod tree minijava.ast.MethodDecl
+;;   [x] )
+
+(defmethod tree minijava.ast.Minus
+  [x] (binop :- x))
+
+;; (defmethod tree minijava.ast.NewArray
+;;   [x] )
+
+;; (defmethod tree minijava.ast.Not
+;;   [x] )
+
+(defmethod tree minijava.ast.Plus
+  [x] (binop :+ x))
+
+;; (defmethod tree minijava.ast.This
+;;   [x] )
+
+(defmethod tree minijava.ast.Times
+  [x] (binop :* x))
+
+;; (defmethod tree minijava.ast.VarDecl
+;;   [x] )
+
+;; (defmethod tree minijava.ast.While
+;;   [x] )
+
+;; (defmethod tree minijava.sat.ArrayLookup
+;;   [x] )

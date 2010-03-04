@@ -1,7 +1,6 @@
 (ns minijava.exp
   "Mixins that define basic IR usage."
-  (:use [minijava.tree :only [tree]]
-        [minijava.ir :only [Conditional Statement]]))
+  (:use [minijava.ir :only [Conditional Statement]]))
 
 (defprotocol Exp
   (unEx [this])
@@ -26,8 +25,8 @@
   [stmType]
   (extend-type stmType
     Exp
-     (unNx [this]     this)
      (unEx [this]     (throw (Exception. "Statement used as expression.")))
+     (unNx [this]     this)
      (unCx [this t f] (throw (Exception. "Statement used as conditional.")))))
 
 (defn addCx!
@@ -35,8 +34,8 @@
   [cndType]
   (extend-type cndType
     Exp
-     (unNx [this]     (Statement this))
      (unEx [this]     ((juxt :op :val1 :val2) this))
+     (unNx [this]     (Statement this))
      (unCx [this t f] this)))
 
 (doseq [t ["BinaryOp" "Call" "Const" "Mem" "Temp" "ExpSeq"]]

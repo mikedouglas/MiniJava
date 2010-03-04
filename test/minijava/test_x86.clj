@@ -19,11 +19,11 @@
 
 (deftest tests-spacing-of-formals
   (let [frame   (create-x86frame (label) [false, false, false])
-        spacing (for [f (.getFormals frame)] (:offset f))]
+        spacing (map :offset (.getFormals frame))]
     (is (= [8, 12, 16] spacing) "Formals are properly spaced")))
 
 (deftest tests-spacing-of-locals
   (let [frame   (create-x86frame (label) [])
         locals  (for [_ (range 3)] (.allocLocal frame true))
-        spacing (for [l locals] (:offset l))]
+        spacing (map :offset locals)]
     (is (= [-4, -8, -12] spacing) "Locals are properly spaced")))
