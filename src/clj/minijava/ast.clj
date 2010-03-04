@@ -11,6 +11,14 @@ readers."
   [str]
   (MiniJavaParser/parse str))
 
+(defn parse-exp
+  "Wraps stm in a generic MiniJava class."
+  [stm]
+  (MiniJavaParser/parse
+   (str "class Test { public static void main(String[] a){"
+        "System.out.println(" stm ");"
+        "} }")))
+
 (defn $
   "Converts a NodeList to a regular list."
   [nlst]

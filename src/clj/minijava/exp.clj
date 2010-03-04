@@ -17,16 +17,16 @@
   [expType]
   (extend-type expType
     Exp
-     (unEx [this]     (tree this))
-     (unNx [this]     (Statement (tree this)))
-     (unCx [this t f] (Conditional :ne (tree this) 0 t f))))
+     (unEx [this]     this)
+     (unNx [this]     (Statement this))
+     (unCx [this t f] (Conditional :ne this 0 t f))))
 
 (defn addNx!
   "Adds methods for a statement."
   [stmType]
   (extend-type stmType
     Exp
-     (unNx [this]     (tree this))
+     (unNx [this]     this)
      (unEx [this]     (throw (Exception. "Statement used as expression.")))
      (unCx [this t f] (throw (Exception. "Statement used as conditional.")))))
 
@@ -35,9 +35,9 @@
   [cndType]
   (extend-type cndType
     Exp
-     (unNx [this]     (Statement (tree this)))
-     (unEx [this]     (apply tree (map this [:op :val1 :val2])))
-     (unCx [this t f] (tree this))))
+     (unNx [this]     (Statement this))
+     (unEx [this]     ((juxt :op :val1 :val2) this))
+     (unCx [this t f] this)))
 
 (doseq [t ["BinaryOp" "Call" "Const" "Mem" "Temp" "ExpSeq"]]
   (addEx! (keyword "minijava.ir" t)))

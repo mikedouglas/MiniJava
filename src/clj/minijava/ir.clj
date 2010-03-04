@@ -1,11 +1,11 @@
 (ns minijava.ir
   "Types for IR language.")
 
-(deftype BinaryOp [op val1 val2])
+(deftype BinaryOp [op exp1 exp2])
 
 (deftype Call [lbl args])
 
-(deftype Conditional [op val1 val2 t f])
+(deftype Conditional [op exp1 exp2 t f])
 
 (deftype Const [val])
 
