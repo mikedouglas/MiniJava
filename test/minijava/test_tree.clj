@@ -1,6 +1,6 @@
 (ns minijava.test-tree
   (:use clojure.test
-        (minijava tree utility))
+        (minijava ast label tree utility))
   (:require [minijava.ir :as ir]))
 
 (import-ast-classes)
@@ -23,3 +23,21 @@
   (is (= (ir/Const 5) (tree (IntegerLiteral. 5))))
   (is (= (ir/Const 1) (tree (BooleanLiteral. true))))
   (is (= (ir/Const 0) (tree (BooleanLiteral. false)))))
+
+(deftest tests-special-if
+  (is (= (ir/Seq [(ir/Conditional :< (ir/Const 3) (ir/Const 4)
+                                  (ir/Name (label)) (ir/Name (label)))
+                  (ir/Label (label))
+                  (ir/Seq [])
+                  (ir/Label (label))
+                  (ir/Seq [])])
+          (tree (parse-stm "if (3 < 4) {} else {}")))))
+
+(deftest tests-regular-if
+  (is (= (ir/Seq [(ir/Conditional :!= (ir/BinaryOp :+ (ir/Const 3) (ir/Const 4))
+                                  0 (ir/Name (label)) (ir/Name (label)))
+                  (ir/Label (label))
+                  (ir/Seq [])
+                  (ir/Label (label))
+                  (ir/Seq [])])
+         (tree (parse-stm "if (3 + 4) {} else {}")))))

@@ -1,29 +1,62 @@
 (ns minijava.ir
   "Types for IR language.")
 
-(deftype BinaryOp [op exp1 exp2])
+(declare Conditional Statement)
 
-(deftype Call [lbl args])
+(defprotocol Exp
+  (unEx [this])
+  (unNx [this])
+  (unCx [this t f]))
 
-(deftype Conditional [op exp1 exp2 t f])
+(deftype BinaryOp [op exp1 exp2]
+  :as this
+  clojure.lang.IPersistentMap
+  Exp
+  (unEx [] this)
+  (unNx [] (Statement this))
+  (unCx [t f]
+    (case (:op this)
+      :< (Conditional :< (:exp1 this) (:exp2 this) t f)
+      :& (Conditional :& (:exp1 this) (:exp2 this) t f)
+      (Conditional :!= (unEx this) 0 t f))))
 
-(deftype Const [val])
+(deftype Call [lbl args]
+  clojure.lang.IPersistentMap)
 
-(deftype ExpSeq [seqs exp])
+(deftype Conditional [op exp1 exp2 t f]
+  clojure.lang.IPersistentMap)
 
-(deftype Jump [lbl])
+(deftype Const [val]
+  clojure.lang.IPersistentMap)
 
-(deftype Label [str])
+(deftype ExpSeq [seqs exp]
+  clojure.lang.IPersistentMap)
 
-(deftype Mem [adr])
+(deftype Jump [lbl]
+  clojure.lang.IPersistentMap)
 
-(deftype Move [src dst])
+(deftype Label [lbl]
+  clojure.lang.IPersistentMap
+  Object
+  (equals [obj] (= (type obj) :minijava.ir/Label))) ;; FIXME: needed to test
 
-(deftype Name [lbl])
+(deftype Mem [adr]
+  clojure.lang.IPersistentMap)
 
-(deftype Seq [seqs])
+(deftype Move [src dst]
+  clojure.lang.IPersistentMap)
 
-(deftype Statement [exp])
+(deftype Name [lbl]
+  clojure.lang.IPersistentMap
+  Object
+  (equals [obj] (= (type obj) :minijava.ir/Name)))
 
-(deftype Temp [reg])
+(deftype Seq [seqs]
+  clojure.lang.IPersistentMap)
+
+(deftype Statement [exp]
+  clojure.lang.IPersistentMap)
+
+(deftype Temp [reg]
+  clojure.lang.IPersistentMap)
 

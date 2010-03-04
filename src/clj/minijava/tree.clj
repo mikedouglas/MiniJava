@@ -1,6 +1,6 @@
 (ns minijava.tree
   "Converting the AST to IR as directly as possible."
-  (:use (minijava ir exp label)))
+  (:use (minijava ir exp label ast)))
 
 (defmulti tree type)
 
@@ -22,7 +22,7 @@
 ;;   [x] )
 
 (defmethod tree minijava.ast.Block
-  [x] (Seq (for [s (.statements x)] (tree s))))
+  [x] (Seq (for [s ($ (.statements x))] (tree s))))
 
 (defmethod tree minijava.ast.BooleanLiteral
   [x] (if (.value x) (Const 1) (Const 0)))
@@ -41,9 +41,9 @@
             f (label)]
         (Seq [(unCx (tree (.tst x)) (Name t) (Name f))
               (Label t)
-              (unNx (tree (.then x)))
+              (unNx (tree (.thn x)))
               (Label f)
-              (unNx (tree (.then x)))])))
+              (unNx (tree (.els x)))])))
 
 (defmethod tree minijava.ast.IntegerLiteral
   [x] (Const (.value x)))

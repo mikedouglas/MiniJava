@@ -1,11 +1,6 @@
 (ns minijava.exp
   "Mixins that define basic IR usage."
-  (:use [minijava.ir :only [Conditional Statement]]))
-
-(defprotocol Exp
-  (unEx [this])
-  (unNx [this])
-  (unCx [this t f]))
+  (:use [minijava.ir :only [Exp Conditional Statement]]))
 
 ;;; basic Exp mixins.
 ;; (deftype PrintStm ...)
@@ -18,7 +13,7 @@
     Exp
      (unEx [this]     this)
      (unNx [this]     (Statement this))
-     (unCx [this t f] (Conditional :ne this 0 t f))))
+     (unCx [this t f] (Conditional :!= this 0 t f))))
 
 (defn addNx!
   "Adds methods for a statement."
@@ -38,11 +33,10 @@
      (unNx [this]     (Statement this))
      (unCx [this t f] this)))
 
-(doseq [t ["BinaryOp" "Call" "Const" "Mem" "Temp" "ExpSeq"]]
+(doseq [t ["Call" "Const" "Mem" "Temp" "ExpSeq"]]
   (addEx! (keyword "minijava.ir" t)))
 
 (doseq [t ["Jump" "Label" "Move" "Seq" "Statement"]]
   (addNx! (keyword "minijava.ir" t)))
 
 (addCx! :minijava.ir/Conditional)
-
