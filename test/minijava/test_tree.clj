@@ -25,19 +25,38 @@
   (is (= (ir/Const 0) (tree (BooleanLiteral. false)))))
 
 (deftest tests-special-if
-  (is (= (ir/Seq [(ir/Conditional :< (ir/Const 3) (ir/Const 4)
-                                  (ir/Name (label)) (ir/Name (label)))
-                  (ir/Label (label))
-                  (ir/Seq [])
-                  (ir/Label (label))
-                  (ir/Seq [])])
-          (tree (parse-stm "if (3 < 4) {} else {}")))))
+  (is (= (let [t (label)
+               f (label)]
+           (ir/Seq [(ir/Conditional :< (ir/Const 3) (ir/Const 4)
+                                    (ir/Name t) (ir/Name f))
+                    (ir/Label t)
+                    (ir/Seq [])
+                    (ir/Label f)
+                    (ir/Seq [])]))
+          (tree (parse-stm "if (3 < 4) {} else {}")))
+      "If statements with boolean tests convert correctly."))
 
 (deftest tests-regular-if
-  (is (= (ir/Seq [(ir/Conditional :!= (ir/BinaryOp :+ (ir/Const 3) (ir/Const 4))
-                                  0 (ir/Name (label)) (ir/Name (label)))
-                  (ir/Label (label))
-                  (ir/Seq [])
-                  (ir/Label (label))
-                  (ir/Seq [])])
-         (tree (parse-stm "if (3 + 4) {} else {}")))))
+  (is (= (let [t (label)
+               f (label)]
+           (ir/Seq [(ir/Conditional :!= (ir/BinaryOp :+ (ir/Const 3) (ir/Const 4))
+                                    0 (ir/Name t) (ir/Name f))
+                    (ir/Label t)
+                    (ir/Seq [])
+                    (ir/Label f)
+                    (ir/Seq [])]))
+         (tree (parse-stm "if (3 + 4) {} else {}")))
+      "If statements that test normal expressions convert correctly."))
+
+(deftest tests-while
+  (is (= (let [test  (label)
+               t (label)
+               f (label)]
+           (ir/Seq [(ir/Label test)
+                    (ir/Conditional :< (ir/Const 3) (ir/Const 4)
+                                    (ir/Name t) (ir/Name f))
+                    (ir/Label t)
+                    (ir/Seq [])
+                    (ir/Jump test)
+                    (ir/Label f)])))
+      "While statements convert correctly."))

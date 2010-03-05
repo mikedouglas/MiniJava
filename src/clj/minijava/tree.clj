@@ -78,8 +78,16 @@
 ;; (defmethod tree minijava.ast.VarDecl
 ;;   [x] )
 
-;; (defmethod tree minijava.ast.While
-;;   [x] )
+(defmethod tree minijava.ast.While
+  [x] (let [t    (label)
+            test (label)
+            f    (label)]
+        (Seq [(Label test)
+              (unCx (tree (.tst x)) (Name t) (Name f))
+              (Label t)
+              (unNx (tree (.body x)))
+              (Jump test)
+              (Label f)])))
 
 ;; (defmethod tree minijava.sat.ArrayLookup
 ;;   [x] )

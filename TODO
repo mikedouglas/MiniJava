@@ -6,6 +6,12 @@
 ** DONE tests for x86 frame                                            :mike:
 ** DONE implement (create-x86frame) & etc                              :mike:
 ** INPROGRESS basic structure of translator                            :mike:
+** TODO equality of datatypes that depend on (label)
+
+I had to neuter the equality of any datatype that depends on (label),
+otherwise we can't test them, because every (label) is unique. We
+need a special binding that will let us override the initial (label).
+
 ** TODO tests for translate
 ** INPROGRESS fix the interpreter                                     :asumu:
 ** TODO implement minijava.translate.implementation
