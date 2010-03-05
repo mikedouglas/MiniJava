@@ -8,7 +8,7 @@
   (BinaryOp op (unEx (tree (.e1 x))) (unEx (tree (.e2 x)))))
 
 (defmethod tree minijava.ast.And
-  [x] (binop :& x))
+  [x] (binop :&& x))
 
 ;;; NOTE: stubs have been commented out to make testing easier.
 
