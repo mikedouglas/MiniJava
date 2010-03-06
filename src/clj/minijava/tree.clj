@@ -13,9 +13,9 @@
             f    (label)
             done (label)
             ret  (minijava.ir.temp.Temp.)]
-        (ExpSeq [(Conditional :!= (-> x .e1 tree unEx) 0 (Name t1) (Name f))
+        (ExpSeq [(-> x .e1 tree (unCx (Name t1) (Name f)))
                  (Label t1)
-                 (Conditional :!= (-> x .e2 tree unEx) 0 (Name t2) (Name f))
+                 (-> x .e2 tree (unCx (Name t2) (Name f)))
                  (Label t2)
                  (Move (Const 1) (Temp ret))
                  (Jump done)
@@ -30,7 +30,7 @@
 ;;   [x] )
 
 ;; (defmethod tree minijava.ast.ArrayLength
-;;   [x] )
+;;   [x] (Mem (BinaryOp :- (Temp ) (Const 1))))
 
 ;; (defmethod tree minijava.ast.Assign
 ;;   [x] )
@@ -41,8 +41,9 @@
 (defmethod tree minijava.ast.BooleanLiteral
   [x] (if (.value x) (Const 1) (Const 0)))
 
-;; (defmethod tree minijava.ast.Call
-;;   [x] )
+(defmethod tree minijava.ast.Call
+  [x] (Call (Name (label (.name x)))
+            (for [a ($ (.rargs x))] (unEx (tree a)))))
 
 ;; (defmethod tree minijava.ast.ClassDecl
 ;;   [x] )
@@ -52,12 +53,15 @@
 
 (defmethod tree minijava.ast.If
   [x] (let [t (label)
-            f (label)]
+            f (label)
+            d (label)]
         (Seq [(unCx (tree (.tst x)) (Name t) (Name f))
               (Label t)
               (unNx (tree (.thn x)))
+              (Jump d)
               (Label f)
-              (unNx (tree (.els x)))])))
+              (unNx (tree (.els x)))
+              (Label d)])))
 
 (defmethod tree minijava.ast.IntegerLiteral
   [x] (Const (.value x)))
@@ -77,8 +81,20 @@
 ;; (defmethod tree minijava.ast.NewArray
 ;;   [x] )
 
-;; (defmethod tree minijava.ast.Not
-;;   [x] )
+;; FIXME: ugly, better solution?
+(defmethod tree minijava.ast.Not
+  [x] (let [t (label)
+            f (label)
+            d (label)
+            r (minijava.ir.temp.Temp.)]
+        (ExpSeq [(unCx (tree (.e x)) (Name t) (Name f))
+                 (Label t)
+                 (Move (Const 0) (Temp r))
+                 (Jump d)
+                 (Label f)
+                 (Move (Const 1) (Temp r))
+                 (Label d)]
+                (Temp r))))
 
 (defmethod tree minijava.ast.Plus
   [x] (binop :+ x))

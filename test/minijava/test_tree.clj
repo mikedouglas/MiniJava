@@ -21,24 +21,30 @@
 
 (deftest tests-special-if
   (is (= (let [t (label)
-               f (label)]
+               f (label)
+               d (label)]
            (Seq [(Conditional :< (Const 3) (Const 4) (Name t) (Name f))
                  (Label t)
                  (Seq [])
+                 (Jump d)
                  (Label f)
-                 (Seq [])]))
+                 (Seq [])
+                 (Label d)]))
          (tree (parse-stm "if (3 < 4) {} else {}")))
       "If statements with boolean tests convert correctly."))
 
 (deftest tests-regular-if
   (is (= (let [t (label)
-               f (label)]
+               f (label)
+               d (label)]
            (Seq [(Conditional :!= (BinaryOp :+ (Const 3) (Const 4))
                               0 (Name t) (Name f))
                  (Label t)
                  (Seq [])
+                 (Jump d)
                  (Label f)
-                 (Seq [])]))
+                 (Seq [])
+                 (Label d)]))
          (tree (parse-stm "if (3 + 4) {} else {}")))
       "If statements that test normal expressions convert correctly."))
 
