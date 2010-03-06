@@ -121,15 +121,16 @@
   [x frame]
   (Call (Name "print") [(-> x .exp (tree frame) unEx)]))
 
-;; (defmethod tree minijava.ast.This
-;;   [x] )
+ (defmethod tree minijava.ast.This
+   [x frame]
+   (Temp "This") ) ;;Is this the correct behaviour? 
 
 (defmethod tree minijava.ast.Times
   [x frame]
   (binop :* x frame))
 
-;; (defmethod tree minijava.ast.VarDecl
-;;   [x] )
+ (defmethod tree minijava.ast.VarDecl
+   [x] )
 
 (defmethod tree minijava.ast.While
   [x frame]
@@ -143,5 +144,7 @@
           (Jump test)
           (Label f)])))
 
-;; (defmethod tree minijava.sat.ArrayLookup
-;;   [x] )
+ (defmethod tree minijava.sat.ArrayLookup
+   [x frame]
+   (Mem (binop :+ (tree (.array x) frame)) (binop :* 4 (tree (.index x) frame) ) )
+)
