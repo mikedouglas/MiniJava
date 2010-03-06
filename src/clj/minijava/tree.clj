@@ -5,7 +5,7 @@
 (defmulti tree type)
 
 (defn binop [op x]
-  (BinaryOp op (unEx (tree (.e1 x))) (unEx (tree (.e2 x)))))
+  (BinaryOp op (-> x .e1 tree unEx) (-> x .e2 tree unEx)))
 
 (defmethod tree minijava.ast.And
   [x] (let [t1   (label)
@@ -36,14 +36,15 @@
 ;;   [x] )
 
 (defmethod tree minijava.ast.Block
-  [x] (Seq (for [s ($ (.statements x))] (tree s))))
+  [x] (Seq (map tree ($ (.statements x)))))
 
 (defmethod tree minijava.ast.BooleanLiteral
   [x] (if (.value x) (Const 1) (Const 0)))
 
 (defmethod tree minijava.ast.Call
-  [x] (Call (Name (label (.name x)))
-            (for [a ($ (.rargs x))] (unEx (tree a)))))
+  [x] (Call (Name (.name x))
+            (cons (-> x .receiver tree unEx)
+                  (map (comp unEx tree) ($ (.rargs x))))))
 
 ;; (defmethod tree minijava.ast.ClassDecl
 ;;   [x] )
@@ -55,12 +56,12 @@
   [x] (let [t (label)
             f (label)
             d (label)]
-        (Seq [(unCx (tree (.tst x)) (Name t) (Name f))
+        (Seq [(-> x .tst tree (unCx (Name t) (Name f)))
               (Label t)
-              (unNx (tree (.thn x)))
+              (-> x .thn tree unNx)
               (Jump d)
               (Label f)
-              (unNx (tree (.els x)))
+              (-> x .els tree unNx)
               (Label d)])))
 
 (defmethod tree minijava.ast.IntegerLiteral
@@ -78,8 +79,8 @@
 (defmethod tree minijava.ast.Minus
   [x] (binop :- x))
 
-;; (defmethod tree minijava.ast.NewArray
-;;   [x] )
+(defmethod tree minijava.ast.NewArray
+  [x] (Call (Name "newArray") [(unEx (.size x))]))
 
 ;; FIXME: ugly, better solution?
 (defmethod tree minijava.ast.Not
@@ -87,7 +88,7 @@
             f (label)
             d (label)
             r (minijava.ir.temp.Temp.)]
-        (ExpSeq [(unCx (tree (.e x)) (Name t) (Name f))
+        (ExpSeq [(-> x .e tree (unCx (Name t) (Name f)))
                  (Label t)
                  (Move (Const 0) (Temp r))
                  (Jump d)
@@ -98,6 +99,9 @@
 
 (defmethod tree minijava.ast.Plus
   [x] (binop :+ x))
+
+(defmethod tree minijava.ast.Print
+  [x] (Call (Name "print") [(-> x .exp tree unEx)]))
 
 ;; (defmethod tree minijava.ast.This
 ;;   [x] )
@@ -113,9 +117,9 @@
             test (label)
             f    (label)]
         (Seq [(Label test)
-              (unCx (tree (.tst x)) (Name t) (Name f))
+              (-> x .tst tree (unCx (Name t) (Name f)))
               (Label t)
-              (unNx (tree (.body x)))
+              (-> x .body tree unNx)
               (Jump test)
               (Label f)])))
 
