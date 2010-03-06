@@ -28,14 +28,18 @@
 
 ;;; NOTE: stubs have been commented out to make testing easier.
 
-;; (defmethod tree minijava.ast.ArrayAssign
-;;   [x] )
+ ;;assign a value to a subscript of an array
+ (defmethod tree minijava.ast.ArrayAssign
+   [x frame] 
+   (Move (tree (.value x) frame) (Mem (BinaryOp :+ (Temp (.name x)) (BinaryOp :* (4 (.index x))) ) )) ;;this could easily be incorrect. Assuming 4 byte array values
+   )
 
 ;; (defmethod tree minijava.ast.ArrayLength
 ;;   [x] (Mem (BinaryOp :- (Temp ) (Const 1))))
 
-;; (defmethod tree minijava.ast.Assign
-;;   [x] )
+ (defmethod tree minijava.ast.Assign
+   [x frame]
+   (Move  ( tree (.value x) frame)   (Temp (.name x))) )
 
 (defmethod tree minijava.ast.Block
   [x frame]
@@ -54,8 +58,9 @@
 ;; (defmethod tree minijava.ast.ClassDecl
 ;;   [x] )
 
-;; (defmethod tree minijava.ast.IdentifierExp
-;;   [x] )
+ (defmethod tree minijava.ast.IdentifierExp
+   [x frame]
+   (Temp (.name x)) )
 
 (defmethod tree minijava.ast.If
   [x frame]
@@ -92,7 +97,7 @@
   [x frame]
   (Call (Name "newArray") [(-> x .size (tree frame) unEx)]))
 
-;; FIXME: ugly, better solution?
+;; FIXME: ugly, better solution? Note: not should really have a different implementation for unCx.
 (defmethod tree minijava.ast.Not
   [x frame]
   (let [t (label)
