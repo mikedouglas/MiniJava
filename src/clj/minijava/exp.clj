@@ -24,19 +24,8 @@
      (unNx [this]     this)
      (unCx [this t f] (throw (Exception. "Statement used as conditional.")))))
 
-(defn addCx!
-  "Add methods for a conditional."
-  [cndType]
-  (extend-type cndType
-    Exp
-     (unEx [this]     ((juxt :op :val1 :val2) this))
-     (unNx [this]     (Statement this))
-     (unCx [this t f] this)))
-
 (doseq [t ["Call" "Const" "Mem" "Temp" "ExpSeq"]]
   (addEx! (keyword "minijava.ir" t)))
 
 (doseq [t ["Jump" "Label" "Move" "Seq" "Statement"]]
   (addNx! (keyword "minijava.ir" t)))
-
-(addCx! :minijava.ir/Conditional)

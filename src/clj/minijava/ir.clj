@@ -1,7 +1,8 @@
 (ns minijava.ir
-  "Types for IR language.")
+  "Types for IR language."
+  (:use minijava.label))
 
-(declare Conditional Statement)
+(declare Conditional Const ExpSeq Move Label Statement Temp)
 
 (defprotocol Exp
   (unEx [this])
@@ -24,7 +25,21 @@
   clojure.lang.IPersistentMap)
 
 (deftype Conditional [op exp1 exp2 t f]
-  clojure.lang.IPersistentMap)
+  :as this
+  clojure.lang.IPersistentMap
+  Exp
+  (unEx []
+    (let [t (label)
+          f (label)
+          r (minijava.ir.temp.Temp.)]
+      (ExpSeq [(Move (Const 1) (Temp r))
+               (unCx this t f)
+               (Label f)
+               (Move (Const 0) (Temp r))
+               (Label t)]
+              (Temp r))))
+  (unNx [] (Statement this))
+  (unCx [t f] (merge this [:t t] [:f f])))
 
 (deftype Const [val]
   clojure.lang.IPersistentMap)
