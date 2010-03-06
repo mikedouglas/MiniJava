@@ -6,14 +6,13 @@
   (let [plus   (parse-exp "5 + 5")
         minus  (parse-exp "5 - 5")
         times  (parse-exp "5 * 5")
-        and    (parse-exp "5 && 5")
         l-than (parse-exp "5 < 5")
         matches (fn [op ast] (= (BinaryOp op (Const 5) (Const 5))
                                 (tree ast)))]
     (dorun
      (map #(is (matches %1 %2) "AST converts to BinaryOp IR.")
-          [:+   :-    :*    :&& :<]
-          [plus minus times and l-than]))))
+          [:+   :-    :*    :<]
+          [plus minus times l-than]))))
 
 (deftest tests-int-bool-conv
   (is (= (Const 5) (tree (parse-exp "5"))))

@@ -8,7 +8,21 @@
   (BinaryOp op (unEx (tree (.e1 x))) (unEx (tree (.e2 x)))))
 
 (defmethod tree minijava.ast.And
-  [x] (binop :&& x))
+  [x] (let [t1   (label)
+            t2   (label)
+            f    (label)
+            done (label)
+            ret  (minijava.ir.temp.Temp.)]
+        (ExpSeq [(Conditional :!= (-> x .e1 tree unEx) 0 (Name t1) (Name f))
+                 (Label t1)
+                 (Conditional :!= (-> x .e2 tree unEx) 0 (Name t2) (Name f))
+                 (Label t2)
+                 (Move (Const 1) (Temp ret))
+                 (Jump done)
+                 (Label f)
+                 (Move (Const 0) (Temp ret))
+                 (Label done)]
+                (Temp ret))))
 
 ;;; NOTE: stubs have been commented out to make testing easier.
 
