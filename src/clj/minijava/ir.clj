@@ -33,7 +33,9 @@
   clojure.lang.IPersistentMap)
 
 (deftype Jump [lbl]
-  clojure.lang.IPersistentMap)
+  clojure.lang.IPersistentMap
+  Object
+  (equals [obj] (= (type obj) :minijava.ir/Jump)))
 
 (deftype Label [lbl]
   clojure.lang.IPersistentMap

@@ -1,15 +1,15 @@
 (ns minijava.x86
-  (:import (minijava.ir.frame Access Frame)
-           minijava.ir.temp.Temp)
-  (:use clojure.contrib.str-utils))
+  (:import (minijava.ir.frame Access Frame))
+  (:use clojure.contrib.str-utils
+        minijava.ir))
 
 (deftype InFrame [offset]
   Access
-  (exp [fp])) ;; TODO
+  (exp [fp] (Mem (BinaryOp :+ (Temp fp) (Const offset)))))
 
 (deftype InReg [temp]
   Access
-  (exp [fp])) ;; TODO
+  (exp [fp] (Temp temp)))
 
 (let [word 4]
   (defn create-x86frame
@@ -23,7 +23,7 @@
           ;; allocating nonescaped locals to registers for now
           (let [loc (if escapes
                       (InFrame (swap! fp - 4))
-                      (InReg (Temp.)))]
+                      (InReg (minijava.ir.temp.Temp.)))]
             (swap! locals conj loc)
             loc))
         (FP [] @fp)

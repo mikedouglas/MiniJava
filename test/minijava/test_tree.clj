@@ -52,5 +52,7 @@
                  (Label t)
                  (Seq [])
                  (Jump test)
-                 (Label f)])))
+                 (Label f)]))
+         (tree (parse-stm "while (3 < 4) {}")))
       "While statements convert correctly."))
+
