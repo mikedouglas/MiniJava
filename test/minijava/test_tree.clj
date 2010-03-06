@@ -2,7 +2,7 @@
   (:use clojure.test
         (minijava ast label ir tree utility x86)))
 
-(defn x86 [] (create-x86frame (label) []))
+(def empty-frame (new-x86 0 0))
 
 (deftest tests-binop-conv
   (let [plus   (parse-exp "5 + 5")
@@ -10,16 +10,16 @@
         times  (parse-exp "5 * 5")
         l-than (parse-exp "5 < 5")
         matches (fn [op ast] (= (BinaryOp op (Const 5) (Const 5))
-                                (tree ast (x86))))]
+                                (tree ast empty-frame)))]
     (dorun
      (map #(is (matches %1 %2) "AST converts to BinaryOp IR.")
           [:+   :-    :*    :<]
           [plus minus times l-than]))))
 
 (deftest tests-int-bool-conv
-  (is (= (Const 5) (tree (parse-exp "5") (x86))))
-  (is (= (Const 1) (tree (parse-exp "true") (x86))))
-  (is (= (Const 0) (tree (parse-exp "false") (x86)))))
+  (is (= (Const 5) (tree (parse-exp "5") empty-frame)))
+  (is (= (Const 1) (tree (parse-exp "true") empty-frame)))
+  (is (= (Const 0) (tree (parse-exp "false") empty-frame))))
 
 (deftest tests-special-if
   (is (= (let [t (label)
@@ -32,7 +32,7 @@
                  (Label f)
                  (Seq [])
                  (Label d)]))
-         (tree (parse-stm "if (3 < 4) {} else {}") (x86)))
+         (tree (parse-stm "if (3 < 4) {} else {}") empty-frame))
       "If statements with boolean tests convert correctly."))
 
 (deftest tests-regular-if
@@ -47,7 +47,7 @@
                  (Label f)
                  (Seq [])
                  (Label d)]))
-         (tree (parse-stm "if (3 + 4) {} else {}") (x86)))
+         (tree (parse-stm "if (3 + 4) {} else {}") empty-frame))
       "If statements that test normal expressions convert correctly."))
 
 (deftest tests-while
@@ -60,6 +60,6 @@
                  (Seq [])
                  (Jump test)
                  (Label f)]))
-         (tree (parse-stm "while (3 < 4) {}") (x86)))
+         (tree (parse-stm "while (3 < 4) {}") empty-frame))
       "While statements convert correctly."))
 
