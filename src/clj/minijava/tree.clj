@@ -2,27 +2,29 @@
   "Converting the AST to IR as directly as possible."
   (:use (minijava ir exp label ast)))
 
-(defmulti tree type)
+(defmulti tree (fn [x frame] (type x)))
 
-(defn binop [op x]
-  (BinaryOp op (-> x .e1 tree unEx) (-> x .e2 tree unEx)))
+(defn binop [op x frame]
+  (BinaryOp op (-> x .e1 (tree frame) unEx)
+            (-> x .e2 (tree frame) unEx)))
 
 (defmethod tree minijava.ast.And
-  [x] (let [t1   (label)
-            t2   (label)
-            f    (label)
-            done (label)
-            ret  (minijava.ir.temp.Temp.)]
-        (ExpSeq [(-> x .e1 tree (unCx (Name t1) (Name f)))
-                 (Label t1)
-                 (-> x .e2 tree (unCx (Name t2) (Name f)))
-                 (Label t2)
-                 (Move (Const 1) (Temp ret))
-                 (Jump done)
-                 (Label f)
-                 (Move (Const 0) (Temp ret))
-                 (Label done)]
-                (Temp ret))))
+  [x frame]
+  (let [t1   (label)
+        t2   (label)
+        f    (label)
+        done (label)
+        ret  (minijava.ir.temp.Temp.)]
+    (ExpSeq [(-> x .e1 (tree frame) (unCx (Name t1) (Name f)))
+             (Label t1)
+             (-> x .e2 (tree frame) (unCx (Name t2) (Name f)))
+             (Label t2)
+             (Move (Const 1) (Temp ret))
+             (Jump done)
+             (Label f)
+             (Move (Const 0) (Temp ret))
+             (Label done)]
+            (Temp ret))))
 
 ;;; NOTE: stubs have been commented out to make testing easier.
 
@@ -36,15 +38,18 @@
 ;;   [x] )
 
 (defmethod tree minijava.ast.Block
-  [x] (Seq (map tree ($ (.statements x)))))
+  [x frame]
+  (Seq (map #(tree % frame) ($ (.statements x)))))
 
 (defmethod tree minijava.ast.BooleanLiteral
-  [x] (if (.value x) (Const 1) (Const 0)))
+  [x frame]
+  (if (.value x) (Const 1) (Const 0)))
 
 (defmethod tree minijava.ast.Call
-  [x] (Call (Name (.name x))
-            (cons (-> x .receiver tree unEx)
-                  (map (comp unEx tree) ($ (.rargs x))))))
+  [x frame]
+  (Call (Name (.name x))
+        (cons (-> x .receiver (tree frame) unEx)
+              (map (comp unEx #(tree % frame)) ($ (.rargs x))))))
 
 ;; (defmethod tree minijava.ast.ClassDecl
 ;;   [x] )
@@ -53,22 +58,25 @@
 ;;   [x] )
 
 (defmethod tree minijava.ast.If
-  [x] (let [t (label)
-            f (label)
-            d (label)]
-        (Seq [(-> x .tst tree (unCx (Name t) (Name f)))
-              (Label t)
-              (-> x .thn tree unNx)
-              (Jump d)
-              (Label f)
-              (-> x .els tree unNx)
-              (Label d)])))
+  [x frame]
+  (let [t (label)
+        f (label)
+        d (label)]
+    (Seq [(-> x .tst (tree frame) (unCx (Name t) (Name f)))
+          (Label t)
+          (-> x .thn (tree frame) unNx)
+          (Jump d)
+          (Label f)
+          (-> x .els (tree frame) unNx)
+          (Label d)])))
 
 (defmethod tree minijava.ast.IntegerLiteral
-  [x] (Const (.value x)))
+  [x frame]
+  (Const (.value x)))
 
 (defmethod tree minijava.ast.LessThan
-  [x] (binop :< x))
+  [x frame]
+  (binop :< x frame))
 
 ;; (defmethod tree minijava.ast.MainClass
 ;;   [x] )
@@ -77,51 +85,58 @@
 ;;   [x] )
 
 (defmethod tree minijava.ast.Minus
-  [x] (binop :- x))
+  [x frame]
+  (binop :- x frame))
 
 (defmethod tree minijava.ast.NewArray
-  [x] (Call (Name "newArray") [(unEx (.size x))]))
+  [x frame]
+  (Call (Name "newArray") [(-> x .size (tree frame) unEx)]))
 
 ;; FIXME: ugly, better solution?
 (defmethod tree minijava.ast.Not
-  [x] (let [t (label)
-            f (label)
-            d (label)
-            r (minijava.ir.temp.Temp.)]
-        (ExpSeq [(-> x .e tree (unCx (Name t) (Name f)))
-                 (Label t)
-                 (Move (Const 0) (Temp r))
-                 (Jump d)
-                 (Label f)
-                 (Move (Const 1) (Temp r))
-                 (Label d)]
-                (Temp r))))
+  [x frame]
+  (let [t (label)
+        f (label)
+        d (label)
+        r (minijava.ir.temp.Temp.)]
+    (ExpSeq [(-> x .e (tree frame) (unCx (Name t) (Name f)))
+             (Label t)
+             (Move (Const 0) (Temp r))
+             (Jump d)
+             (Label f)
+             (Move (Const 1) (Temp r))
+             (Label d)]
+            (Temp r))))
 
 (defmethod tree minijava.ast.Plus
-  [x] (binop :+ x))
+  [x frame]
+  (binop :+ x frame))
 
 (defmethod tree minijava.ast.Print
-  [x] (Call (Name "print") [(-> x .exp tree unEx)]))
+  [x frame]
+  (Call (Name "print") [(-> x .exp (tree frame) unEx)]))
 
 ;; (defmethod tree minijava.ast.This
 ;;   [x] )
 
 (defmethod tree minijava.ast.Times
-  [x] (binop :* x))
+  [x frame]
+  (binop :* x frame))
 
 ;; (defmethod tree minijava.ast.VarDecl
 ;;   [x] )
 
 (defmethod tree minijava.ast.While
-  [x] (let [t    (label)
-            test (label)
-            f    (label)]
-        (Seq [(Label test)
-              (-> x .tst tree (unCx (Name t) (Name f)))
-              (Label t)
-              (-> x .body tree unNx)
-              (Jump test)
-              (Label f)])))
+  [x frame]
+  (let [t    (label)
+        test (label)
+        f    (label)]
+    (Seq [(Label test)
+          (-> x .tst (tree frame) (unCx (Name t) (Name f)))
+          (Label t)
+          (-> x .body (tree frame) unNx)
+          (Jump test)
+          (Label f)])))
 
 ;; (defmethod tree minijava.sat.ArrayLookup
 ;;   [x] )

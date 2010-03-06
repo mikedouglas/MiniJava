@@ -4,7 +4,14 @@
 * Part Three
 ** TODO hook up the junit tests
 ** DONE tests for x86 frame                                            :mike:
-** DONE implement (create-x86frame) & etc                              :mike:
+** INPROGRESS implement (create-x86frame) & etc                        :mike:
+
+The current implementation is tied heavily to the Java classes,
+making it fairly ugly to use. Before we start depending heavily on
+its internals, I want to rewrite it using deftype/defprotocol.
+
+The InFrame/InReg types are fine, though.
+
 ** INPROGRESS basic structure of translator                            :mike:
 ** TODO equality of datatypes that depend on (label)
 
