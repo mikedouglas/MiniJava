@@ -8,6 +8,7 @@ public class BooleanLiteral extends Expression {
 
 	public BooleanLiteral(boolean value) {
 		super();
+		super.setType(BooleanType.instance);
 		this.value = value;
 	}
 

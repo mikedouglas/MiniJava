@@ -8,6 +8,7 @@ public class IntegerLiteral extends Expression {
 
 	public IntegerLiteral(int value) {
 		super();
+		super.setType(IntegerType.instance);
 		this.value = value;
 	}
 

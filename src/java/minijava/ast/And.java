@@ -9,6 +9,7 @@ public class And extends Expression {
 	
 	public And(Expression e1, Expression e2) {
 		super();
+		super.setType(BooleanType.instance);
 		this.e1 = e1;
 		this.e2 = e2;
 	}

@@ -8,6 +8,7 @@ public class NewArray extends Expression {
 
 	public NewArray(Expression size) {
 		super();
+		super.setType(IntArrayType.instance);
 		this.size = size;
 	}
 

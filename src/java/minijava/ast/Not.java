@@ -8,6 +8,7 @@ public class Not extends Expression {
 	
 	public Not(Expression e) {
 		super();
+		super.setType(BooleanType.instance);
 		this.e = e;
 	}
 

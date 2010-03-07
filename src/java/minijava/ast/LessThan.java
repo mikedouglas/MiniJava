@@ -9,6 +9,7 @@ public class LessThan extends Expression {
 	
 	public LessThan(Expression e1, Expression e2) {
 		super();
+		super.setType(BooleanType.instance);
 		this.e1 = e1;
 		this.e2 = e2;
 	}
