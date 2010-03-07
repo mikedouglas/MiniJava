@@ -102,15 +102,12 @@
   [x frame]
   (let [t (label)
         f (label)
-        d (label)
         r (minijava.ir.temp.Temp.)]
-    (ExpSeq [(-> x .e (tree frame) (unCx (Name t) (Name f)))
-             (Label t)
-             (Move (Const 0) (Temp r))
-             (Jump d)
+    (ExpSeq [(Move (Const 0) (Temp r))
+             (-> x .e (tree frame) (unCx (Name t) (Name f)))
              (Label f)
              (Move (Const 1) (Temp r))
-             (Label d)]
+             (Label t)]
             (Temp r))))
 
 (defmethod tree minijava.ast.Plus

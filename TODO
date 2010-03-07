@@ -4,7 +4,7 @@
 * Part Three
 ** TODO hook up the junit tests
 ** DONE tests for x86 frame                                            :mike:
-** INPROGRESS implement (create-x86frame) & etc                        :mike:
+** DONE implement (create-x86frame) & etc                              :mike:
 
 The current implementation is tied heavily to the Java classes,
 making it fairly ugly to use. Before we start depending heavily on

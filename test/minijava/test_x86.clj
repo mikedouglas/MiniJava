@@ -27,3 +27,11 @@
         locals  (for [_ (range 3)] (.allocLocal frame true))
         spacing (map :offset locals)]
     (is (= [-4, -8, -12] spacing) "Locals are properly spaced")))
+
+(deftest tests-location-of-fp-and-rv
+  (let [frame (new-x86 0 1)]
+    (is (= (InFrame 4) (rv frame)) "Return address correct")
+    (is (= (InFrame 8) (obj frame)) "Object address correct")
+    (is (= (InFrame 0) (fp frame)) "Frame pointer correct w/o alloc")
+    (allocLocal frame true)
+    (is (= (InFrame -4) (fp frame)) "Frame pointer correct w/ alloc")))
