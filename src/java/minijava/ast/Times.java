@@ -9,6 +9,7 @@ public class Times extends Expression {
 
 	public Times(Expression e1, Expression e2) {
 		super();
+		super.setType(IntegerType.instance);
 		this.e1 = e1;
 		this.e2 = e2;
 	}

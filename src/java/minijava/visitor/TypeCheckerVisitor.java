@@ -167,7 +167,7 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		if (type == null) {
 			reporter.undefinedId(idExp.name);
 		}
-		
+		idExp.setType(type);
 		return type;
 	}
 
@@ -220,7 +220,9 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 					
 					visit(exp.rands,method);
 					
-					return recMethod.getReturnType();
+					Type returnType =  recMethod.getReturnType();
+					exp.setType(returnType);
+					return returnType;
 				}
 			}
 		}
@@ -373,7 +375,9 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 		{
 			reporter.undefinedId(exp.typeName);
 		}
-		return new ObjectType(exp.typeName);
+		Type t = new ObjectType(exp.typeName);
+		exp.setType(t);
+		return t;
 	}
 	
 	/**
@@ -503,7 +507,9 @@ public class TypeCheckerVisitor extends ReflectionVisitor {
 	}
 	
 	public Type visit(This t, MethodEntry method) {
-		return new ObjectType(method.getParent().getClassName());
+		Type type= new ObjectType(method.getParent().getClassName());
+		t.setType(type);
+		return type;
 	}
 	
 	public Type visit(IntegerLiteral lit) {

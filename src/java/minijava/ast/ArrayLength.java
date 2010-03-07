@@ -8,6 +8,7 @@ public class ArrayLength extends Expression {
 	
 	public ArrayLength(Expression array) {
 		super();
+		super.setType(IntegerType.instance);
 		this.array = array;
 	}
 

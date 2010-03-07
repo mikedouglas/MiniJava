@@ -9,6 +9,7 @@ public class ArrayLookup extends Expression {
 	
 	public ArrayLookup(Expression array, Expression index) {
 		super();
+		super.setType(IntegerType.instance);//all arrays contain integers
 		this.array = array;
 		this.index = index;
 	}

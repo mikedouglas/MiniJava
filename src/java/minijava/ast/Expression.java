@@ -7,7 +7,7 @@ public abstract class Expression extends AST {
 	/**
 	 * The type of an expression is set by the type checking phase.
 	 */
-	private Type type;
+	public Type type;
 
 	public Type getType() {
 		Assert.assertNotNull("Was this AST typechecked?", type);
