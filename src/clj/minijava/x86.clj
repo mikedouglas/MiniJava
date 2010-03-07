@@ -35,8 +35,8 @@
       (swap! (:locals this) conj loc)
       loc))
   (obj [] (first (:formals this)))
-  (fp [] (deref (:fp this)))
-  (rv [] (merge-with + (obj this) [:offset 4]))
+  (fp [] (InFrame (deref (:fp this))))
+  (rv [] (InFrame (- (:offset (obj this)) 4)))
   (formals [] (:formals this))
   (word-size [] (:word this)))
 
