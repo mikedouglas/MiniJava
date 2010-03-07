@@ -63,3 +63,11 @@
          (tree (parse-stm "while (3 < 4) {}") empty-frame))
       "While statements convert correctly."))
 
+(deftest tests-normal-call
+  (let [frame (new-x86 0 ["obj" "a"])
+        call  (tree (parse-exp "a.test(3)") frame)]
+    (is (= (Call (Name "test")
+                 [(Mem (BinaryOp :+ (Temp :bp) (Const 12)))
+                  (Const 3)])
+           call)
+        "Method calls convert correctly.")))

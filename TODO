@@ -12,15 +12,20 @@ its internals, I want to rewrite it using deftype/defprotocol.
 
 The InFrame/InReg types are fine, though.
 
-** INPROGRESS basic structure of translator                            :mike:
+** DONE basic structure of translator                                  :mike:
 ** TODO equality of datatypes that depend on (label)
 
 I had to neuter the equality of any datatype that depends on (label),
 otherwise we can't test them, because every (label) is unique. We
 need a special binding that will let us override the initial (label).
 
-** TODO tests for translate
+** INPROGRESS tests for translate
 ** INPROGRESS fix the interpreter                                     :asumu:
-** TODO implement minijava.translate.implementation
+** INPROGRESS implement minijava.translate.implementation
+** TODO attach types to every variable
+
+When we call a method on an object, I need to be able to calculate
+the address of the function at compile time, so I need its type.
+
 ** Optional
 *** TODO reimplement the minijava.ir.canon algorithms

@@ -28,14 +28,16 @@
 
 ;;; NOTE: stubs have been commented out to make testing easier.
 
-;; (defmethod tree minijava.ast.ArrayAssign
-;;   [x] )
+(defmethod tree minijava.ast.ArrayAssign
+  [x frame] (Move (-> x .value tree unEx)
+            (Mem (BinaryOp :+ (exp (lookup frame (.name x)))
+                           (-> x .index tree unEx)))))
 
-;; (defmethod tree minijava.ast.ArrayLength
-;;   [x] (Mem (BinaryOp :- (Temp ) (Const 1))))
+(defmethod tree minijava.ast.ArrayLength
+  [x frame] (Mem (BinaryOp :- (tree (.array x) frame) (Const 1))))
 
-;; (defmethod tree minijava.ast.Assign
-;;   [x] )
+(defmethod tree minijava.ast.Assign
+  [x frame] (Move (-> x .value tree unEx) (lookup frame (.name x))))
 
 (defmethod tree minijava.ast.Block
   [x frame]
@@ -48,14 +50,14 @@
 (defmethod tree minijava.ast.Call
   [x frame]
   (Call (Name (.name x))
-        (cons (-> x .receiver (tree frame) unEx)
-              (map (comp unEx #(tree % frame)) ($ (.rargs x))))))
+        (map (comp unEx #(tree % frame))
+             (cons (.receiver x) ($ (.rands x))))))
 
 ;; (defmethod tree minijava.ast.ClassDecl
-;;   [x] )
+;;   [x frame] )
 
-;; (defmethod tree minijava.ast.IdentifierExp
-;;   [x] )
+(defmethod tree minijava.ast.IdentifierExp
+  [x frame] (exp (lookup frame (.name x))))
 
 (defmethod tree minijava.ast.If
   [x frame]
@@ -79,10 +81,10 @@
   (binop :< x frame))
 
 ;; (defmethod tree minijava.ast.MainClass
-;;   [x] )
+;;   [x frame] )
 
 ;; (defmethod tree minijava.ast.MethodDecl
-;;   [x] )
+;;   [x frame] )
 
 (defmethod tree minijava.ast.Minus
   [x frame]
@@ -114,14 +116,16 @@
   (Call (Name "print") [(-> x .exp (tree frame) unEx)]))
 
 (defmethod tree minijava.ast.This
-  [x frame] (exp (obj frame)))
+  [x frame]
+  (exp (obj frame)))
 
 (defmethod tree minijava.ast.Times
   [x frame]
   (binop :* x frame))
 
-;; (defmethod tree minijava.ast.VarDecl
-;;   [x] )
+(defmethod tree minijava.ast.VarDecl
+  [x frame]
+  (allocLocal frame (.name x) true))
 
 (defmethod tree minijava.ast.While
   [x frame]
@@ -135,5 +139,6 @@
           (Jump test)
           (Label f)])))
 
-;; (defmethod tree minijava.sat.ArrayLookup
-;;   [x] )
+(defmethod tree minijava.ast.ArrayLookup
+  [x frame]
+  (Mem (BinaryOp :+ (exp (lookup frame (.name x))) (-> x .index tree unEx))))
