@@ -17,8 +17,8 @@
   (unNx [] (Statement this))
   (unCx [t f]
     (case (:op this)
-      :<  (Conditional :<  (:exp1 this) (:exp2 this) t f)
-      :&& (Conditional :&& (:exp1 this) (:exp2 this) t f)
+      :<  (Conditional :<  exp1 exp2 t f)
+      :&& (Conditional :&& exp1 exp2 t f)
       (Conditional :!= (unEx this) 0 t f))))
 
 (deftype Call [lbl args]

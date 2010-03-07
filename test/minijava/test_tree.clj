@@ -2,7 +2,9 @@
   (:use clojure.test
         (minijava ast label ir tree utility x86)))
 
-(defn x86 [] (create-x86frame (label) []))
+
+(def empty-frame (new-x86 0 ["obj"]))
+
 
 (deftest tests-binop-conv
   (let [plus   (parse-exp "5 + 5")

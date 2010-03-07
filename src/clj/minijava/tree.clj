@@ -119,7 +119,7 @@
   (Call (Name "print") [(-> x .exp (tree frame) unEx)]))
 
 (defmethod tree minijava.ast.This
-  [x frame] (exp (obj frame) (fp frame)))
+  [x frame] (exp (obj frame)))
 
 
 (defmethod tree minijava.ast.Times
