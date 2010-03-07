@@ -125,7 +125,13 @@
 
 (defmethod tree minijava.ast.VarDecl
   [x frame]
-  (allocLocal frame (.name x) true))
+  (cond 
+   (=  (.kind x) (.LOCAL minijava.ast.VarDecl$Kind))    
+   (Statement  (allocLocal frame (.name x)  false))
+   (=  (.kind x)  (.FIELD minijava.ast.VarDecl$Kind))    
+   (Statement nil) ;;we need to support classes before this can be figured out.
+   (=  (.kind x) (.FORMAL minijava.ast.VarDecl$Kind))   
+   (Statement  nil))) ;;formals are allocated at frame creation (call) so this case does nothing (?)
 
 (defmethod tree minijava.ast.While
   [x frame]
@@ -141,4 +147,6 @@
 
 (defmethod tree minijava.ast.ArrayLookup
   [x frame]
-  (Mem (BinaryOp :+ (exp (lookup frame (.name x))) (-> x .index tree unEx))))
+  (Mem (BinaryOp :+ (exp (lookup frame (.name x)))
+                 (BinaryOp :* (Const 4)
+                           (-> x .index tree unEx)))))
