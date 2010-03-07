@@ -1,5 +1,4 @@
 (ns minijava.x86
-  ;;(:import (minijava.ir.frame Access Frame))
   (:use clojure.contrib.str-utils
         minijava.ir))
 
