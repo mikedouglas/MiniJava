@@ -82,8 +82,10 @@
   [x frame]
   (binop :< x frame))
 
-;; (defmethod tree minijava.ast.MainClass
-;;   [x frame] )
+ (defmethod tree minijava.ast.MainClass
+   [x frame] 
+   (tree (.statement x) frame)
+   )
 
 ;; (defmethod tree minijava.ast.MethodDecl
 ;;   [x frame] )
