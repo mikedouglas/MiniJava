@@ -1,6 +1,6 @@
 (ns minijava.tree
   "Converting the AST to IR as directly as possible."
-  (:use (minijava ir exp label ast)))
+  (:use (minijava ir exp label ast x86)))
 
 (defmulti tree (fn [x frame] (type x)))
 
@@ -121,9 +121,9 @@
   [x frame]
   (Call (Name "print") [(-> x .exp (tree frame) unEx)]))
 
- (defmethod tree minijava.ast.This
-   [x frame]
-   (Temp "This") ) ;;Is this the correct behaviour? 
+(defmethod tree minijava.ast.This
+  [x frame] (exp (obj frame) (fp frame)))
+
 
 (defmethod tree minijava.ast.Times
   [x frame]
