@@ -60,7 +60,8 @@
 
  (defmethod tree minijava.ast.IdentifierExp
    [x frame]
-   (Temp (.name x)) )
+   (exp ( lookup frame (.name x) ))
+  )
 
 (defmethod tree minijava.ast.If
   [x frame]
@@ -127,7 +128,15 @@
   (binop :* x frame))
 
  (defmethod tree minijava.ast.VarDecl
-   [x] )
+   [x frame]
+    (cond 
+    (=  (.kind x) (.LOCAL minijava.ast.VarDecl$Kind))    
+    		(Statement  (allocLocal frame (.name x)  false))
+    (=  (.kind x)  (.FIELD minijava.ast.VarDecl$Kind))    
+    		(Statement nil) ;;we need to support classes before this can be figured out.
+    (=  (.kind x) (.FORMAL minijava.ast.VarDecl$Kind))   
+    		(Statement  nil) ;;formals are allocated at frame creation (call) so this case does nothing (?)
+    ))
 
 (defmethod tree minijava.ast.While
   [x frame]
@@ -141,7 +150,7 @@
           (Jump test)
           (Label f)])))
 
- (defmethod tree minijava.sat.ArrayLookup
+ (defmethod tree minijava.ast.ArrayLookup
    [x frame]
    (Mem (binop :+ (tree (.array x) frame)) (binop :* 4 (tree (.index x) frame) ) )
 )
