@@ -45,7 +45,31 @@
      (is (= 0 (eval-prog prog)))
      (is (= (build-label-map prog (hash-map))
             (hash-map t (list (ir/Temp tmp)))))))
- 
+
+(deftest test-cond
+  (let [t (label)
+        f (label)
+        d (label)
+        tmp (minijava.ir.temp.Temp.)
+        prog1 (list (ir/Conditional := (ir/Const 10) (ir/Const 10)
+                       (ir/Name t) (ir/Name f))
+                   (ir/Label t)
+                   (ir/Move (ir/Const 1) (ir/Temp tmp))
+                   (ir/Jump d)
+                   (ir/Label f)
+                   (ir/Move (ir/Const 2) (ir/Temp tmp))
+                   (ir/Label d)
+                   (ir/Temp tmp))
+        prog2 (list (ir/Conditional :!= (ir/Const 10) (ir/Const 10)
+                       (ir/Name t) (ir/Name f))
+                   (ir/Label t)
+                   (ir/Move (ir/Const 1) (ir/Temp tmp))
+                   (ir/Label f)
+                   (ir/Move (ir/Const 2) (ir/Temp tmp))
+                   (ir/Temp tmp))]
+    (is (= 1 (eval-prog prog1)))
+    (is (= 2 (eval-prog prog2)))))
+
 (deftest test-while
   (let [t (label)
         f (label)
@@ -54,7 +78,7 @@
         prog (list (ir/Move (ir/Const 0) (ir/Temp tmp))
                    (ir/Label s)
                    (ir/Conditional :< (ir/Temp tmp) (ir/Const 10)
-                       (ir/Name f) (ir/Name t))
+                       (ir/Name t) (ir/Name f))
                    (ir/Label t)
                    (ir/Move (ir/BinaryOp :+ (ir/Temp tmp) (ir/Const 1))
                             (ir/Temp tmp))
@@ -62,7 +86,7 @@
                    (ir/Label f)
                    (ir/Temp tmp))]
     (is (= 10 (eval-prog prog)))
-    (is (= (build-label-map prog (hash-map))
+    (is (= (build-label-map prog {})
            (hash-map s
              (list (ir/Conditional :< (ir/Temp tmp) (ir/Const 10)
                        (ir/Name t) (ir/Name f))
@@ -72,7 +96,7 @@
                    (ir/Jump s)
                    (ir/Label f)
                    (ir/Temp tmp))
-             t
+             t 
              (list (ir/Move (ir/BinaryOp :+ (ir/Temp tmp) (ir/Const 1))
                             (ir/Temp tmp))
                    (ir/Jump s)
@@ -80,7 +104,7 @@
                    (ir/Temp tmp))
              f
              (list (ir/Temp tmp)))))))
- 
+
 (comment Sanity checks)
 (deftest test-label
   (let [t (label)
