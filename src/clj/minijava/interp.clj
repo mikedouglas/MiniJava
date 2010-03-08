@@ -15,6 +15,10 @@
 (defn read-label [env key]
   (get-in @env [:labels key]))
 
+(comment eval-ir evaluates the linearized IR tree. Only types that
+         appear in the final tree have cases in the multimethod.
+         e.g. ESeq and Seq are gone after linearization)
+
 (comment dispatch on type of first arg)
 (defmulti eval-ir (fn [x y] (type x)))
 
@@ -78,11 +82,10 @@
 (defmethod eval-ir :minijava.ir/Jump [exp env]
   (eval-ir (read-label env (:lbl exp)) env))
 
-(comment Labels and names don't do anything after the label 
-         table is built)
-
 (defmethod eval-ir :minijava.ir/Label [exp env]
-  nil)
+  (comment Labels and names don't do anything after the label
+           table is built. These should never be called since
+           eval-ir unpacks these directly.))
 
 (defmethod eval-ir :minijava.ir/Name [exp env]
   nil)

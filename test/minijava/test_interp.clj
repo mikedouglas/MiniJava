@@ -46,6 +46,30 @@
      (is (= (build-label-map prog (hash-map))
             (hash-map t (list (ir/Temp tmp)))))))
 
+(deftest test-cond
+  (let [t (label)
+        f (label)
+        d (label)
+        tmp (minijava.ir.temp.Temp.)
+        prog1 (list (ir/Conditional := (ir/Const 10) (ir/Const 10)
+                       (ir/Name t) (ir/Name f))
+                   (ir/Label t)
+                   (ir/Move (ir/Const 1) (ir/Temp tmp))
+                   (ir/Jump d)
+                   (ir/Label f)
+                   (ir/Move (ir/Const 2) (ir/Temp tmp))
+                   (ir/Label d)
+                   (ir/Temp tmp))
+        prog2 (list (ir/Conditional :!= (ir/Const 10) (ir/Const 10)
+                       (ir/Name t) (ir/Name f))
+                   (ir/Label t)
+                   (ir/Move (ir/Const 1) (ir/Temp tmp))
+                   (ir/Label f)
+                   (ir/Move (ir/Const 2) (ir/Temp tmp))
+                   (ir/Temp tmp))]
+    (is (= 1 (eval-prog prog1)))
+    (is (= 2 (eval-prog prog2)))))
+
 (deftest test-while
   (let [t (label)
         f (label)
