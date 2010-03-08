@@ -8,18 +8,19 @@
   (atom (struct env (hash-map) (hash-map) (hash-map))))
 
 (defn write-temp [env key val]
-  (assoc (:temps env) key val))
+  (swap! env (fn [e k v] (assoc-in e [:temps k] v)) key val))
 (defn read-temp [env key]
-  (get (:temps env) key))
+  (get-in @env [:temps key]))
 (defn read-label [env key]
-  (get (:labels env) key))
+  (get-in @env [:labels key]))
 
 (comment dispatch on type of first arg)
 (defmulti eval-ir (fn [x y] (type x)))
 
 (comment use lookahead to see if we jump or evaluate normally)
 (defmethod eval-ir clojure.lang.PersistentList [lst env]
-  (cond (empty? lst) nil ;; all done
+  (cond (empty? (rest lst)) ;; since dispatching on empty is annoying
+          (eval-ir (first lst) env)
         (or (isa? (first lst) :minijava.ir/Jump)
             (isa? (first lst) :minijara.ir/Conditional))
           (eval-ir (first lst) env)
@@ -56,12 +57,12 @@
 ;(defmethod eval-ir ::minijava.ir/Seq [exp])
 
 (defmethod eval-ir ::minijava.ir/Move [exp env]
-  (let [val (eval-ir (::src exp))
-        dst (::dst exp)]
-    (swap! env write-temp dst val)))
+  (let [val (eval-ir (:src exp) env)
+        dst (:reg (:dst exp))]
+    (write-temp env dst val)))
 
 (defmethod eval-ir ::minijava.ir/Jump [exp env]
-  (eval-ir (read-label (:lbl exp) env) env))
+  (eval-ir (read-label env (:lbl exp)) env))
 
 (comment Labels don't do anything after the label table is
          built)
@@ -75,21 +76,19 @@
   nil)
 
 (defmethod eval-ir ::minijava.ir/Temp [exp env]
-  (read-temp @env (::reg exp)))
+  (read-temp env (:reg exp)))
 
 (comment Build map of label code - should be efficient by persistence
          of list data structure)
 (defn build-label-map [stms map]
   (cond (empty? stms) map
         (= (type (first stms)) ::minijava.ir/Label)
-         (build-label-map (rest stms)
-                          (assoc map (:lbl Label) (rest stms)))
+          (build-label-map (rest stms)
+                           (assoc map (:lbl (first stms)) (rest stms)))
         true (build-label-map (rest stms) map)))
 
 (comment top-level eval for a sequence of statements)
 (defn eval-prog [stms]
-  (let [labels (build-label-map stms (hash-map))
-        env empty-env]
-    (do (swap! env (fn [env ls] (assoc env :labels ls)) labels)
-        (eval-ir stms env))))
-
+  (let [labels (build-label-map stms (hash-map))]
+    (eval-ir stms 
+             (atom (struct env (hash-map) (hash-map) labels)))))

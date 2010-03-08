@@ -22,29 +22,35 @@
 
 (deftest test-temp
   (let [tmp (minijava.ir.temp.Temp.)
-        prog (list ;(ir/Move (ir/Const 5) (ir/Temp tmp))
+        prog (list (ir/Move (ir/Const 5) (ir/Temp tmp))
                    (ir/Temp tmp))]
     (is (= 5 (eval-prog prog)))))
 
-(deftest test-jump
-   (let [t (label)
-         tmp (minijava.ir.temp.Temp.)
-         prog (list ;(ir/Move (ir/Const 0) (ir/Temp tmp))
-                    (ir/Jump t)
-                    ;(ir/Move (ir/Const 5) (ir/Temp tmp))
-                    (ir/Label t)
-                    (ir/Temp tmp))]
-     (is (= 5 (eval-prog prog)))))
-
 (deftest test-labels
    (let [t (label)
-         prog (list (ir/Label t)
+         prog (list (ir/Const 7)
+                    (ir/Label t)
                     (ir/Const 5))]
      (is (= (build-label-map prog (hash-map))
             (hash-map t (list (ir/Const 5)))))))
 
+(deftest test-jump
+   (let [t (label)
+         tmp (minijava.ir.temp.Temp.)
+         prog (list (ir/Move (ir/Const 0) (ir/Temp tmp))
+                    (ir/Jump t)
+                    (ir/Move (ir/Const 5) (ir/Temp tmp))
+                    (ir/Label t)
+                    (ir/Temp tmp))]
+     (is (= 5 (eval-prog prog)))
+     (is (= (build-label-map prog (hash-map))
+            (hash-map t (list (ir/Temp tmp)))))))
+
+(comment Sanity checks)
 (deftest test-label
   (let [t (label)
         prog (list (ir/Label t))]
     (is (= (ir/Label t)
-           (first prog)))))
+           (first prog)))
+    (is (= (hash-map t 5)
+           (hash-map (:lbl (first prog)) 5)))))
