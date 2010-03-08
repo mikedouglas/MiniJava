@@ -49,16 +49,16 @@
 (deftest test-cond
   (let [t (label)
         f (label)
-        e (label)
+        d (label)
         tmp (minijava.ir.temp.Temp.)
         prog1 (list (ir/Conditional := (ir/Const 10) (ir/Const 10)
                        (ir/Name t) (ir/Name f))
                    (ir/Label t)
                    (ir/Move (ir/Const 1) (ir/Temp tmp))
-                   (ir/Jump e)
+                   (ir/Jump d)
                    (ir/Label f)
                    (ir/Move (ir/Const 2) (ir/Temp tmp))
-                   (ir/Label e)
+                   (ir/Label d)
                    (ir/Temp tmp))
         prog2 (list (ir/Conditional :!= (ir/Const 10) (ir/Const 10)
                        (ir/Name t) (ir/Name f))
@@ -86,7 +86,7 @@
                    (ir/Label f)
                    (ir/Temp tmp))]
     (is (= 10 (eval-prog prog)))
-    (is (= (build-label-map prog (hash-map))
+    (is (= (build-label-map prog {})
            (hash-map s
              (list (ir/Conditional :< (ir/Temp tmp) (ir/Const 10)
                        (ir/Name t) (ir/Name f))
