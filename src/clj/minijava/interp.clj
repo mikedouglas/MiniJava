@@ -2,18 +2,30 @@
   (:use (minijava ir))
   (:import (minijava.ir.temp.label)))
 
-(defstruct env :temps :mem)
+(defstruct env :temps :mem :labels)
 
 (def empty-env 
-  (atom (struct env (hash-map) (hash-map))))
+  (atom (struct env (hash-map) (hash-map) (hash-map))))
 
 (defn write-temp [env key val]
   (assoc (:temps env) key val))
 (defn read-temp [env key]
   (get (:temps env) key))
+(defn read-label [env key]
+  (get (:labels env) key))
 
-;; dispatch on type of first arg
+(comment dispatch on type of first arg)
 (defmulti eval-ir (fn [x y] (type x)))
+
+(comment use lookahead to see if we jump or evaluate normally)
+(defmethod eval-ir clojure.lang.PersistentList [lst env]
+  (cond (empty? lst) nil ;; all done
+        (or (isa? (first lst) :minijava.ir/Jump)
+            (isa? (first lst) :minijara.ir/Conditional))
+          (eval-ir (first lst) env)
+        true 
+          (do (eval-ir (first lst) env)
+              (eval-ir (rest lst) env))))
 
 (defmethod eval-ir :minijava.ir/BinaryOp [exp env]
   (let [e1 (eval-ir (:exp1 exp) env)
@@ -48,12 +60,13 @@
         dst (::dst exp)]
     (swap! env write-temp dst val)))
 
-;; TODO
 (defmethod eval-ir ::minijava.ir/Jump [exp env]
-  (:lbl exp))
+  (eval-ir (read-label (:lbl exp) env) env))
 
+(comment Labels don't do anything after the label table is
+         built)
 (defmethod eval-ir ::minijava.ir/Label [exp env]
-  (:lbl exp))
+  nil)
 
 (defmethod eval-ir ::minijava.ir/Mem [exp env]
   nil)
@@ -64,15 +77,19 @@
 (defmethod eval-ir ::minijava.ir/Temp [exp env]
   (read-temp @env (::reg exp)))
 
-;; top-level eval for a sequence of statements
-(defn eval-prog [lst env]
-  (if (empty? lst)
-      (read-temp @env "a") ;; temporary hack
-      (do (eval-ir (first lst) env)
-          (eval-prog (rest lst) env))))
+(comment Build map of label code - should be efficient by persistence
+         of list data structure)
+(defn build-label-map [stms map]
+  (cond (empty? stms) map
+        (= (type (first stms)) ::minijava.ir/Label)
+         (build-label-map (rest stms)
+                          (assoc map (:lbl Label) (rest stms)))
+        true (build-label-map (rest stms) map)))
 
-;(defmethod eval-jump ::minijava.ir/Jump [jmp stms env]
-;  (cond (empty? stms) nil
-;        (.equals (:lbl jmp) (first stms))
-;        (rest stms)
-;(defmethod eval-jump :default [exp stms env])
+(comment top-level eval for a sequence of statements)
+(defn eval-prog [stms]
+  (let [labels (build-label-map stms (hash-map))
+        env empty-env]
+    (do (swap! env (fn [env ls] (assoc env :labels ls)) labels)
+        (eval-ir stms env))))
+
