@@ -62,7 +62,7 @@
                    (ir/Label f)
                    (ir/Temp tmp))]
     (is (= 10 (eval-prog prog)))
-    (is (= (build-label-map prog (hash-map))
+    (is (= (build-label-map prog {})
            (hash-map s
              (list (ir/Conditional :< (ir/Temp tmp) (ir/Const 10)
                        (ir/Name t) (ir/Name f))
