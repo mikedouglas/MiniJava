@@ -42,9 +42,44 @@
                     (ir/Move (ir/Const 5) (ir/Temp tmp))
                     (ir/Label t)
                     (ir/Temp tmp))]
-     (is (= 5 (eval-prog prog)))
+     (is (= 0 (eval-prog prog)))
      (is (= (build-label-map prog (hash-map))
             (hash-map t (list (ir/Temp tmp)))))))
+
+(deftest test-while
+  (let [t (label)
+        f (label)
+        s (label)
+        tmp (minijava.ir.temp.Temp.)
+        prog (list (ir/Move (ir/Const 0) (ir/Temp tmp))
+                   (ir/Label s)
+                   (ir/Conditional :< (ir/Temp tmp) (ir/Const 10)
+                       (ir/Name t) (ir/Name f))
+                   (ir/Label t)
+                   (ir/Move (ir/BinaryOp :+ (ir/Temp tmp) (ir/Const 1))
+                            (ir/Temp tmp))
+                   (ir/Jump s)
+                   (ir/Label f)
+                   (ir/Temp tmp))]
+    (is (= 10 (eval-prog prog)))
+    (is (= (build-label-map prog (hash-map))
+           (hash-map s
+             (list (ir/Conditional :< (ir/Temp tmp) (ir/Const 10)
+                       (ir/Name t) (ir/Name f))
+                   (ir/Label t)
+                   (ir/Move (ir/BinaryOp :+ (ir/Temp tmp) (ir/Const 1))
+                            (ir/Temp tmp))
+                   (ir/Jump s)
+                   (ir/Label f)
+                   (ir/Temp tmp))
+             t 
+             (list (ir/Move (ir/BinaryOp :+ (ir/Temp tmp) (ir/Const 1))
+                            (ir/Temp tmp))
+                   (ir/Jump s)
+                   (ir/Label f)
+                   (ir/Temp tmp))
+             f
+             (list (ir/Temp tmp)))))))
 
 (comment Sanity checks)
 (deftest test-label

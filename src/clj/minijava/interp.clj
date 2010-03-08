@@ -17,12 +17,16 @@
 (comment dispatch on type of first arg)
 (defmulti eval-ir (fn [x y] (type x)))
 
+(comment this gets called if the program jumps to the very end)
+(defmethod eval-ir clojure.lang.PersistentList$EmptyList [lst env]
+  nil)
+
 (comment use lookahead to see if we jump or evaluate normally)
 (defmethod eval-ir clojure.lang.PersistentList [lst env]
-  (cond (empty? (rest lst)) ;; since dispatching on empty is annoying
+  (cond (or (= (type (first lst)) :minijava.ir/Jump)
+            (= (type (first lst)) :minijara.ir/Conditional))
           (eval-ir (first lst) env)
-        (or (isa? (first lst) :minijava.ir/Jump)
-            (isa? (first lst) :minijara.ir/Conditional))
+        (empty? (rest lst))
           (eval-ir (first lst) env)
         true 
           (do (eval-ir (first lst) env)
@@ -41,11 +45,20 @@
 
 (defmethod eval-ir :minijava.ir/Conditional [exp env]
   (let [e1 (eval-ir (:exp1 exp) env)
-        e2 (eval-ir (:exp2 exp) env)]
+        e2 (eval-ir (:exp2 exp) env)
+        lt (read-label env (:lbl (:t exp)))
+        lf (read-label env (:lbl (:f exp)))]
     (case (:op exp)
-          :<  (if (< e1 e2) 1 0)
-          :!= (if (not (= e1 e2)) 1 0)
-          :=  (if (= e1 e2) 1 0))))
+          :<  (if (< e1 e2) 
+                  (eval-ir lt env) 
+                  (eval-ir lf env))
+          :!= (if (not (= e1 e2))
+                  (eval-ir lt env) 
+                  (eval-ir lf env))
+          :=  (if (= e1 e2)
+                  (eval-ir lt env) 
+                  (eval-ir lf env)))))
+          
 
 ; Canonicalization removes eseqs and also seqs
 ;
@@ -64,15 +77,14 @@
 (defmethod eval-ir ::minijava.ir/Jump [exp env]
   (eval-ir (read-label env (:lbl exp)) env))
 
-(comment Labels don't do anything after the label table is
-         built)
+(comment Labels and names don't do anything after the label 
+         table is built)
 (defmethod eval-ir ::minijava.ir/Label [exp env]
+  nil)
+(defmethod eval-ir ::minijava.ir/Name [exp env]
   nil)
 
 (defmethod eval-ir ::minijava.ir/Mem [exp env]
-  nil)
-
-(defmethod eval-ir ::minijava.ir/Name [exp env]
   nil)
 
 (defmethod eval-ir ::minijava.ir/Temp [exp env]
