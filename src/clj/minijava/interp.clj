@@ -101,9 +101,9 @@
 (defn build-label-map [stms map]
   (cond (empty? stms) map
         (= (type (first stms)) :minijava.ir/Label)
-          (build-label-map (rest stms)
-                           (assoc map (:lbl (first stms)) (rest stms)))
-        true (build-label-map (rest stms) map)))
+          (recur (rest stms)
+                 (assoc map (:lbl (first stms)) (rest stms)))
+        true (recur (rest stms) map)))
 
 ;; top-level eval for a sequence of statements
 (defn eval-prog [stms]
