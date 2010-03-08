@@ -28,7 +28,7 @@
 (comment use lookahead to see if we jump or evaluate normally)
 (defmethod eval-ir clojure.lang.PersistentList [lst env]
   (cond (or (= (type (first lst)) :minijava.ir/Jump)
-            (= (type (first lst)) :minijara.ir/Conditional))
+            (= (type (first lst)) :minijava.ir/Conditional))
           (eval-ir (first lst) env)
         (empty? (rest lst))
           (eval-ir (first lst) env)
@@ -62,7 +62,6 @@
           :=  (if (= e1 e2)
                   (eval-ir lt env) 
                   (eval-ir lf env)))))
-          
 
 (defmethod eval-ir ::minijava.ir/Move [exp env]
   (let [val (eval-ir (:src exp) env)
