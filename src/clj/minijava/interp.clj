@@ -4,10 +4,10 @@
   (:import (minijava.ir.temp.label)))
  
 (defstruct env :temps :mem :labels)
- 
-(def empty-env
-  (atom (struct env (hash-map) (hash-map) (hash-map))))
- 
+
+(def empty-env 
+  (atom (struct env {} {} {})))
+
 (defn write-temp [env key val]
   (swap! env (fn [e k v] (assoc-in e [:temps k] v)) key val))
 (defn read-temp [env key]
@@ -15,18 +15,18 @@
 (defn read-label [env key]
   (get-in @env [:labels key]))
 
-(comment eval-ir evaluates the linearized IR tree. Only types that
-         appear in the final tree have cases in the multimethod.
-         e.g. ESeq and Seq are gone after linearization)
+;; eval-ir evaluates the linearized IR tree. Only types that
+;; appear in the final tree have cases in the multimethod.
+;; e.g. ESeq and Seq are gone after linearization
 
-(comment dispatch on type of first arg)
+;; dispatch on type of first arg
 (defmulti eval-ir (fn [x y] (type x)))
 
-(comment this gets called if the program jumps to the very end)
+;; this gets called if the program jumps to the very end
 (defmethod eval-ir clojure.lang.PersistentList$EmptyList [lst env]
   nil)
 
-(comment use lookahead to see if we jump or evaluate normally)
+;; use lookahead to see if we jump or evaluate normally
 (defmethod eval-ir clojure.lang.PersistentList [lst env]
   (cond (or (= (type (first lst)) :minijava.ir/Jump)
             (= (type (first lst)) :minijava.ir/Conditional))
@@ -82,10 +82,11 @@
 (defmethod eval-ir :minijava.ir/Jump [exp env]
   (eval-ir (read-label env (:lbl exp)) env))
 
+;; Labels and names don't do anything after the label
+;; table is built. These should never be called since
+;; eval-ir unpacks these directly.
 (defmethod eval-ir :minijava.ir/Label [exp env]
-  (comment Labels and names don't do anything after the label
-           table is built. These should never be called since
-           eval-ir unpacks these directly.))
+  nil)
 
 (defmethod eval-ir :minijava.ir/Name [exp env]
   nil)
@@ -95,18 +96,17 @@
 
 (defmethod eval-ir :minijava.ir/Temp [exp env]
 
-  (read-temp env (:reg exp)))
- 
-(comment Build map of label code - should be efficient by persistence
-         of list data structure)
+
+;; Build map of label code - should be efficient by persistence
+;; of list data structure
 (defn build-label-map [stms map]
   (cond (empty? stms) map
-        (= (type (first stms)) ::minijava.ir/Label)
+        (= (type (first stms)) :minijava.ir/Label)
           (build-label-map (rest stms)
                            (assoc map (:lbl (first stms)) (rest stms)))
         true (build-label-map (rest stms) map)))
- 
-(comment top-level eval for a sequence of statements)
+
+;; top-level eval for a sequence of statements
 (defn eval-prog [stms]
   (let [labels (build-label-map stms (hash-map))]
     (eval-ir stms

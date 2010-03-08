@@ -2,7 +2,6 @@
 #+TODO: TODO | INPROGRESS | DONE
 
 * Part Three
-** TODO hook up the junit tests
 ** DONE tests for x86 frame                                            :mike:
 ** DONE implement (create-x86frame) & etc                              :mike:
 
@@ -22,7 +21,7 @@ need a special binding that will let us override the initial (label).
 ** INPROGRESS tests for translate
 ** INPROGRESS fix the interpreter                                     :asumu:
 ** INPROGRESS implement minijava.translate.implementation
-** TODO attach types to every variable
+** DONE attach types to every variable                                  :sam:
 
 When we call a method on an object, I need to be able to calculate
 the address of the function at compile time, so I need its type.

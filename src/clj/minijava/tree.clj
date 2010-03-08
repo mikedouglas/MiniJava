@@ -26,19 +26,17 @@
              (Label done)]
             (Temp ret))))
 
-;;; NOTE: stubs have been commented out to make testing easier.
-
 (defmethod tree minijava.ast.ArrayAssign
-  [x frame] (Move (-> x .value tree unEx)
+  [x frame] (Move (-> x .value (tree frame) unEx)
             (Mem (BinaryOp :+ (exp (lookup frame (.name x)))
-                           (-> x .index tree unEx)))))
+                           (-> x .index (tree frame) unEx)))))
 
 (defmethod tree minijava.ast.ArrayLength
   [x frame] (Mem (BinaryOp :- (tree (.array x) frame) (Const 1))))
 
 
 (defmethod tree minijava.ast.Assign
-  [x frame] (Move (-> x .value tree unEx) (lookup frame (.name x))))
+  [x frame] (Move (-> x .value (tree frame) unEx) (lookup frame (.name x))))
 
 
 (defmethod tree minijava.ast.Block
@@ -55,8 +53,12 @@
         (map (comp unEx #(tree % frame))
              (cons (.receiver x) ($ (.rands x))))))
 
-;; (defmethod tree minijava.ast.ClassDecl
-;;   [x frame] )
+(defmethod tree minijava.ast.ClassDecl
+  [x frame]
+  (into {} (for [i ($ (.methods x))]
+             (let [frame (new-x86 0 (map #(. % name) ($ (.vars i))))]
+               [(str (.name x) "_" (.name i))
+                (-> i .statements $ first (tree frame))]))))
 
 (defmethod tree minijava.ast.IdentifierExp
   [x frame] (exp (lookup frame (.name x))))
@@ -82,13 +84,14 @@
   [x frame]
   (binop :< x frame))
 
- (defmethod tree minijava.ast.MainClass
-   [x frame] 
-   (tree (.statement x) frame)
-   )
+(defmethod tree minijava.ast.MainClass
+  [x frame]
+  {"main" (tree (.statement x) (new-x86 0 ["obj"]))})
 
+
+;; UNUSED
 ;; (defmethod tree minijava.ast.MethodDecl
-;;   [x frame] )
+;;   [x frame] nil)
 
 (defmethod tree minijava.ast.Minus
   [x frame]
@@ -98,7 +101,12 @@
   [x frame]
   (Call (Name "newArray") [(-> x .size (tree frame) unEx)]))
 
-;; FIXME: ugly, better solution? Note: not should really have a different implementation for unCx.
+
+(defmethod tree minijava.ast.NewObject
+  [x frame]
+  (Call (Name "newObject") (.typeName x)))
+
+;; FIXME: ugly, better solution?
 (defmethod tree minijava.ast.Not
   [x frame]
   (let [t (label)
@@ -118,6 +126,10 @@
 (defmethod tree minijava.ast.Print
   [x frame]
   (Call (Name "print") [(-> x .exp (tree frame) unEx)]))
+
+(defmethod tree minijava.ast.Program
+  [x frame]
+  (apply merge (map tree (cons (.mainClass x) ($ (.classes x))) (repeat nil))))
 
 (defmethod tree minijava.ast.This
   [x frame]
@@ -155,5 +167,4 @@
   [x frame]
   (Mem (BinaryOp :+ (exp (lookup frame (.name x)))
                  (BinaryOp :* (Const 4)
-                           (-> x .index tree unEx)))))
-
+                           (-> x .index (tree frame) unEx)))))
