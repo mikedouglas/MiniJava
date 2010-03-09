@@ -104,6 +104,11 @@
 (defmethod eval-ir :minijava.ir/Temp [exp env]
   (read-temp env (:reg exp)))
 
+(defmethod eval-ir :minijava.ir/Statement [exp env]
+  (do
+    (eval-ir (:exp exp) env)
+    nil)) ;; ensure no value returned
+
 ;; Build map of label code - should be efficient by persistence
 ;; of list data structure
 (defn build-label-map [stms map]
