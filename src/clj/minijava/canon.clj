@@ -57,9 +57,26 @@
   (and (= :minijava.ir/BinaryOp (type s)) ;; FIXME: generalize to all expressions
        (= :minijava.ir/ExpSeq (type (:exp2 s)))))
 
+(defn isit? [x t]
+(= (type x) t) 
+)
+
+;;Support function for Commutes, taken from Canon.java
+ (defn isNop [a]
+  (and (isit? a :minijava.ir/Statement) (isit? (:exp a) :minijava.ir/Const))
+  )
+
+;;Commutes, translated from Canon.java
+(defn commutes
+  [a b]
+  (or (isNop a) (isit? b :minijava.ir/Name) (isit? b :minijava.ir/Const) )) 
+
+;;Commutes? s is whether the children of s commute (as opposed to whether s commutes with something else.
+;;s is assumed to have two child functions here - other wise it wouldn't match the Eseq form so we wouldn't try to call commute? on it.
 (defn commutes?
-  [s]
-  false) ;; TODO
+	[s]
+	(commutes (second (first s)) (second (second s)))
+)
 
 (defn canon
   "Converts a Seq to linear IR form."
