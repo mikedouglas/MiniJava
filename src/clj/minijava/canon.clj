@@ -20,8 +20,9 @@
         expr (get-in tree [:exp1 :exp])]
     (conj (vec stmt)
           (merge tree [:exp1 expr]))))
-
-(defn remove-eseq-commute
+ 
+ ;;is this correct for CJumps, or just for Binops? As seen in figure 8.1 (3), if a Cjump is fed into this, it should end up with no ESeqs, just Seqs.
+(defn remove-eseq-commute 
   "(BinaryOp op e1 (ExpSeq s2 e2)) -> [s2 (BinaryOp op e1 e2)]"
   [tree]
   (let [e1 (get tree :exp1)
@@ -49,13 +50,26 @@
 
 (defn matches-eseq-left?
   [s]
-  (and (= :minijava.ir/BinaryOp (type s)) ;; FIXME: generalize to all expressions
-       (= :minijava.ir/ExpSeq (type (:exp1 s)))))
+  (or
+   (and (= :minijava.ir/BinaryOp (type s)) ;; What follows are the conditions listed in figure 8.1
+       (= :minijava.ir/ExpSeq (type (:exp1 s))))
+   (and (= :minijava.ir/Mem (type s)) 
+       (= :minijava.ir/ExpSeq (type (:adr s))))
+   (and (= :minijava.ir/Jump (type s)) 
+       (= :minijava.ir/ExpSeq (type (:lbl s))))
+   (and (= :minijava.ir/Conditional (type s)) 
+       (= :minijava.ir/ExpSeq (type (:exp1 s))))
+ ))
+ 
 
 (defn matches-eseq-commute?
   [s]
-  (and (= :minijava.ir/BinaryOp (type s)) ;; FIXME: generalize to all expressions
-       (= :minijava.ir/ExpSeq (type (:exp2 s)))))
+  (or
+  (and (= :minijava.ir/BinaryOp (type s)) ;; What follows are the conditions listed in figure 8.1
+       (= :minijava.ir/ExpSeq (type (:exp2 s))))
+   (and (= :minijava.ir/Conditional (type s)) 
+       (= :minijava.ir/ExpSeq (type (:exp2 s))))             
+  ))
 
 (defn isit? [x t]
 (= (type x) t) 
