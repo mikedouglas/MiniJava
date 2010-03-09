@@ -42,11 +42,34 @@
   )
  )
  
+ (defmethod cannon :minijava.ir/ExpSeq
+  [x]
+ 	(let ( (stms  cannon (:seqs x))
+ 				(b (cannon (:exp x))))
+ 			(ExpSeq (seq stms (:stm b)) (:exp b))) 	
+ 	)  
+ 
+ (defmethod cannon :minijava.ir/ExpSeq
+  [x]
+ 	(reorder x)  
+ )
+ 
  (defmethod cannon :default
   [x]
  	(reorder x)  
  )
   
+
+  static ESEQ do_exp(ESEQ e) {
+		IRStm stms = do_stm(e.stm);
+		ESEQ b = do_exp(e.exp);
+		return new ESEQ(seq(stms,b.stm), b.exp);
+	}
+
+	static ESEQ do_exp (IRExp e) {
+		if (e instanceof ESEQ) return do_exp((ESEQ)e);
+		else return reorder_exp(e);
+	}
   
 (defn reorderExpCall [x]
 	
