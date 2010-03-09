@@ -1,32 +1,37 @@
 (ns minijava.cannon
   (:use (minijava ir)))
 
+(defn commute? [x y]
+	true ;;standin
+)
+
 (defmulti cannon (fn [x] (type x)))
 
+ (defmulti cannonExp (fn [x] (type x)))
 (defn isit? [x t]
 (= (type x) t) 
 )
 
-(defn nopNull (list (Exp (Const 0))))
+(def nopNull (cons (Exp (Const 0)) '()))
 
 (defn reorder [exps]
 	(cond 
 			(empty? exps)
 						(nopNull)
 			 (true)
-			 		   (let ((a (first exps)))
+			 		   (let [ a (first exps)]
 			 		   (cond (isit? a :minijava.ir/Call)
-			 		   			 (let ((t (minijava.ir.temp.Temp)) 
-			 		   			 				(e (ExpSeq (Move (Temp t) a) (Temp t))))
+			 		   			 (let [t (minijava.ir.temp.Temp )
+			 		   			 				e (ExpSeq (Move (Temp t) a) (Temp t))]
 			 		   			 		(reorder (cons e (rest exps)))
 			 		   			 )
 			 		   			 (true)
-			 		   			 (let ((aa (cannonExp a))
-			 		   			 				(bb (reorder (rest exps))))
+			 		   			 (let [aa ( cannonExp a)
+			 		   			 				bb (reorder (rest exps))]
 			 		   			       (cond (commute? (:stm bb) (:exp aa))
 			 		   			       							(list (make-seq (:stm aa) (:stm bb)) (cons (:exp aa) (:exps bb)))
 			 		   			       				(true)
-			 		   			       			  (let ((t (minijava.ir.temp.Temp)))
+			 		   			       			  (let [ t (minijava.ir.temp.Temp)]
 			 		   			       			  (list (make-seq (:stm aa) (make-seq (Move (Temp t) (:exp aa)) (:stm bb)) (cons (Temp t) (:exps bb)) ))
 			 		   			       )			 		   			     
 			 		   			 ))
@@ -52,13 +57,13 @@
 
 
 (defn reorderExp [x]
-	(let ((r (reorder (kids e))))
+	(let [ r (reorder (kids e)) ]
 	(ExpSeq (:stm x) (build e (:exps x)))
 	)
 )
 
 (defn reorderStm [x]
-	(let ((r (reorder (kids e))))
+	(let [ r (reorder (kids e) ])
 	(ExpSeq (:stm x) (build e (:exps x)))
 	)
 )
@@ -126,18 +131,17 @@
  )
   
  
- (defmulti cannonExp (fn [x] (type x)))
  
  (defmethod cannonExp :minijava.ir/ExpSeq
   [x]
- 	(let ( (stms  cannon (:seqs x))
- 				(b (cannon (:exp x))))
+ 	(let [ stms  cannon (:seqs x)
+ 				b (cannon (:exp x)])
  			(ExpSeq (make-seq stms (:stm b)) (:exp b))) 	
  	)  
  
  (defmethod cannonExp :default
    [x]
- 	 (let ((lst  (reorderExp (kids x)))) 	 
+ 	 (let [ lst  (reorderExp (kids x)]) 	 
  			(ExpSeq (:stm lst) (build x (:exps lst)))
  			)  
  )
