@@ -27,7 +27,7 @@
   nil)
 
 ;; use lookahead to see if we jump or evaluate normally
-(defmethod eval-ir clojure.lang.PersistentList [lst env]
+(defmethod eval-ir clojure.lang.ISeq [lst env]
   (cond (or (= (type (first lst)) :minijava.ir/Jump)
             (= (type (first lst)) :minijava.ir/Conditional))
           (eval-ir (first lst) env)
@@ -44,6 +44,13 @@
           :+ (+ e1 e2)
           :- (- e1 e2)
           :* (* e1 e2))))
+
+(defmethod eval-ir :minijava.ir/Call [exp env]
+  (let [func (:lbl (:lbl exp))
+        args (:args exp)]
+    (case func
+      "print" (println (eval-ir (first args) env))
+      (println "missing function"))))
 
 (defmethod eval-ir :minijava.ir/Const [exp env]
   (:val exp))

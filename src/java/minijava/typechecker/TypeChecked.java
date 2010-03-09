@@ -1,5 +1,7 @@
 package minijava.typechecker;
 
+import minijava.ast.Program;
+
 /**
  * An instance of this class represents a correctly TypeChecked minijava program.
  * It may also contain other useful information computed by the type checker during
@@ -15,6 +17,11 @@ package minijava.typechecker;
  * will suffice (since phase 2 test don't check anything about the type checker's returned
  * result, they only check whether appropriate TypeCheckerExceptions are being raised.
  */
-public abstract class TypeChecked {
-
+public class TypeChecked {
+    public final Program program;
+    
+    public TypeChecked(Program program) 
+    {
+        this.program = program;
+    }
 }

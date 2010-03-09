@@ -35,7 +35,7 @@
   [x frame] (Mem (BinaryOp :- (tree (.array x) frame) (Const 1))))
 
 (defmethod tree minijava.ast.Assign
-  [x frame] (Move (-> x .value (tree frame) unEx) (lookup frame (.name x))))
+  [x frame] (Move (-> x .value (tree frame) unEx) (exp (lookup frame (.name x)))))
 
 (defmethod tree minijava.ast.Block
   [x frame]
@@ -53,10 +53,13 @@
 
 (defmethod tree minijava.ast.ClassDecl
   [x frame]
-  (into {} (for [i ($ (.methods x))]
-             (let [frame (new-x86 0 (map #(. % name) ($ (.vars i))))]
-               [(str (.name x) "_" (.name i))
-                (-> i .statements $ first (tree frame))]))))
+  {(.name x)
+   (into {} (for [i ($ (.methods x))]
+              (let [frame (new-x86 0 (map #(. % name) ($ (.vars i))))
+                    name  (str (.name x) "_" (.name i))]
+                [name
+                 (Seq (cons (Label name)
+                       (map #(tree % frame) (-> i .statements $))))])))})
 
 (defmethod tree minijava.ast.IdentifierExp
   [x frame] (exp (lookup frame (.name x))))
@@ -125,7 +128,8 @@
 
 (defmethod tree minijava.ast.Program
   [x frame]
-  (apply merge (map tree (cons (.mainClass x) ($ (.classes x))) (repeat nil))))
+  (apply merge (map #(tree % nil)
+                    (cons (.mainClass x) ($ (.classes x))) (repeat nil))))
 
 (defmethod tree minijava.ast.This
   [x frame]
@@ -137,13 +141,10 @@
 
 (defmethod tree minijava.ast.VarDecl
   [x frame]
-  (cond 
-   (=  (.kind x) (.LOCAL minijava.ast.VarDecl$Kind))    
-   (Statement  (allocLocal frame (.name x)  false))
-   (=  (.kind x)  (.FIELD minijava.ast.VarDecl$Kind))    
-   (Statement nil) ;;we need to support classes before this can be figured out.
-   (=  (.kind x) (.FORMAL minijava.ast.VarDecl$Kind))   
-   (Statement  nil))) ;;formals are allocated at frame creation (call) so this case does nothing (?)
+  (condp = (.kind x)
+    (.LOCAL minijava.ast.VarDecl$Kind) (allocLocal frame (.name x) false)
+    (.FIELD minijava.ast.VarDecl$Kind) (throw (Exception. "shouldn't be called"))
+    (.FORMAL minijava.ast.VarDecl$Kind) (throw (Exception. "shouldn't be called"))))
 
 (defmethod tree minijava.ast.While
   [x frame]

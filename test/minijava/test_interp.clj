@@ -105,7 +105,7 @@
              f
              (list (ir/Temp tmp)))))))
 
-(comment Sanity checks)
+;; sanity checks
 (deftest test-label
   (let [t (label)
         prog (list (ir/Label t))]
@@ -113,3 +113,9 @@
            (first prog)))
     (is (= (hash-map t 5)
            (hash-map (:lbl (first prog)) 5)))))
+
+(deftest test-print
+  (let [prog (ir/Call (ir/Name "print") [(ir/Const 5)])]
+    (is (= (with-out-str
+             (eval-prog prog))
+           "5\n"))))
