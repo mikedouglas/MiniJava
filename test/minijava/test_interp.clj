@@ -1,6 +1,13 @@
 (ns minijava.test-interp
   (:use clojure.test
-        (minijava ast interp label tree utility x86))
+        (minijava 
+         [ast :only (parse-exp)]
+         interp 
+         label 
+         tree 
+         [typechecker :only (parse-meth)]
+         utility 
+         x86))
   (:import (minijava.ir.temp.label))
   (:require [minijava.ir :as ir]))
 
@@ -124,7 +131,7 @@
         entry-point (list (ir/Call (ir/Name "hello_func")))]
     (is (= 5 (eval-prog entry-point (get prog "hello"))))))
 
-(comment Sanity checks)
+;; sanity checks
 (deftest test-label
   (let [t (label)
         prog (list (ir/Label t))]
@@ -132,3 +139,9 @@
            (first prog)))
     (is (= (hash-map t 5)
            (hash-map (:lbl (first prog)) 5)))))
+
+(deftest test-print
+  (let [prog (ir/Call (ir/Name "print") [(ir/Const 5)])]
+    (is (= (with-out-str
+             (eval-prog prog))
+           "5\n"))))

@@ -33,7 +33,7 @@
   nil)
 
 ;; use lookahead to see if we jump or evaluate normally
-(defmethod eval-ir clojure.lang.PersistentList [lst env]
+(defmethod eval-ir clojure.lang.ISeq [lst env]
   (cond (or (= (type (first lst)) :minijava.ir/Jump)
             (= (type (first lst)) :minijava.ir/Conditional))
           (eval-ir (first lst) env)
@@ -116,8 +116,13 @@
   (let [fn-name (:lbl (:lbl exp))
         args (map (fn [arg] (eval-ir arg env)) (:args exp))]
     (case fn-name
-      "print" (print (first args))
+      "print" (println (first args))
       (eval-ir (read-method env fn-name) env))))
+
+(defmethod eval-ir :minijava.ir/Statement [exp env]
+  (do
+    (eval-ir (:exp exp) env)
+    nil)) ;; ensure no value returned
 
 ;; Build map of label code - should be efficient by persistence
 ;; of list data structure
