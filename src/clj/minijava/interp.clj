@@ -3,10 +3,10 @@
         clojure.contrib.pprint)
   (:import (minijava.ir.temp.label)))
 
-(defstruct env :temps :mem :labels)
+(defstruct env :temps :mem :labels :methods)
 
 (def empty-env 
-  (atom (struct env {} {} {})))
+  (atom (struct env {} {} {} {})))
 
 (defn write-temp [env key val]
   (swap! env (fn [e k v] (assoc-in e [:temps k] v)) key val))
@@ -18,6 +18,8 @@
   (swap! env (fn [e a v] (assoc-in e [:mem a] v)) addr val))
 (defn read-mem [env addr]
   (get-in @env [:mem addr]))
+(defn read-method [env name]
+  (get-in @env [:methods name]))
 
 ;; eval-ir evaluates the linearized IR tree. Only types that
 ;; appear in the final tree have cases in the multimethod.
@@ -109,6 +111,14 @@
 (defmethod eval-ir :minijava.ir/Temp [exp env]
   (read-temp env (:reg exp)))
 
+;; Function call
+(defmethod eval-ir :minijava.ir/Call [exp env]
+  (let [fn-name (:lbl (:lbl exp))
+        args (map (fn [arg] (eval-ir arg env)) (:args exp))]
+    (case fn-name
+      "print" (print (first args))
+      (eval-ir (read-method env fn-name) env))))
+
 ;; Build map of label code - should be efficient by persistence
 ;; of list data structure
 (defn build-label-map [stms map]
@@ -119,7 +129,9 @@
         true (recur (rest stms) map)))
 
 ;; top-level eval for a sequence of statements
-(defn eval-prog [stms]
-  (let [labels (build-label-map stms (hash-map))]
-    (eval-ir stms 
-             (atom (struct env (hash-map) (hash-map) labels)))))
+(defn eval-prog 
+  ([stms] (eval-prog stms (hash-map)))
+  ([stms methods]
+    (let [labels (build-label-map stms (hash-map))]
+      (eval-ir stms 
+               (atom (struct env (hash-map) (hash-map) labels))))))

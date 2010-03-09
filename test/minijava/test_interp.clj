@@ -110,6 +110,20 @@
              f
              (list (ir/Temp tmp)))))))
 
+(deftest test-classes
+  (let [prog (tree (minijava.ast.ClassDecl. 
+                     "hello" nil [] 
+                     [(parse-meth "public int func() { 
+                                    int b; 
+                                    boolean a; 
+                                    a = true; 
+                                    System.out.println(3); 
+                                    return 5; 
+                                   }")])
+                   nil)
+        entry-point (list (ir/Call (ir/Name "hello_func")))]
+    (is (= 5 (eval-prog entry-point (get prog "hello"))))))
+
 (comment Sanity checks)
 (deftest test-label
   (let [t (label)
