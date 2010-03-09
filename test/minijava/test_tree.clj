@@ -1,9 +1,11 @@
 (ns minijava.test-tree
   (:use clojure.test
+        clojure.contrib.def
         (minijava ast label ir tree utility x86)))
 
 
-(def empty-frame (new-x86 0 ["obj"]))
+(defonce- empty-frame (new-x86 0 ["obj"]))
+
 
 
 (deftest tests-binop-conv

@@ -1,151 +1,80 @@
-(ns minijava.cannon
-  (:use (minijava ir)))
 
-(defn commute? [x y]
-	true ;;standin
-)
+(ns minijava.canon
+  "Implementation of the canonicalization algorithms for IR."
+  (:use minijava.ir
+        clojure.contrib.seq))
 
-(defmulti cannon (fn [x] (type x)))
+(defn remove-double-eseq
+  "(ExpSeq s1 (ExpSeq s2 e)) -> [s1 s2 e]"
+  [tree]
+  (let [s1 (get tree :seqs)
+        s2 (get-in tree [:exp :seqs])
+        e  (get-in tree [:exp :exp])]
+    (conj (vec (concat s1 s2))
+          e)))
 
- (defmulti cannonExp (fn [x] (type x)))
-(defn isit? [x t]
-(= (type x) t) 
-)
+(defn remove-eseq-left
+  "(BinaryOp op (ExpSeq stmt expr) e2) -> [stmt (BinaryOp op expr e2)]"
+  [tree]
+  (let [stmt (get-in tree [:exp1 :seqs])
+        expr (get-in tree [:exp1 :exp])]
+    (conj (vec stmt)
+          (merge tree [:exp1 expr]))))
 
-(def nopNull (cons (Exp (Const 0)) '()))
+(defn remove-eseq-commute
+  "(BinaryOp op e1 (ExpSeq s2 e2)) -> [s2 (BinaryOp op e1 e2)]"
+  [tree]
+  (let [e1 (get tree :exp1)
+        s2 (get-in tree [:exp2 :seqs])
+        e2 (get-in tree [:exp2 :exp])]
+    (conj (vec s2)
+          (merge tree [:exp2 e2]))))
 
-(defn reorder [exps]
-	(cond 
-			(empty? exps)
-						(nopNull)
-			 (true)
-			 		   (let [ a (first exps)]
-			 		   (cond (isit? a :minijava.ir/Call)
-			 		   			 (let [t (minijava.ir.temp.Temp )
-			 		   			 				e (ExpSeq (Move (Temp t) a) (Temp t))]
-			 		   			 		(reorder (cons e (rest exps)))
-			 		   			 )
-			 		   			 (true)
-			 		   			 (let [aa ( cannonExp a)
-			 		   			 				bb (reorder (rest exps))]
-			 		   			       (cond (commute? (:stm bb) (:exp aa))
-			 		   			       							(list (make-seq (:stm aa) (:stm bb)) (cons (:exp aa) (:exps bb)))
-			 		   			       				(true)
-			 		   			       			  (let [ t (minijava.ir.temp.Temp)]
-			 		   			       			  (list (make-seq (:stm aa) (make-seq (Move (Temp t) (:exp aa)) (:stm bb)) (cons (Temp t) (:exps bb)) ))
-			 		   			       )			 		   			     
-			 		   			 ))
-			 		   )
-			 		   
-			 		   )
-	)
+(defn remove-eseq-no-commute
+  "(BinaryOp op e1 (ExpSeq s2 e2)) -> [(Move e1 (Temp t)) s2 (BinaryOp op (Temp t e2))]"
+  [tree]
+  (let [e1 (get tree :exp1)
+        s1 (get-in tree [:exp2 :seqs])
+        e2 (get-in tree [:exp2 :exp])
+        t  (minijava.ir.temp.Temp.)]
+    (concat [(Move e1 (Temp t))]
+            s1
+            [(merge tree [:exp1 (Temp t)]
+                    [:exp2 e2])])))
 
-)
+(defn matches-double-eseq?
+  [s]
+  (and (= :minijava.ir/ExpSeq (type s))
+       (= :minijava.ir/ExpSeq (type (:exp s)))))
 
+(defn matches-eseq-left?
+  [s]
+  (and (= :minijava.ir/BinaryOp (type s)) ;; FIXME: generalize to all expressions
+       (= :minijava.ir/ExpSeq (type (:exp1 s)))))
 
-(defn reorderExpCall [x]
-	(reorder x) ;;this is likely wrong
+(defn matches-eseq-commute?
+  [s]
+  (and (= :minijava.ir/BinaryOp (type s)) ;; FIXME: generalize to all expressions
+       (= :minijava.ir/ExpSeq (type (:exp2 s)))))
 
-)
+(defn commutes?
+  [s]
+  false) ;; TODO
 
-(defn reorderCallMove [x]
-	(reorder x) ;;this is likely wrong
-
-)
-
-
-
-
-(defn reorderExp [x]
-	(let [ r (reorder (kids e)) ]
-	(ExpSeq (:stm x) (build e (:exps x)))
-	)
-)
-
-(defn reorderStm [x]
-	(let [ r (reorder (kids e) ])
-	(ExpSeq (:stm x) (build e (:exps x)))
-	)
-)
-
-(defn linear [s lst]
-  (linear (first (:seqs s)) (linear (rest (:seqs s)) lst)) )
-)
-
-(defn linear [s lst]
-	(cond (isit? minijava.ir/Seq)
-				(linear (s l))
-				(true)
-				(cons s l)
-	)
-
-)
-
-(defn linearize [s]
-	(linear (cannon s) '()))
-)
-
-
-
- (defn isNop [a]
-  (and (isit? a :minijava.ir/Statement) (isit? (:exp a) :minijava.ir/Const))
-  )
-
- (defn make-seq [a b]
-  (cond 
-  			(isNop a) b
-  			(isNop b) a
-  			(true) (Seq a b)  
-  )
-
-(defmethod cannon :minijava.ir/Seq
-  [x]
-  (make-seq (cannon (first (:seqs x)) (rest (:seqs x)))) 
-  )
-  
-(defmethod cannon :minijava.ir/Move
-  [x]
-  (cond 
-  	(and ( isit? (:dst x ) :minijava.ir/Temp) ( isit? (:src x ) :minijava.ir/Call) )
-  			(reorderCallMove (:dst x ) (:src x ))
-  	 (isit? (:dst x) :minijava.ir/ExpSeq)
-  	 		 (cannon (Seq (:seqs (:dst x)) (Move (:exp (:dst x)) (:src x)) ) )
-  	 (true (reorderStm x) )
-  			
-  )
- 
- )
-
-(defmethod cannon :minijava.ir/Statement
-  [x]
-  (cond
-  	 (isit? (:exp x) :minijava.ir/Call)
-  	 			(reorderExpCall (:exp x))
-  	 	(true (reorderStm x))
-  )
- )
- 
-  (defmethod cannon :default
-  [x]
- 	(reorderStm x)  
- )
-  
- 
- 
- (defmethod cannonExp :minijava.ir/ExpSeq
-  [x]
- 	(let [ stms  cannon (:seqs x)
- 				b (cannon (:exp x)])
- 			(ExpSeq (make-seq stms (:stm b)) (:exp b))) 	
- 	)  
- 
- (defmethod cannonExp :default
-   [x]
- 	 (let [ lst  (reorderExp (kids x)]) 	 
- 			(ExpSeq (:stm lst) (build x (:exps lst)))
- 			)  
- )
- 
-
-
+(defn canon
+  "Converts a Seq to linear IR form."
+  [seqs]
+  (flatten ;; possibly expensive
+   (for [s (:seqs seqs)]
+    (cond
+     (matches-eseq-left? s) (remove-eseq-left s)
+     (matches-double-eseq? s) (remove-double-eseq s)
+     (matches-eseq-commute? s)
+       (if (commutes? s)
+         (remove-eseq-commute s)
+         (remove-eseq-no-commute s))
+     (= (type s) :minijava.ir/Seq) (canon s)
+     (= (type s) :minijava.ir/ExpSeq)
+       (list (canon (:seqs s)) (:exp s))
+     :else s))))
 
