@@ -1,86 +1,39 @@
-(ns minijava.cannon
-  (:use (minijava ir exp label x86)))
-
+(ns minijava.canon
+  "Implementation of the canonicalization algorithms for IR."
+  (:use minijava.ir))
+ 
+(defn remove-eseq-left
+  [tree]
+  (let [statements (get-in tree [:exp1 :seqs])
+        expression (get-in tree [:exp1 :exp])]
+    (conj (vec statements)
+          (merge tree [:exp1 expression]))))
+ 
+(defn remove-double-eseq
+  [tree]
+  (let [s1 (get tree :seqs)
+        s2 (get-in tree [:exp :seqs])
+        e (get-in tree [:exp :exp])]
+    (conj (vec (concat s1 s2))
+          e)))
+ 
+(defn remove-eseq-commute
+  [tree]
+  (let [s1 (get-in tree [:exp1 :seqs])
+        e1 (get-in tree [:exp1 :exp])
+        e2 (get tree :exp2)]
+    (conj (vec s1)
+          (merge tree [:exp1 e1]))))
+ 
+(defn remove-eseq-no-commute
+  [tree]
+  (let [e1 (get tree :exp1)
+        s1 (get-in tree [:exp2 :seqs])
+        e2 (get-in tree [:exp2 :exp])
+        t (minijava.ir.temp.Temp.)]
+    (concat [(Move e1 (Temp t))]
+            s1
+            [(merge tree [:exp1 (Temp t)]
+                    [:exp2 e2])])))
+ 
 (defmulti cannon (fn [x] (type x)))
-
-
- (defn isNop [a]
-  (and (isa? a :minijava.ir/Statement) (isa? (:exp a) :minijava.ir/Const))
-  )
-
- (defn seq [a b]
-  (cond 
-  			((isNop a) b)
-  			((isNop b) a)
-  			(true (Seq a b)))  
-  )
-
-(defmethod cannon :minijava.ir/Seq
-  [x]
-  (seq (cannon (.left x) (.right x))) ;;this code is wrong - how are the elements of the sequence accessed?
-  )
-  
-(defmethod cannon :minijava.ir/Move
-  [x]
-  (cond 
-  	(and ( isa? (:dst x ) :minijava.ir/Temp) ( isa? (:src x ) :minijava.ir/Call) )
-  			(reorderCallMove (:dst x ) (:src x ))
-  	 (isa? (:dst x) :minijava.ir/ExpSeq)
-  	 		 (cannon (Seq (:seqs (:dst x)) (Move (:exp (:dst x)) (:src x)) ) )
-  	 (true (reorder x) )
-  			
-  )
- 
- )
-
-(defmethod cannon :minijava.ir/Statement
-  [x]
-  (cond
-  	 (isa? (:exp x) :minijava.ir/Call)
-  	 			(reorderExpCall (:exp x))
-  	 	(true (reorder x))
-  )
- )
- 
- (defmethod cannon :minijava.ir/ExpSeq
-  [x]
- 	(let ( (stms  cannon (:seqs x))
- 				(b (cannon (:exp x))))
- 			(ExpSeq (seq stms (:stm b)) (:exp b))) 	
- 	)  
- 
- (defmethod cannon :minijava.ir/ExpSeq
-  [x]
- 	(reorder x)  
- )
- 
- (defmethod cannon :default
-  [x]
- 	(reorder x)  
- )
-  
-
-  static ESEQ do_exp(ESEQ e) {
-		IRStm stms = do_stm(e.stm);
-		ESEQ b = do_exp(e.exp);
-		return new ESEQ(seq(stms,b.stm), b.exp);
-	}
-
-	static ESEQ do_exp (IRExp e) {
-		if (e instanceof ESEQ) return do_exp((ESEQ)e);
-		else return reorder_exp(e);
-	}
-  
-(defn reorderExpCall [x]
-	
-
-)
-
-(defn reorderCallMove [x]
-	
-
-)
-
-(defmulti reorder (fn [x] (type x)))
-  
- 
