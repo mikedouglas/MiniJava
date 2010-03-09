@@ -14,6 +14,10 @@
   (get-in @env [:temps key]))
 (defn read-label [env key]
   (get-in @env [:labels key]))
+(defn write-mem [env addr val]
+  (swap! env (fn [e a v] (assoc-in e [:mem a] v)) addr val))
+(defn read-mem [env addr]
+  (get-in @env [:mem addr]))
 
 ;; eval-ir evaluates the linearized IR tree. Only types that
 ;; appear in the final tree have cases in the multimethod.
@@ -75,8 +79,11 @@
 
 (defmethod eval-ir :minijava.ir/Move [exp env]
   (let [val (eval-ir (:src exp) env)
-        dst (:reg (:dst exp))]
-    (write-temp env dst val)))
+        dst (:dst exp)]
+    (cond (= (type dst) :minijava.ir/Temp)
+          (write-temp env (:reg dst) val)
+          (= (type dst) :minijava.ir/Mem)
+          (write-mem env (:adr dst) val))))
 
 (defmethod eval-ir :minijava.ir/Jump [exp env]
   (eval-ir (read-label env (:lbl exp)) env))
@@ -86,12 +93,18 @@
 ;; eval-ir unpacks these directly.
 (defmethod eval-ir :minijava.ir/Label [exp env]
   nil)
-
 (defmethod eval-ir :minijava.ir/Name [exp env]
   nil)
 
+;; Mem does need to eval in case an operation is hiding
+;; in the address expression
 (defmethod eval-ir :minijava.ir/Mem [exp env]
-  nil)
+  (let [addr (eval-ir (:adr exp) env)]
+    (read-mem env addr)))
+
+;; This case needed for Mem case above
+(defmethod eval-ir java.lang.Integer [exp env]
+  exp)
 
 (defmethod eval-ir :minijava.ir/Temp [exp env]
   (read-temp env (:reg exp)))

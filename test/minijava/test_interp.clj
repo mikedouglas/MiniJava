@@ -26,6 +26,11 @@
                    (ir/Temp tmp))]
     (is (= 5 (eval-prog prog)))))
 
+(deftest test-assign
+  (let [prog (list (ir/Move (ir/Const 5) (ir/Mem 0))
+                   (ir/Mem 0))]
+    (is (= 5 (eval-prog prog)))))
+
 (deftest test-labels
    (let [t (label)
          prog (list (ir/Const 7)
