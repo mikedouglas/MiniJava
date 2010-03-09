@@ -117,6 +117,8 @@
         args (map (fn [arg] (eval-ir arg env)) (:args exp))]
     (case fn-name
       "print" (println (first args))
+      "newObject" (println "Unimplemented stub")
+      "newArray"  (println "Unimplemented stub")
       (eval-ir (read-method env fn-name) env))))
 
 (defmethod eval-ir :minijava.ir/Statement [exp env]
