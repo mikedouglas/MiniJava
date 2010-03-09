@@ -75,5 +75,7 @@
   clojure.lang.IPersistentMap)
 
 (deftype Temp [reg]
-  clojure.lang.IPersistentMap)
+  clojure.lang.IPersistentMap
+  Object
+  (equals [obj] (= (type obj) :minijava.ir/Temp)))
 

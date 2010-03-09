@@ -19,11 +19,12 @@
 
 (defn remove-eseq-commute
   [tree]
-  (let [s1 (get-in tree [:exp1 :seqs])
-        e1 (get-in tree [:exp1 :exp])
-        e2 (get tree :exp2)]
-    (conj (vec s1)
-          (merge tree [:exp1 e1]))))
+  (let [e1 (get tree :exp1)
+        s2 (get-in tree [:exp2 :seqs])
+        e2 (get-in tree [:exp2 :exp])
+]
+    (conj (vec s2)
+          (merge tree [:exp2 e2]))))
 
 (defn remove-eseq-no-commute
   [tree]
