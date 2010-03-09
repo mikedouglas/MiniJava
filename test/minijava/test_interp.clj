@@ -131,6 +131,12 @@
         entry-point (list (ir/Call (ir/Name "hello_func")))]
     (is (= 5 (eval-prog entry-point (get prog "hello"))))))
 
+(deftest test-print
+  (let [prog (ir/Call (ir/Name "print") [(ir/Const 5)])]
+    (is (= (with-out-str
+             (eval-prog prog))
+           "5\n"))))
+
 ;; sanity checks
 (deftest test-label
   (let [t (label)
@@ -139,9 +145,3 @@
            (first prog)))
     (is (= (hash-map t 5)
            (hash-map (:lbl (first prog)) 5)))))
-
-(deftest test-print
-  (let [prog (ir/Call (ir/Name "print") [(ir/Const 5)])]
-    (is (= (with-out-str
-             (eval-prog prog))
-           "5\n"))))
