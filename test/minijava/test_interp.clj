@@ -1,12 +1,13 @@
 (ns minijava.test-interp
   (:use clojure.test
+        clojure.contrib.def
         (minijava ast interp label tree utility x86))
   (:import (minijava.ir.temp.label))
   (:require [minijava.ir :as ir]))
 
 (import-ast-classes)
 
-(def empty-frame (new-x86 0 ["obj"]))
+(defonce- empty-frame (new-x86 0 ["obj"]))
 
 (deftest test-eval-const
   (let [const (tree (parse-exp "5") empty-frame)]

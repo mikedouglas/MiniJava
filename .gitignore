@@ -1,4 +1,5 @@
 classes
 lib
 src/java/minijava/parser/jcc/*.java
+*jar
 .DS_Store
