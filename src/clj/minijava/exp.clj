@@ -2,9 +2,10 @@
   "Mixins that define basic IR usage."
   (:use [minijava.ir :only [Exp Conditional Statement]]))
 
-;;; basic Exp mixins.
-;; (deftype PrintStm ...)
-;; (addNx! ::PrintStm)
+;;; IR Hierarchy
+;; :minijava.exp/expression -> BinaryOp, Const, Mem, Temp, ExpSeq
+;; :minijava.exp/statement  -> Jump, Label, Move, Seq, Statement
+;; :minijava.exp/conditonal -> Conditional
 
 (defn addEx!
   "Adds methods for an expression."
@@ -25,7 +26,9 @@
      (unCx [this t f] (throw (Exception. "Statement used as conditional.")))))
 
 (doseq [t ["Call" "Const" "Mem" "Temp" "ExpSeq"]]
-  (addEx! (keyword "minijava.ir" t)))
+  (addEx! (keyword "minijava.ir" t))
+  (derive (keyword "minijava.ir" t) ::expression))
 
 (doseq [t ["Jump" "Label" "Move" "Seq" "Statement"]]
-  (addNx! (keyword "minijava.ir" t)))
+  (addNx! (keyword "minijava.ir" t))
+  (derive (keyword "minijava.ir" t) ::statement))

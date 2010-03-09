@@ -1,7 +1,7 @@
 (ns minijava.test-interp
   (:use clojure.test
         clojure.contrib.def
-        (minijava ast interp label tree utility x86))
+        (minijava interp label tree typechecker utility x86))
   (:import (minijava.ir.temp.label))
   (:require [minijava.ir :as ir]))
 
@@ -106,6 +106,26 @@
              f
              (list (ir/Temp tmp)))))))
 
+(deftest test-classes
+  (let [prog (tree (minijava.ast.ClassDecl. 
+                     "hello" nil [] 
+                     [(parse-meth "public int func() { 
+                                    int b; 
+                                    boolean a; 
+                                    a = true; 
+                                    System.out.println(3); 
+                                    return 5; 
+                                   }")])
+                   nil)
+        entry-point (list (ir/Call (ir/Name "hello_func") []))]
+    (is (= 5 (eval-prog entry-point (get prog "hello"))))))
+
+(deftest test-print
+  (let [prog (ir/Call (ir/Name "print") [(ir/Const 5)])]
+    (is (= (with-out-str
+             (eval-prog prog))
+           "5\n"))))
+
 ;; sanity checks
 (deftest test-label
   (let [t (label)
@@ -114,9 +134,3 @@
            (first prog)))
     (is (= (hash-map t 5)
            (hash-map (:lbl (first prog)) 5)))))
-
-(deftest test-print
-  (let [prog (ir/Call (ir/Name "print") [(ir/Const 5)])]
-    (is (= (with-out-str
-             (eval-prog prog))
-           "5\n"))))

@@ -21,6 +21,8 @@
       :&& (Conditional :&& exp1 exp2 t f)
       (Conditional :!= (unEx this) 0 t f))))
 
+(derive ::BinaryOp :minijava.exp/expression)
+
 (deftype Call [lbl args]
   clojure.lang.IPersistentMap)
 
@@ -40,6 +42,8 @@
               (Temp r))))
   (unNx [] (Statement this))
   (unCx [t f] (merge this [:t t] [:f f])))
+
+(derive ::Conditional :minijava.exp/conditional)
 
 (deftype Const [val]
   clojure.lang.IPersistentMap)

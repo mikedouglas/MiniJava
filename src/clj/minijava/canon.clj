@@ -48,12 +48,12 @@
 
 (defn matches-eseq-left?
   [s]
-  (and (= :minijava.ir/BinaryOp (type s)) ;; FIXME: generalize to all expressions
+  (and (isa? (type s) :minijava.exp/expression) ;; FIXME: difference between [x] and [x y]
        (= :minijava.ir/ExpSeq (type (:exp1 s)))))
 
 (defn matches-eseq-commute?
   [s]
-  (and (= :minijava.ir/BinaryOp (type s)) ;; FIXME: generalize to all expressions
+  (and (isa? (type s) :minijava.exp/expression) ;; FIXME: difference between [x] and [x y]
        (= :minijava.ir/ExpSeq (type (:exp2 s)))))
 
 (defn commutes?
@@ -63,7 +63,7 @@
 (defn canon
   "Converts a Seq to linear IR form."
   [seqs]
-  (flatten ;; possibly expensive
+  (flatten
    (for [s (:seqs seqs)]
     (cond
      (matches-eseq-left? s) (remove-eseq-left s)
