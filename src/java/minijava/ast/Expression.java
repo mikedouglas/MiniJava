@@ -15,7 +15,11 @@ public abstract class Expression extends AST {
 	}
 	
 	public void setType(Type theType) {
-		Assert.assertNull(type);
+		//Assert.assertNull(type); 
+		//As our visitor is written, we expect the types of some nodes to be set multiple times.
+		//as long as there is no conflict in these type settings, there is no problem, and the assertion has been
+		//modified to reflect that.
+		assert(type==null || type.equals(theType));		
 		type = theType;
 	}
 
