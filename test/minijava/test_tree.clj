@@ -3,7 +3,10 @@
         clojure.contrib.def
         (minijava label ir tree typechecker utility x86)))
 
+
 (defonce- empty-frame (new-x86 0 ["obj"]))
+
+
 
 (deftest tests-binop-conv
   (let [plus   (parse-int "5 + 5")

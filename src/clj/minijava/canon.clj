@@ -1,3 +1,4 @@
+
 (ns minijava.canon
   "Implementation of the canonicalization algorithms for IR."
   (:use minijava.ir
@@ -19,8 +20,9 @@
         expr (get-in tree [:exp1 :exp])]
     (conj (vec stmt)
           (merge tree [:exp1 expr]))))
-
-(defn remove-eseq-commute
+ 
+ ;;is this correct for CJumps, or just for Binops? As seen in figure 8.1 (3), if a Cjump is fed into this, it should end up with no ESeqs, just Seqs.
+(defn remove-eseq-commute 
   "(BinaryOp op e1 (ExpSeq s2 e2)) -> [s2 (BinaryOp op e1 e2)]"
   [tree]
   (let [e1 (get tree :exp1)
@@ -48,17 +50,44 @@
 
 (defn matches-eseq-left?
   [s]
-  (and (isa? (type s) :minijava.exp/expression) ;; FIXME: difference between [x] and [x y]
-       (= :minijava.ir/ExpSeq (type (:exp1 s)))))
+  (or
+   (and (= :minijava.ir/BinaryOp (type s)) ;; the conditions listed in figure 8.1
+        (= :minijava.ir/ExpSeq (type (:exp1 s))))
+   (and (= :minijava.ir/Mem (type s)) 
+        (= :minijava.ir/ExpSeq (type (:adr s))))
+   (and (= :minijava.ir/Jump (type s)) 
+        (= :minijava.ir/ExpSeq (type (:lbl s))))
+   (and (= :minijava.ir/Conditional (type s)) 
+        (= :minijava.ir/ExpSeq (type (:exp1 s))))))
+ 
 
 (defn matches-eseq-commute?
   [s]
-  (and (isa? (type s) :minijava.exp/expression) ;; FIXME: difference between [x] and [x y]
-       (= :minijava.ir/ExpSeq (type (:exp2 s)))))
+  (or
+   (and (= :minijava.ir/BinaryOp (type s)) ;; the conditions listed in figure 8.1
+        (= :minijava.ir/ExpSeq (type (:exp2 s))))
+   (and (= :minijava.ir/Conditional (type s))
+        (= :minijava.ir/ExpSeq (type (:exp2 s))))))
 
+(defn isit? [x t]
+  (= (type x) t))
+
+;; support function for Commutes, taken from Canon.java
+(defn isNop [a]
+  (and (isit? a :minijava.ir/Statement) (isit? (:exp a) :minijava.ir/Const)))
+
+;; commutes, translated from Canon.java
+(defn commutes
+  [a b]
+  (or (isNop a) (isit? b :minijava.ir/Name) (isit? b :minijava.ir/Const)))
+
+;; commutes? s is whether the children of s commute (as opposed to
+;; whether s commutes with something else.  s is assumed to have two
+;; child functions here - other wise it wouldn't match the Eseq form so
+;; we wouldn't try to call commute? on it.
 (defn commutes?
   [s]
-  false) ;; TODO
+  (commutes (second (first s)) (second (second s))))
 
 (defn canon
   "Converts a Seq to linear IR form."
@@ -76,3 +105,4 @@
      (= (type s) :minijava.ir/ExpSeq)
        (list (canon (:seqs s)) (:exp s))
      :else s))))
+

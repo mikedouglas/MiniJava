@@ -13,10 +13,11 @@
         formals (formals frame)
         locals  (for [i (range 4)] (allocLocal frame (str i) true))
         vars    (concat formals locals)]
-    (is (= 4 (count formals)))
+    (is (= (count escapes) (count formals)))
     (is (apply distinct? vars) "Formals and locals are unique")))
 
 (deftest tests-spacing-of-formals
+
   (let [frame   (new-x86 0 ["obj" "arg1" "arg2"])
         spacing (map :offset (formals frame))]
     (is (= [8, 12, 16] spacing) "Formals are properly spaced")))
