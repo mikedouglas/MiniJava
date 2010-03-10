@@ -1,5 +1,6 @@
 (ns minijava.typechecker
-  (:import minijava.typechecker.MiniJavaTypeChecker))
+  (:import minijava.typechecker.MiniJavaTypeChecker)
+  (:use [minijava.ast :only [$]]))
 
 (defn types?
   "Returns true if program types correctly."
@@ -13,17 +14,6 @@
 readers."
   [str]
   (. (MiniJavaTypeChecker/parseAndCheck str) program))
-
-(defn parse-exp
-  "Wraps exp in a generic MiniJava class."
-  [exp]
-  (-> (str "class Test { public static void main(String[] a){"
-           "System.out.println(" exp ");"
-           "} }")
-      parse
-      .mainClass
-      .statement
-      .exp))
 
 (defn parse-meth
   [meth]
@@ -39,8 +29,23 @@ readers."
 
 (defn parse-stm
   [stm]
-  (-> (str "public int func() {"
-           stm " return 42; }")
-      parse-meth
-      .statements
-      (.elementAt 0)))
+  (let [meth (-> (str "public int func() {"
+                      stm " return 42; }")
+                 parse-meth)]
+    (concat ($ (.vars meth)) ($ (.statements meth)))))
+
+(defn parse-int
+  "Wraps exp in a generic MiniJava class."
+  [exp]
+  (-> (str "int a; a = " exp ";")
+      parse-stm
+      second
+      .value))
+
+(defn parse-bool
+  "Wraps exp in a generic MiniJava class."
+  [exp]
+  (-> (str "boolean a; a = " exp ";")
+      parse-stm
+      second
+      .value))

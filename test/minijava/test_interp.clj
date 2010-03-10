@@ -10,13 +10,13 @@
 (defonce- empty-frame (new-x86 0 ["obj"]))
 
 (deftest test-eval-const
-  (let [const (tree (parse-exp "5") empty-frame)]
+  (let [const (tree (parse-int "5") empty-frame)]
     (is (= 5 (eval-ir const empty-env)))))
 
 (deftest test-eval-binop
-  (let [plus  (tree (parse-exp "5 + 5") empty-frame)
-        minus (tree (parse-exp "5 - 5") empty-frame)
-        times (tree (parse-exp "5 * 5") empty-frame)]
+  (let [plus  (tree (parse-int "5 + 5") empty-frame)
+        minus (tree (parse-int "5 - 5") empty-frame)
+        times (tree (parse-int "5 * 5") empty-frame)]
     (is (= 10 (eval-ir plus empty-env)))
     (is (= 0  (eval-ir minus empty-env)))
     (is (= 25 (eval-ir times empty-env)))))

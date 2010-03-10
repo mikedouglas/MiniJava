@@ -72,6 +72,8 @@
   Object
   (equals [obj] (= (type obj) :minijava.ir/Name)))
 
+(deftype NoOp [])
+
 (deftype Seq [seqs]
   clojure.lang.IPersistentMap)
 

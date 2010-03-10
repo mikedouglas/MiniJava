@@ -11,6 +11,10 @@
   (BinaryOp op (-> x .e1 (tree frame) unEx)
             (-> x .e2 (tree frame) unEx)))
 
+(defn tree-prog [seq]
+  (let [frame (new-x86 0 [])]
+    (for [s seq] (tree s frame))))
+
 (extend-class minijava.ast.And
   Treeable
   (tree [x frame]
@@ -35,7 +39,8 @@
   (tree [x frame]
     (Move (-> x .value (tree frame) unEx)
           (Mem (BinaryOp :+ (exp (lookup frame (.name x)))
-                         (-> x .index (tree frame) unEx))))))
+                         (BinaryOp :* (Const (word-size frame))
+                                   (-> x .index (tree frame) unEx)))))))
 
 (extend-class minijava.ast.ArrayLength
   Treeable
@@ -71,9 +76,7 @@
      (into {} (for [i ($ (.methods x))]
                 (let [frame (new-x86 0 (map #(. % name) ($ (.vars i))))
                       name  (str (.name x) "_" (.name i))]
-                  [name
-                   (Seq (cons (Label name)
-                              (map #(tree % frame) (-> i .statements $))))])))}))
+                  [name (Seq (cons (Label name) (tree i frame)))])))}))
 
 (extend-class minijava.ast.IdentifierExp
   Treeable
@@ -109,9 +112,11 @@
   (tree [x frame]
     {"main" (tree (.statement x) (new-x86 0 ["obj"]))}))
 
-;; UNUSED
-;; (defmethod tree minijava.ast.MethodDecl
-;;   [x frame] nil)
+(extend-class minijava.ast.MethodDecl
+  Treeable
+  (tree [x frame]
+    (map #(tree % frame) (concat (-> x .vars $)
+                                 (-> x .statements $)))))
 
 (extend-class minijava.ast.Minus
   Treeable
@@ -171,9 +176,9 @@
   Treeable
   (tree [x frame]
     (condp = (.kind x)
-      (.LOCAL minijava.ast.VarDecl$Kind) (allocLocal frame (.name x) false)
-      (.FIELD minijava.ast.VarDecl$Kind) (throw (Exception. "shouldn't be called"))
-      (.FORMAL minijava.ast.VarDecl$Kind) (throw (Exception. "shouldn't be called")))))
+      minijava.ast.VarDecl$Kind/LOCAL (do (allocLocal frame (.name x) false) (NoOp))
+      minijava.ast.VarDecl$Kind/FIELD (throw (Exception. "shouldn't be called"))
+      minijava.ast.VarDecl$Kind/FORMAL (throw (Exception. "shouldn't be called")))))
 
 (extend-class minijava.ast.While
   Treeable
@@ -191,6 +196,6 @@
 (extend-class minijava.ast.ArrayLookup
   Treeable
   (tree [x frame]
-    (Mem (BinaryOp :+ (exp (lookup frame (.name x)))
-                   (BinaryOp :* (Const 4)
+    (Mem (BinaryOp :+ (unEx (tree (.array x) frame))
+                   (BinaryOp :* (Const (word-size frame))
                              (-> x .index (tree frame) unEx))))))

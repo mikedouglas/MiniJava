@@ -4,7 +4,7 @@
 
 ;;; IR Hierarchy
 ;; :minijava.exp/expression -> BinaryOp, Const, Mem, Temp, ExpSeq
-;; :minijava.exp/statement  -> Jump, Label, Move, Seq, Statement
+;; :minijava.exp/statement  -> Jump, Label, Move, NoOp, Seq, Statement
 ;; :minijava.exp/conditonal -> Conditional
 
 (defn addEx!
@@ -29,6 +29,6 @@
   (addEx! (keyword "minijava.ir" t))
   (derive (keyword "minijava.ir" t) ::expression))
 
-(doseq [t ["Jump" "Label" "Move" "Seq" "Statement"]]
+(doseq [t ["Jump" "Label" "Move" "NoOp" "Seq" "Statement"]]
   (addNx! (keyword "minijava.ir" t))
   (derive (keyword "minijava.ir" t) ::statement))
