@@ -4,6 +4,12 @@ A modified version of the project three starter is available at
 src/java/. The clojure code automatically loads class files from
 classes/ folder.
 
+FOR THE TA:
+To run the tests
+$ java -jar minijava-standalone.jar
+
+
+FOR THE GROUP:
 To build the java code and download deps:
 $ ant
 $ lein deps

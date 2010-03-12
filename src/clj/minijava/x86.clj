@@ -15,12 +15,10 @@
   (exp [this]))
 
 (deftype InFrame [offset]
-  clojure.lang.IPersistentMap
   Access
   (exp [] (Mem (BinaryOp :+ (Temp :bp) (Const offset)))))
 
 (deftype InReg [temp]
-  clojure.lang.IPersistentMap
   Access
   (exp [] (Temp temp)))
 

@@ -1,43 +1,31 @@
 (ns minijava.test-interp
   (:use clojure.test
-        (minijava 
-         [ast :only (parse-exp)]
-         interp 
-         label 
-         tree 
-         [typechecker :only (parse-meth)]
-         utility 
-         x86))
-  (:import (minijava.ir.temp.label))
+        clojure.contrib.def
+        (minijava interp label tree typechecker utility x86))
   (:require [minijava.ir :as ir]))
-
+ 
 (import-ast-classes)
 
-(def empty-frame (new-x86 0 ["obj"]))
+(defonce- empty-frame (new-x86 0 ["obj"]))
 
 (deftest test-eval-const
-  (let [const (tree (parse-exp "5") empty-frame)]
+  (let [const (tree (parse-int "5") empty-frame)]
     (is (= 5 (eval-ir const empty-env)))))
-
+ 
 (deftest test-eval-binop
-  (let [plus  (tree (parse-exp "5 + 5") empty-frame)
-        minus (tree (parse-exp "5 - 5") empty-frame)
-        times (tree (parse-exp "5 * 5") empty-frame)]
+  (let [plus  (tree (parse-int "5 + 5") empty-frame)
+        minus (tree (parse-int "5 - 5") empty-frame)
+        times (tree (parse-int "5 * 5") empty-frame)]
     (is (= 10 (eval-ir plus empty-env)))
-    (is (= 0  (eval-ir minus empty-env)))
+    (is (= 0 (eval-ir minus empty-env)))
     (is (= 25 (eval-ir times empty-env)))))
-
+ 
 (deftest test-temp
   (let [tmp (minijava.ir.temp.Temp.)
         prog (list (ir/Move (ir/Const 5) (ir/Temp tmp))
                    (ir/Temp tmp))]
     (is (= 5 (eval-prog prog)))))
-
-(deftest test-assign
-  (let [prog (list (ir/Move (ir/Const 5) (ir/Mem 0))
-                   (ir/Mem 0))]
-    (is (= 5 (eval-prog prog)))))
-
+ 
 (deftest test-labels
    (let [t (label)
          prog (list (ir/Const 7)
@@ -45,7 +33,7 @@
                     (ir/Const 5))]
      (is (= (build-label-map prog (hash-map))
             (hash-map t (list (ir/Const 5)))))))
-
+ 
 (deftest test-jump
    (let [t (label)
          tmp (minijava.ir.temp.Temp.)
@@ -128,7 +116,7 @@
                                     return 5; 
                                    }")])
                    nil)
-        entry-point (list (ir/Call (ir/Name "hello_func")))]
+        entry-point (list (ir/Call (ir/Name "hello_func") []))]
     (is (= 5 (eval-prog entry-point (get prog "hello"))))))
 
 (deftest test-print
