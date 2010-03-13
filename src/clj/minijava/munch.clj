@@ -1,6 +1,7 @@
 (ns minijava.munch
   (:use (minijava ir gas)))
 
+
 ;;helper method to do instanceof
 (defn isit? [x t]
 (= (type x) t) 
@@ -40,7 +41,7 @@
 ;;This method contains a bunch of special cases, organized by preference (size), of x86 statements that can 
 ;;do a Move on a Mem and then (any) expression.
 ;;Similar methods can be defined for a Move and any combination of its arguments, all the way up to Move (Expression Expression)
-(defmethod munchMap [:minijava.ir/Move :minijava.ir/expression :minijava.ir/Mem]
+(defmethod munchMap [:minijava.ir/Move :minijava.exp/expression :minijava.ir/Mem]
   [x src dst] 			
   (cond 
   	;;Move(Mem(Binop(Plus(Const(i),e1)),e2) -> movl $i[e1] e2
@@ -64,7 +65,7 @@
   
   
   ;;Default Move pattern: just use Movl
-  (defmethod munchMap [:minijava.ir/Move :minijava.ir/expression :minijava.ir/expression]
+  (defmethod munchMap [:minijava.ir/Move :minijava.exp/expression :minijava.exp/expression]
   [x src dst] 	
   	;;Move(e1,e2) -> Movl e1 e2 
   	  (let [s (munch src) 
@@ -73,7 +74,7 @@
   								 
   ;;Default Mem pattern: Invent a new temporary, and move the memory at this address into that temporary. 
   ;;Since Mem is an expression, return that temporary.
-  (defmethod munchMap [:minijava.ir/Mem :minijava.ir/expression]
+  (defmethod munchMap [:minijava.ir/Mem :minijava.exp/expression]
   [x adr] 	
   	;;Mem(addr) -> Movl [adr] Temp 
   	(let [d (Temp (minijava.ir.temp.Temp.))
