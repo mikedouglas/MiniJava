@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>CS411 - MiniJava Project</title>
+
+<style type="text/css">
+p, table, li, h1, h2, h3 {
+font-family: verdana,arial,'sans serif';
+}
+p, h1, h2, h3, table, li, hr {
+margin-left: 10pt;
+}
+body {
+}
+p, li {
+font-size: smaller;
+}
+pre {
+margin-left: 30pt;
+}
+</style></head>
+<body>
+<h1>CPSC 411 - Stage 1: Parsing</h1>
+<p>In
+this stage of the project we are grouping together the work described
+in Chapters 2, 3 and 4 of the book. The goal of this stage is to
+produce (and test) a working parser for MiniJava. It accepts a single
+source file as input and produces a parse tree.</p><h2>Tools</h2><p>The
+book proposes two useful parsing tools: JavaCC and SableCC. We are
+going to use JavaCC. The first thing you will want to do is install the
+<a href="http://eclipse-javacc.sourceforge.net/">JavaCC Eclipse plugin</a>. This will make it easy for you to integrate the use of JavaCC into your development process.</p><p>Documentation on using JavaCC is <a href="https://javacc.dev.java.net/doc/docindex.html">here</a>.</p><h2>Project Setup</h2><p>The
+zip file in which these instructions are contained is an archived copy
+of an Eclipse project. To import this project into Eclipse do as
+follows:</p><ol><li>Select "File &gt; Import" Menu.</li><li>Select "General &gt; Existing Projects into Workspace".</li><li>Select&nbsp;"Select Archive file" and Browse for this .zip file.</li><li>Select&nbsp;the project and click "Finish".</li></ol><p>As in assignment 2, the project is set up with a number of JUnit tests. The provided tests should be thought of&nbsp;as an <span style="font-weight: bold;">executable specification</span>. This means that<span style="font-weight: bold;"> you should not change any code in the test classes</span>.&nbsp;Otherwise
+you are free to change any and all code in the project. We also
+encourage you to create additional tests, to more thoroughly test your
+solution.</p><p>Test classes,<span style="font-weight: bold;"><span style="font-weight: bold;"> </span></span>who's
+name contains the word "Internal" are an exception to the "don't change
+the tests" rule. These tests are intended to test a chunk of
+functionality that is "internal" to your solution. You may in fact
+chose to change these tests. For example, in this project a file
+Test2LexInternal tests your scanner. As such it is dependent on
+specific choices of token names. However only the parser itself
+actually depends on these implementation details, so you could choose
+to change the names given to different token classes without breaking
+the implicit contract the parser has with the rest of the code. <span style="font-weight: bold;"><span style="font-weight: bold;"></span></span></p><p>The project has the
+following layout:</p><ul><li><span style="font-weight: bold;">src</span>:
+directory with all the project source code including the following packages.</li><ul><li><span style="font-weight: bold;">minijava.test.parser:</span> JUnit tests for this phase of the project.</li><li><span style="font-weight: bold;">minijava.test: </span>Contains some support code for the tests.</li></ul><ul><li><span style="font-weight: bold;">minijava.ast</span>: AST classes already implemented for you.</li><li><span style="font-weight: bold;">minijava.visitor: </span>contains a basic "Visitor" infrastructure for the AST classes, including a PrettyPrintVisitor. </li><li><span style="font-weight: bold;">minijava.parser: </span>A package containing a MiniJavaParser class that is called by the test code.</li><li><span style="font-weight: bold;">minijava.parser.jcc: </span>This
+package is currently empty except for a readme file. The intention is
+that you will place your .jj file here and keep all the files generated
+by JavaCC confined to this package. Except for the stubs in
+minijava.parser there will be no calls directly to the generated code.</li></ul><li><span style="font-weight: bold;">sample: </span>directory containing the sample MiniJava program that come with the textbook online material.</li><li>readme*.html: Readme files about the project.</li><li>files starting with a "." : various settings that tell
+Eclipse how to compile and run the project.</li></ul>
+<h2>How to get started</h2><span style="font-family: verdana,arial,'sans serif';"></span><p>Many classes in the starter code are heavily commented and provide explanation about the code, as well as some explanation
+on what you are supposed to do and how. In particular, the following
+are good places to start:</p>
+<ul><li>The README file at the toplevel of the src directory.</li><li>The README file in the&nbsp;<span style="font-weight: bold;">minijava.parser.jcc </span>package.</li><li>The comments in <span style="font-weight: bold;">MiniJavaParser.java</span> in the&nbsp;<span style="font-weight: bold;">minijava.parser</span> package<span style="font-weight: bold;">.</span></li><li>The comments in the test files <span style="font-weight: bold;">Test2LexInternal.java</span>, <span style="font-weight: bold;">Test3Parse.java</span> and <span style="font-weight: bold;">Test4Parse.java</span>.<span style="font-weight: bold;"><br></span></li><li>You should also read Chapter 2,3 and 4 of the textbook.</li></ul><p>One
+further note: although you are allowed to change all code&nbsp;except
+for the tests, this does not mean that you actually have to change any
+code at all! In fact, you can complete this assignment simply by
+providing an appropriate <span style="font-weight: bold;">MiniJava.jj</span> file in <span style="font-weight: bold;">minijava.parser.jcc&nbsp;</span>package.</p><h2>Handing In</h2>
+<p>Only one of the team members should hand in for your team. <span style="font-weight: bold;">Make sure you have filled in the names of each team member in the src/README.txt file</span>. </p><p>The name of this project stage for the electronic handin is <b>
+project1</b>. Pleas use the <a href="http://www.cs.ubc.ca/ugrad/facilities/windows/handin.shtml">handin
+web-interface</a>.</p>
+<p>You should handin the entire contents of your project's src
+directory, excluding the test files&nbsp; which you were not supposed
+to change. We have provided a <span style="font-weight: bold;">build.xml</span> script in the src directory that packages up the correct files in a .zip file. <span style="font-weight: bold;">Please use this script</span>, it will ensure a uniform layout for all handed in materials, which makes it easier for the TA mark efficiently.</p><h3>Copying and Plagiarism Policy</h3><span style="font-family: verdana,arial,'sans serif';"></span><p>Please read the departmental policy on Plagiarism and Collaboration <a href="http://www.cs.ubc.ca/about/policies/collaboration.shtml">here</a>.</p><p>Plagiarism
+means passing of someone else's work as your own. Plagiarism is a
+serious offense and dealt with quite harshly by the
+university. Suspected cases are forwarded to the Dean's office and can
+result in suspension from the university as well as an entry on your
+academic transcript.</p><p>The key to using other people's code without
+commiting plagiarism is to make it absolutely clear how much of
+your assignment is your own work and how much it is&nbsp;based on someone else's
+work. When copying something, or adapting it as part of your solution, <span style="font-weight: bold;">you are fully responsible to provide clear references to your</span> <span style="font-weight: bold;">sources</span>, <span style="font-weight: bold;">and to what extent your solution is based on these sources</span>. Code comments are a good way to do that for programming assignments.</p><p>For
+the MiniJava project you will work in teams. It is expected that the
+work submitted as a team is collaborative work. As such we will treat
+the code as being developed by all team members together. We do not
+require you to provide comments about the details of exactly which team member wrote
+every single line of code. However, if we suspect
+there is an imbalance in the contributions made by each team member, we
+may ask for clarification and we may reflect this imbalance in your
+final marks.&nbsp;</p><p>You are not supposed to copy code or
+otherwise collaborate with people other than those on your own project team. If
+you do, then you can still submit your work for partial credit,
+provided that you provide adequate documentation of your sources and
+the extent to which your solution is derived from them.</p><p>When
+you are provided starter code, as is the case in most of our assignments and project drops, it is
+automatically assumed that you did not write the starter code yourself.
+It is therefore not necessary to provide explicit documentation to explain this
+obvious fact. On the other hand, it is automatically assumed that <span style="font-weight: bold;">you
+are claiming any code that differs from the original starter code as
+entirely your own work. If this is not the case, you are fully
+responsible to provide a clear and complete explanation of this fact.</span> Any failure to do so will be considered academic misconduct. Forgetfulness is not an excuse.</p></body></html>

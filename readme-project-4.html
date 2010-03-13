@@ -1,0 +1,90 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><title>CS411 - MiniJava Project</title>
+
+<style type="text/css">
+p, table, li, h1, h2, h3 {
+font-family: verdana,arial,'sans serif';
+}
+p, h1, h2, h3, table, li, hr {
+margin-left: 10pt;
+}
+body {
+}
+p, li {
+font-size: smaller;
+}
+pre {
+margin-left: 30pt;
+}
+</style></head>
+<body>
+<h1>CPSC 411 - Stage 4: Instruction Selection</h1>
+<p>In
+this stage of the project we are doing the work described
+in Chapters 9 of the book. This stage of the compiler is responsible
+for converting the IR code into assembly language for particular target
+architecture (x86 in our case).</p><h2>Project Setup</h2><p><span style="font-weight: bold; color: red;">Warning:</span>
+Before installing the new files, it is advisable to make a backup copy of
+your project. Otherwise you run the risk of overwriting any
+changes you have made to some of the files that were provided in earlier phases.</p><p>The
+zip file in which these instructions are contained is an archived copy
+of an Eclipse project. To import this project into Eclipse do as
+follows:</p><ol><li>Select "File &gt; Import" Menu.</li><li>Select "General &gt; Existing Projects into Workspace".</li><li>Select&nbsp;"Select Archive file" and Browse for this .zip file.</li><li>Select&nbsp;the project and click "Finish".</li></ol><p>The project is set up with a number of JUnit tests. The provided tests should be thought of&nbsp;as an <span style="font-weight: bold;">executable specification</span>. This means that<span style="font-weight: bold;"> you should not change any code in the test classes</span>.&nbsp;Otherwise
+you are free to change any and all code in the project. We also
+encourage you to create additional tests, to more thoroughly test your
+solution.</p><p>Test classes<span style="font-weight: bold;"><span style="font-weight: bold;"> </span></span>who's
+name contains the word "Internal" are an exception to the "don't change
+the tests" rule. These tests are intended to test a chunk of
+functionality that is "internal" to your solution.&nbsp; <span style="font-weight: bold;"><span style="font-weight: bold;"></span></span></p><p>The project contains the same files from the previous stage with the following new files:</p><ul><li><span style="font-weight: bold;">src</span></li><ul><li><span style="font-weight: bold;">minijava.test.codegen</span>: Tests for this stage of the compiler.</li></ul><ul><li><span style="font-weight: bold;">minijava.codegen:&nbsp;</span>This package contains the instruction selection implementation&nbsp;</li></ul><ul><ul><li><span style="font-weight: bold;">assem:</span> This sub package corresponds to the Assem package from the textbook.</li><li><span style="font-weight: bold;">patterns: </span>This sub package provides a pattern matching infrastructure to create and match patterns to IR trees (as explained in lecture).</li><li><span style="font-weight: bold;">muncher:</span> This sub package defines the class Muncher. You implement your X86Muncher as a subclass of Muncher.</li><li><span style="font-weight: bold;">X86MuncherExample.java</span>:&nbsp; An example of how to create a subclass of Muncher.</li></ul></ul></ul><p>A
+few files where changed compared to the previous project drop. Most of
+them are inconsequential typos in comments, but one of them is
+significant:</p><ul><li><span style="font-weight: bold;">src&nbsp;</span></li><ul><li><span style="font-weight: bold;">minijava.ir:</span>&nbsp;</li></ul><ul><ul><li><span style="font-weight: bold;">frame:&nbsp;</span>Some methods where added to the Frame class.</li></ul></ul></ul><h2>Inheritance</h2><p>The
+implementation of inheritance in MiniJava is optional. We may come back
+to this later if we have time to cover the material from Chapter 14 of
+the textbook. You may attempt to implement inheritance support if you like an extra challenge.</p><ul><ul><span style="font-family: verdana,arial,'sans serif';"></span></ul></ul>
+<h2>How to get started</h2><p>The
+tests for this part of the assignment are in minijava.test.codegen. As
+always you are free to change any/all code you wish as long as you
+don't break the provided tests.</p><p>However,
+you are essentially
+provided with a "complete" implementation of a generic Maximal munch
+code generator. To make this generic implementation work for a
+specific target architecture, it needs to be initialized with a set of
+architecture specific MunchRules. To provide your definition of these
+rules proceed as follows:</p><ol><li>Create a package minijava.codegen.x86 (try to keep all your code in here).</li><li>Copy the class X86MuncherExample.java into this package and rename it to X86Muncher.java.</li><li>Provide
+an appropriate implementation of the "newMuncher" method in your X86Frame
+class (it should create an instance of X86Muncher).</li><li>Add
+more and more rules to your X86Muncher class, until you are satisfied
+that it produces "good" X86 code from the IR, for all the Unit tests.</li></ol><p>Things to read and browse:</p><ol><li>Chapter 9 of the book.</li><li>The slides on "Instruction Selection" (for some extra info on the pattern and munch rule framework)</li><li>Explore the code in the codegen.assem and codegen.muncher packages if you are not certain how some of it works.</li></ol><span style="font-family: verdana,arial,'sans serif';"></span><h2>Handing In</h2>
+<p>Only one of the team members should hand in for your team. <span style="font-weight: bold;">Make sure you have filled in the names of each team member in the src/README_stage4.txt file</span>. </p><p>The name of this project stage for the electronic handin is <b>
+project4</b>. Please use the <a href="http://www.cs.ubc.ca/ugrad/facilities/windows/handin.shtml">handin
+web-interface</a>.</p>
+<p>You should handin the entire contents of your project's src
+directory, excluding the test files. We have provided a <span style="font-weight: bold;">build.xml</span> script in the src directory that packages up the correct files in a .zip file. <span style="font-weight: bold;">Please use this script</span>, it will ensure a uniform layout for all handed in materials, which makes it easier for the TA.</p><h3>Copying and Plagiarism Policy</h3><span style="font-family: verdana,arial,'sans serif';"></span><p>Please read the departmental policy on Plagiarism and Collaboration <a href="http://www.cs.ubc.ca/about/policies/collaboration.shtml">here</a>.</p><p>Plagiarism
+means passing of someone else's work as your own. Plagiarism is a
+serious offense and dealt with quite harshly by the
+university. Suspected cases are forwarded to the Dean's office and can
+result in suspension from the university as well as an entry on your
+academic transcript.</p><p>The key to using other people's code without
+committing plagiarism is to make it absolutely clear how much of
+your assignment is your own work and how much it is&nbsp;based on someone else's
+work. When copying something, or adapting it as part of your solution, <span style="font-weight: bold;">you are fully responsible to provide clear references to your</span> <span style="font-weight: bold;">sources</span>, <span style="font-weight: bold;">and to what extent your solution is based on these sources</span>. Code comments are a good way to do that for programming assignments.</p><p>For
+the MiniJava project you will work in teams. It is expected that the
+work submitted as a team is collaborative work. As such we will treat
+the code as being developed by all team members together. We do not
+require you to provide comments about the details of exactly which team member wrote
+every single line of code. However, if we suspect
+there is an imbalance in the contributions made by each team member, we
+may ask for clarification and we may reflect this imbalance in your
+final marks.&nbsp;</p><p>You are not supposed to copy code or
+otherwise collaborate with people other than those on your own project team. If
+you do, then you can still submit your work for partial credit,
+provided that you provide adequate documentation of your sources and
+the extent to which your solution is derived from them.</p><p>When
+you are provided starter code, as is the case in most of our assignments and project drops, it is
+automatically assumed that you did not write the starter code yourself.
+It is therefore not necessary to provide explicit documentation to explain this
+obvious fact. On the other hand, it is automatically assumed that <span style="font-weight: bold;">you
+are claiming any code that differs from the original starter code as
+entirely your own work. If this is not the case, you are fully
+responsible to provide a clear and complete explanation of this fact.</span> Any failure to do so will be considered academic misconduct. Forgetfulness is not an excuse.</p></body></html>
