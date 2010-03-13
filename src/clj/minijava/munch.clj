@@ -5,13 +5,23 @@
 (defn isit? [x t]
 (= (type x) t) 
 )
+
+(def instr '())
   
 
 (defn emit [x]
 ;;I'm not sure what the best way to implement this is yet. But emit just appends x to the end of a list, so theres not too much to it.
 ;;emit should return nil.
-	nil
+	(do
+			(set! instr (cons x instr)) 
+	nil)
 )
+
+(defn select [irtree]
+	(do
+		(set! instr '()) ;;reset instr to empty list
+		(munch irtree)
+		 instr))
 
 ;;ir is the root of the ir tree to munch; args is an (optional) list of the 'children' of the root node, for pattern matching purposes.
 ;;its ok to omit args.
