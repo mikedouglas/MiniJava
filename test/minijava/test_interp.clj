@@ -1,24 +1,21 @@
 (ns minijava.test-interp
   (:use clojure.test
         clojure.contrib.def
-        (minijava ast interp label tree utility x86))
-  ;;(:import (minijava.ir.temp.label))
+        (minijava interp label tree typechecker utility x86))
   (:require [minijava.ir :as ir]))
  
 (import-ast-classes)
 
-
 (defonce- empty-frame (new-x86 0 ["obj"]))
 
-
 (deftest test-eval-const
-  (let [const (tree (parse-exp "5") empty-frame)]
+  (let [const (tree (parse-int "5") empty-frame)]
     (is (= 5 (eval-ir const empty-env)))))
  
 (deftest test-eval-binop
-  (let [plus (tree (parse-exp "5 + 5") empty-frame)
-        minus (tree (parse-exp "5 - 5") empty-frame)
-        times (tree (parse-exp "5 * 5") empty-frame)]
+  (let [plus  (tree (parse-int "5 + 5") empty-frame)
+        minus (tree (parse-int "5 - 5") empty-frame)
+        times (tree (parse-int "5 * 5") empty-frame)]
     (is (= 10 (eval-ir plus empty-env)))
     (is (= 0 (eval-ir minus empty-env)))
     (is (= 25 (eval-ir times empty-env)))))
@@ -108,6 +105,26 @@
              f
              (list (ir/Temp tmp)))))))
 
+(deftest test-classes
+  (let [prog (tree (minijava.ast.ClassDecl. 
+                     "hello" nil [] 
+                     [(parse-meth "public int func() { 
+                                    int b; 
+                                    boolean a; 
+                                    a = true; 
+                                    System.out.println(3); 
+                                    return 5; 
+                                   }")])
+                   nil)
+        entry-point (list (ir/Call (ir/Name "hello_func") []))]
+    (is (= 5 (eval-prog entry-point (get prog "hello"))))))
+
+(deftest test-print
+  (let [prog (ir/Call (ir/Name "print") [(ir/Const 5)])]
+    (is (= (with-out-str
+             (eval-prog prog))
+           "5\n"))))
+
 ;; sanity checks
 (deftest test-label
   (let [t (label)
@@ -116,11 +133,4 @@
            (first prog)))
     (is (= (hash-map t 5)
            (hash-map (:lbl (first prog)) 5)))))
-
-
-(deftest test-print
-  (let [prog (ir/Call (ir/Name "print") [(ir/Const 5)])]
-    (is (= (with-out-str
-             (eval-prog prog))
-           "5\n"))))
 

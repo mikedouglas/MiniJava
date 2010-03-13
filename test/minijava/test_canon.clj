@@ -42,13 +42,10 @@
 
  (deftest test-commute
   (let [s (Statement (Const 0))
-  			m (Move s (Const 2))
-  			s2 (Statement (Statement (Const 1)))
-  			m2 (Move s2 (Const 2))
-  			m3 (Move s2 (Statement (Const 2)))
-  			]
-  			(is (commutes? m))
-  			(is  (commutes? m2))
-  			(is (not (commutes? m3)))
-  			) 
- )
+        m (Move s (Const 2))
+        s2 (Statement (Statement (Const 1)))
+        m2 (Move s2 (Const 2))
+        m3 (Move s2 (Statement (Const 2)))]
+    (is (commutes? m))
+    (is (commutes? m2))
+    (is (not (commutes? m3)))) )

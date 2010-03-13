@@ -51,51 +51,48 @@
 (defn matches-eseq-left?
   [s]
   (or
-   (and (= :minijava.ir/BinaryOp (type s)) ;; What follows are the conditions listed in figure 8.1
-       (= :minijava.ir/ExpSeq (type (:exp1 s))))
+   (and (= :minijava.ir/BinaryOp (type s)) ;; the conditions listed in figure 8.1
+        (= :minijava.ir/ExpSeq (type (:exp1 s))))
    (and (= :minijava.ir/Mem (type s)) 
-       (= :minijava.ir/ExpSeq (type (:adr s))))
+        (= :minijava.ir/ExpSeq (type (:adr s))))
    (and (= :minijava.ir/Jump (type s)) 
-       (= :minijava.ir/ExpSeq (type (:lbl s))))
+        (= :minijava.ir/ExpSeq (type (:lbl s))))
    (and (= :minijava.ir/Conditional (type s)) 
-       (= :minijava.ir/ExpSeq (type (:exp1 s))))
- ))
+        (= :minijava.ir/ExpSeq (type (:exp1 s))))))
  
 
 (defn matches-eseq-commute?
   [s]
   (or
-  (and (= :minijava.ir/BinaryOp (type s)) ;; What follows are the conditions listed in figure 8.1
-       (= :minijava.ir/ExpSeq (type (:exp2 s))))
-   (and (= :minijava.ir/Conditional (type s)) 
-       (= :minijava.ir/ExpSeq (type (:exp2 s))))             
-  ))
+   (and (= :minijava.ir/BinaryOp (type s)) ;; the conditions listed in figure 8.1
+        (= :minijava.ir/ExpSeq (type (:exp2 s))))
+   (and (= :minijava.ir/Conditional (type s))
+        (= :minijava.ir/ExpSeq (type (:exp2 s))))))
 
 (defn isit? [x t]
-(= (type x) t) 
-)
+  (= (type x) t))
 
-;;Support function for Commutes, taken from Canon.java
- (defn isNop [a]
-  (and (isit? a :minijava.ir/Statement) (isit? (:exp a) :minijava.ir/Const))
-  )
+;; support function for Commutes, taken from Canon.java
+(defn isNop [a]
+  (and (isit? a :minijava.ir/Statement) (isit? (:exp a) :minijava.ir/Const)))
 
-;;Commutes, translated from Canon.java
+;; commutes, translated from Canon.java
 (defn commutes
   [a b]
-  (or (isNop a) (isit? b :minijava.ir/Name) (isit? b :minijava.ir/Const) )) 
+  (or (isNop a) (isit? b :minijava.ir/Name) (isit? b :minijava.ir/Const)))
 
-;;Commutes? s is whether the children of s commute (as opposed to whether s commutes with something else.
-;;s is assumed to have two child functions here - other wise it wouldn't match the Eseq form so we wouldn't try to call commute? on it.
+;; commutes? s is whether the children of s commute (as opposed to
+;; whether s commutes with something else.  s is assumed to have two
+;; child functions here - other wise it wouldn't match the Eseq form so
+;; we wouldn't try to call commute? on it.
 (defn commutes?
-	[s]
-	(commutes (second (first s)) (second (second s)))
-)
+  [s]
+  (commutes (second (first s)) (second (second s))))
 
 (defn canon
   "Converts a Seq to linear IR form."
   [seqs]
-  (flatten ;; possibly expensive
+  (flatten
    (for [s (:seqs seqs)]
     (cond
      (matches-eseq-left? s) (remove-eseq-left s)

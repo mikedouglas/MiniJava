@@ -2,7 +2,6 @@
   (:use clojure.contrib.str-utils
         minijava.ir))
 
-
 (defprotocol Frame
   (allocLocal [this sym escapes?])
   (lookup [this sym])
@@ -14,7 +13,6 @@
 
 (defprotocol Access
   (exp [this]))
-
 
 (deftype InFrame [offset]
   Access
