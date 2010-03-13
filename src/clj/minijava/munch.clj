@@ -6,6 +6,9 @@
 (= (type x) t) 
 )
   
+(defn emit [x]
+
+)
 
 ;;ir is the root of the ir tree to munch; args is an (optional) list of the 'children' of the root node, for pattern matching purposes.
 ;;its ok to omit args.
@@ -20,7 +23,6 @@
 ;;This method contains a bunch of special cases, organized by preference (size), of x86 statements that can 
 ;;do a Move on a Mem and then (any) expression.
 ;;Similar methods can be defined for a Move and any combination of its arguments, all the way up to Move (Expression Expression)
-;;Note that src and dst are swapped in order relative to the book.
 (defmethod munch :minijava.ir/Move :minijava.ir/Expression :minijava.ir/Mem
   [x src dst] 			
   (cond 
@@ -29,9 +31,27 @@
   	(and (isit? (:adr dst) :minijava.ir/BinaryOp) (= (:op (:adr dst)) :+)  (isit? (:exp1 (:adr dst)) :minijava.ir/Const)) 
   						(do (munch (:exp2 (:adr dst)));;Here, we need to muncn e1 and e2 in the statement above: that is, the non-const argument to Binop, and the Expression for Move. 
   								(munch src)
-  								 :STORE) ;;AFTER munching these two statements, return the result of this statement.
+  								 (emit :STORE)) ;;AFTER munching these two statements, return the result of this statement.
   								 
 
 
   ))
+  
+  
+  ;;Default Move pattern: just use Movl
+  (defmethod munch :minijava.ir/Move :minijava.ir/Expression :minijava.ir/Expression
+  [x src dst] 	
+  	;;Move(e1,e2) -> Movl e1 e2 
+  	  (do (munch src) 
+  				(munch dst)
+  				 (emit :movl))) ;;AFTER munching these two statements, return the result of this statement.
+  								 
+  ;;Default Mem pattern: as far as I can tell, you cannot have a Mem statement by itself in x86 - it has no destination.
+  ;;So we'll invent a new temp, and move the memory location into that temp?
+  (defmethod munch :minijava.ir/Mem :minijava.ir/Expression
+  [x src dst] 	
+  	;;Mem(addr) -> Movl [adr] e2 
+  	  (do (munch src) 
+  				(munch dst)
+  				 (emit :movl))) ;;AFTER munching these two statements, return the result of this statement.
   
