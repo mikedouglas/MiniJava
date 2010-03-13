@@ -10,4 +10,4 @@
 				
 				 (is (= (select tree)
            '(Movl (MEMORY t1 (CONST 2))t2))
-				))
+				)))
