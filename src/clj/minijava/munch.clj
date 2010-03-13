@@ -1,5 +1,5 @@
-(ns minijava.selection
-  (:use [minijava.ir ]))
+(ns minijava.munch
+  (:use (minijava ir gas)))
 
 ;;helper method to do instanceof
 (defn isit? [x t]
@@ -9,10 +9,13 @@
 
 (defn emit [x]
 ;;I'm not sure what the best way to implement this is yet. But emit just appends x to the end of a list, so theres not too much to it.
+;;emit should return nil.
+	nil
 )
 
 ;;ir is the root of the ir tree to munch; args is an (optional) list of the 'children' of the root node, for pattern matching purposes.
 ;;its ok to omit args.
+;;Munch rules for statements return nil, munch rules for expressions return Temps
 (defmulti munch (fn [ir & args] (type x)))
 
 (defmethod munch  :default
@@ -32,10 +35,7 @@
   	(and (isit? (:adr dst) :minijava.ir/BinaryOp) (= (:op (:adr dst)) :+)  (isit? (:exp1 (:adr dst)) :minijava.ir/Const)) 
   						(do (munch (:exp2 (:adr dst)));;Here, we need to muncn e1 and e2 in the statement above: that is, the non-const argument to Binop, and the Expression for Move. 
   								(munch src)
-  								 (emit :STORE)) ;;AFTER munching these two statements, return the result of this statement.
-  								 
-
-
+  								 (emit :STORE)) ;;AFTER munching these two statements, emit the code.
   ))
   
   
@@ -43,16 +43,17 @@
   (defmethod munch :minijava.ir/Move :minijava.ir/Expression :minijava.ir/Expression
   [x src dst] 	
   	;;Move(e1,e2) -> Movl e1 e2 
-  	  (do (munch src) 
-  				(munch dst)
-  				 (emit :movl))) ;;AFTER munching these two statements, return the result of this statement.
+  	  (let [s (munch src) 
+  				 d (munch dst)]
+  				 (emit (movl s d)))) ;;AFTER munching these two statements, emit Movl.
   								 
-  ;;Default Mem pattern: as far as I can tell, you cannot have a Mem statement by itself in x86 - it has no destination.
-  ;;So we'll invent a new temp, and move the memory location into that temp?
+  ;;Default Mem pattern: Invent a new temporary, and move the memory position into that temporary. 
+  ;;Since Mem is an expression, return that temporary.
   (defmethod munch :minijava.ir/Mem :minijava.ir/Expression
-  [x src dst] 	
-  	;;Mem(addr) -> Movl [adr] e2 
-  	  (do (munch src) 
-  				(munch dst)
-  				 (emit :movl))) ;;AFTER munching these two statements, return the result of this statement.
+  [x adr] 	
+  	;;Mem(addr) -> Movl [adr] Temp 
+  	(let [d (Temp (minijava.ir.temp.Temp.))
+  	  		s (munch adr)]  				
+  				 (emit (movl s d))
+  				 dst)) ;;Since Mem is an expression, it returns a temp.
   
