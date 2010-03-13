@@ -6,6 +6,17 @@
 (deftype movl [src dst]
   clojure.lang.IPersistentMap)
   
+  ;;this is NOT an x86 instruction - it is a constant argument to an instruction (ie addl $2 %eax)
+  (deftype CONST [value]
+      clojure.lang.IPersistentMap)
+      
+  ;;this is NOT an x86 instruction - it is a memory lookup argument for an instruction (ie addl 2(%edx) %eax)
+  ;;offset is optional; its the number of bytes off from the address to read from
+  (deftype MEMORY [adr offset?]
+      clojure.lang.IPersistentMap)   
+   
+
+      
   ;;Adds the first operand to the second, storing the result in the second
  (deftype addl [src dst]
   clojure.lang.IPersistentMap)
