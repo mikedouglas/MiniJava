@@ -1,5 +1,5 @@
 (ns minijava.munch
-  (:use (minijava ir gas)))
+  (:use (minijava exp ir gas)))
 
 
 ;;helper method to do instanceof
@@ -23,12 +23,12 @@
 ;;ir is the root of the ir tree to munch; args is an (optional) list of the 'children' of the root node, for pattern matching purposes.
 ;;its ok to omit args.
 ;;Munch rules for statements return nil, munch rules for expressions return Temps
-(defmulti munchMap (fn [ir args] (vec (map type (cons ir args)))))
+(defmulti munchMap (fn [ir & args] (vec (map type (cons ir args)))))
 
 
 (defn munch 
 	[x] ;;note: vec forces evaluation of the lazy sequence produced by vars into a vector, required by multimethod dispatching
-	(munchMap x  (vals x)));;if a call is made to munch with just the ir root argument, call back munchStm with the ir root followed by its children (for easier pattern matching).
+	(apply munchMap (conj  (vals x) x)));;if a call is made to munch with just the ir root argument, call back munchStm with the ir root followed by its children (for easier pattern matching).
 
 ;;Entry function to maximal munch. 
 (defn select [irtree]
@@ -41,6 +41,7 @@
 ;;This method contains a bunch of special cases, organized by preference (size), of x86 statements that can 
 ;;do a Move on a Mem and then (any) expression.
 ;;Similar methods can be defined for a Move and any combination of its arguments, all the way up to Move (Expression Expression)
+
 (defmethod munchMap [:minijava.ir/Move :minijava.exp/expression :minijava.ir/Mem]
   [x src dst] 			
   (cond 
