@@ -17,18 +17,22 @@
 	nil)
 )
 
+
+
+;;ir is the root of the ir tree to munch; args is an (optional) list of the 'children' of the root node, for pattern matching purposes.
+;;its ok to omit args.
+;;Munch rules for statements return nil, munch rules for expressions return Temps
+(defmulti munch (fn [ir & args] (map type (cons ir args))))
+
+
+;;Entry function to maximal munch. 
 (defn select [irtree]
 	(do
 		(set! instr '()) ;;reset instr to empty list
 		(munch irtree)
 		 instr))
 
-;;ir is the root of the ir tree to munch; args is an (optional) list of the 'children' of the root node, for pattern matching purposes.
-;;its ok to omit args.
-;;Munch rules for statements return nil, munch rules for expressions return Temps
-(defmulti munch (fn [ir & args] (type x)))
-
-(defmethod munch  :default
+(defmethod munch  [:default]
 	[x]
 	(munch x (vals x)) ;;if a call is made to munch with just the ir root argument, call back munchStm with the ir root followed by its children (for easier pattern matching).
 )
@@ -37,7 +41,7 @@
 ;;This method contains a bunch of special cases, organized by preference (size), of x86 statements that can 
 ;;do a Move on a Mem and then (any) expression.
 ;;Similar methods can be defined for a Move and any combination of its arguments, all the way up to Move (Expression Expression)
-(defmethod munch :minijava.ir/Move :minijava.ir/Expression :minijava.ir/Mem
+(defmethod munch [:minijava.ir/Move :minijava.ir/Expression :minijava.ir/Mem]
   [x src dst] 			
   (cond 
   	;;Move(Mem(Binop(Plus(Const(i),e1)),e2) -> movl $i[e1] e2
@@ -56,12 +60,12 @@
   	(true)
   			(let [adr (munch (:adr src))
   						e2 (munch dst) ]
-  						(emit (movl (MEMORY e1) e2)))
+  						(emit (movl (MEMORY adr) e2)))
   ))
   
   
   ;;Default Move pattern: just use Movl
-  (defmethod munch :minijava.ir/Move :minijava.ir/Expression :minijava.ir/Expression
+  (defmethod munch [:minijava.ir/Move :minijava.ir/Expression :minijava.ir/Expression]
   [x src dst] 	
   	;;Move(e1,e2) -> Movl e1 e2 
   	  (let [s (munch src) 
@@ -70,7 +74,7 @@
   								 
   ;;Default Mem pattern: Invent a new temporary, and move the memory at this address into that temporary. 
   ;;Since Mem is an expression, return that temporary.
-  (defmethod munch :minijava.ir/Mem :minijava.ir/Expression
+  (defmethod munch [:minijava.ir/Mem :minijava.ir/Expression]
   [x adr] 	
   	;;Mem(addr) -> Movl [adr] Temp 
   	(let [d (Temp (minijava.ir.temp.Temp.))
@@ -78,9 +82,9 @@
   				 (emit (movl s d))
   				 d)) ;;Since Mem is an expression, it returns a temp.
   
-  (defmethod munch :minijava.ir/Const
+  (defmethod munch [:minijava.ir/Const]
   [x] 	
   	;;Const(i) -> Movl $i Temp 
   	(let [d (Temp (minijava.ir.temp.Temp.))]  				
   				 (emit (movl (CONST (:val x) d))
-  				 d)) ;;Since Mem is an expression, it returns a temp.
+  				 d))) ;;Since Mem is an expression, it returns a temp.
