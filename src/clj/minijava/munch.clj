@@ -6,14 +6,14 @@
 (= (type x) t) 
 )
 
-(def instr '())
+(def *instr* '())
   
 
 (defn emit [x]
 ;;I'm not sure what the best way to implement this is yet. But emit just appends x to the end of a list, so theres not too much to it.
 ;;emit should return nil.
 	(do
-			(set! instr (cons x instr)) 
+			(binding [*instr* (cons x *instr*)]) 
 	nil)
 )
 
@@ -28,9 +28,9 @@
 ;;Entry function to maximal munch. 
 (defn select [irtree]
 	(do
-		(set! instr '()) ;;reset instr to empty list
+		(binding [*instr* '()]) ;;reset instr to empty list
 		(munch irtree)
-		 instr))
+		 *instr*))
 
 (defmethod munch  [:default]
 	[x]
