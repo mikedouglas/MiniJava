@@ -6,8 +6,9 @@
 (= (type x) t) 
 )
   
-(defn emit [x]
 
+(defn emit [x]
+;;I'm not sure what the best way to implement this is yet. But emit just appends x to the end of a list, so theres not too much to it.
 )
 
 ;;ir is the root of the ir tree to munch; args is an (optional) list of the 'children' of the root node, for pattern matching purposes.
