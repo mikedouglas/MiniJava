@@ -42,7 +42,9 @@
 	(do
 		(reset! *instr* '()) ;;reset instr to empty list
 		(munch irtree)
-		 (reverse (deref *instr*))))
+		(reverse (@ *instr*))))
+
+
 
 ;;Munch the move statement
 ;;This method contains a bunch of special cases, organized by preference (size), of x86 statements that can 
@@ -89,7 +91,11 @@
   	  		s (munch adr)]  				
   				 (emit (movl s d))
   				 d)) ;;Since Mem is an expression, it returns a temp.
-  
+
+(defmethod munchMap [:minijava.ir/Temp minijava.ir.temp.Temp]
+  [exp temp]
+  exp) ;;Leave temps alone
+
   				 
 (defmethod munchMap [:minijava.ir/Const java.lang.Integer]
   [x value] 	
@@ -97,25 +103,26 @@
   	(let [d (Temp (minijava.ir.temp.Temp.))]  				
   				 (emit (movl (CONST value) d))
   				 d)) ;;Since Mem is an expression, it returns a temp.
-  				 
-   				 
- (defmethod munchMap [:minijava.ir/Temp minijava.ir.temp.Temp]
-  [exp temp]
-  exp)  ;;Leave temps alone
-  	
- ;; Handles binop cases
-;(defmulti munchOp (fn [op r1 r2] op))
-;(defmulti munchOp [:+] [op rand1 rand2])
- 
- (defmethod munchMap [:minijava.ir/BinaryOp :+ :minijava.ir/Const  :minijava.ir/Const]
-  [exp op rand1 rand2]
-   (emit (CONST (+ (:val rand1) (:val rand2)))))
-      
- (defmethod munchMap [:minijava.ir/BinaryOp :+ :minijava.ir/Const  :minijava.exp/expression]
-  [exp op rand1 rand2]       
-        (emit (addl (CONST (:val rand1))
-                    (munch rand2))))
 
+
+;; Constant operands can be compiled out into a CONST
+(defmethod munchMap [:minijava.ir/BinaryOp :+ :minijava.ir/Const  :minijava.ir/Const]
+ [exp op rand1 rand2]
+  (emit (CONST (+ (:val rand1) (:val rand2)))))
+
+(defmethod munchMap [:minijava.ir/BinaryOp :- :minijava.ir/Const  :minijava.ir/Const]
+ [exp op rand1 rand2]
+  (emit (CONST (- (:val rand1) (:val rand2)))))
+
+(defmethod munchMap [:minijava.ir/BinaryOp :* :minijava.ir/Const  :minijava.ir/Const]
+ [exp op rand1 rand2]
+  (emit (CONST (* (:val rand1) (:val rand2)))))
+    
+;; Other BinOp cases
+(defmethod munchMap [:minijava.ir/BinaryOp :+ :minijava.ir/Const  :minijava.exp/expression]
+ [exp op rand1 rand2]       
+       (emit (addl (CONST (:val rand1))
+                   (munch rand2))))
 
 (defmethod munchMap [:minijava.ir/BinaryOp :+ :minijava.exp/expression :minijava.ir/Const ]
   [exp op rand1 rand2]    

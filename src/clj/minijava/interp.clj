@@ -2,12 +2,12 @@
   (:use (minijava ir)
         clojure.contrib.pprint)
   (:import (minijava.ir.temp.label)))
- 
+
 (defstruct env :temps :mem :labels :methods)
- 
-(def empty-env
+
+(def empty-env 
   (atom (struct env {} {} {} {})))
- 
+
 (defn write-temp [env key val]
   (swap! env (fn [e k v] (assoc-in e [:temps k] v)) key val))
 (defn read-temp [env key]
@@ -103,14 +103,14 @@
 (defmethod eval-ir :minijava.ir/Mem [exp env]
   (let [addr (eval-ir (:adr exp) env)]
     (read-mem env addr)))
- 
+
 ;; This case needed for Mem case above
 (defmethod eval-ir java.lang.Integer [exp env]
   exp)
- 
+
 (defmethod eval-ir :minijava.ir/Temp [exp env]
   (read-temp env (:reg exp)))
- 
+
 ;; Function call
 (defmethod eval-ir :minijava.ir/Call [exp env]
   (let [fn-name (:lbl (:lbl exp))
@@ -134,11 +134,11 @@
           (recur (rest stms)
                  (assoc map (:lbl (first stms)) (rest stms)))
         true (recur (rest stms) map)))
- 
+
 ;; top-level eval for a sequence of statements
-(defn eval-prog
+(defn eval-prog 
   ([stms] (eval-prog stms (hash-map)))
   ([stms methods]
     (let [labels (build-label-map stms (hash-map))]
-      (eval-ir stms
+      (eval-ir stms 
                (atom (struct env (hash-map) (hash-map) labels))))))

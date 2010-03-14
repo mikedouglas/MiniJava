@@ -25,6 +25,3 @@
 				 (is (= (select tree)
           (list(movl (MEMORY t1 2)t2)))
 				)))
-
-
-				
