@@ -18,12 +18,19 @@
 	nil)
 )
 
-
+;;utility method that is almost exactly the same as 'type', except that in the case of a symbol (like :+),
+;;it returns that symbol, instead of its type. This is so that we can dispatch on BinaryOp's operation (:+. :-, etc). 
+;;Otherwise they all get turned into clojure.lang.Keyword
+(defn symbol-or-type [x]
+	(if (isit? x clojure.lang.Keyword)
+		x
+		(type x))
+)
 
 ;;ir is the root of the ir tree to munch; args is an (optional) list of the 'children' of the root node, for pattern matching purposes.
 ;;its ok to omit args.
 ;;Munch rules for statements return nil, munch rules for expressions return Temps
-(defmulti munchMap (fn [ir & args] (vec (map type (cons ir args)))))
+(defmulti munchMap (fn [ir & args] (vec (map symbol-or-type (cons ir args)))))
 
 
 (defn munch 
@@ -83,27 +90,10 @@
   				 (emit (movl s d))
   				 d)) ;;Since Mem is an expression, it returns a temp.
 
-;; Handles binop cases
-(defmulti munchOp (fn [op r1 r2] op))
-
-(defmethod munchOp :+ [op rand1 rand2]
-  (cond (and (isit? rand1 :minijava.ir/Const)
-             (isit? rand2 :minijava.ir/Const))
-        (emit (CONST (+ (:val rand1) (:val Arand2))))
-        (isit? rand1 :minijava.ir/Const)
-        (emit (addl (CONST (:val rand1))
-                    (munch rand2)))
-        (isit? rand2 :minijava.ir/Const)
-        (emit (addl (CONST (:val rand2))
-                    (munch rand1)))))
-
-(defmethod munchMap [:minijava.ir/BinaryOp clojure.lang.Keyword :minijava.exp/expression :minijava.exp/expression]
-  [exp op rand1 rand2]
-  (munchOp op rand1 rand2))
-
 (defmethod munchMap [:minijava.ir/Temp minijava.ir.temp.Temp]
   [exp temp]
-  exp) 
+  exp) ;;Leave temps alone
+
   				 
 (defmethod munchMap [:minijava.ir/Const java.lang.Integer]
   [x value] 	
@@ -111,3 +101,30 @@
   	(let [d (Temp (minijava.ir.temp.Temp.))]  				
   				 (emit (movl (CONST value) d))
   				 d)) ;;Since Mem is an expression, it returns a temp.
+
+
+(defmethod munchMap [:minijava.ir/BinaryOp :+ :minijava.ir/Const  :minijava.ir/Const]
+ [exp op rand1 rand2]
+  (emit (CONST (+ (:val rand1) (:val rand2)))))
+     
+(defmethod munchMap [:minijava.ir/BinaryOp :+ :minijava.ir/Const  :minijava.exp/expression]
+ [exp op rand1 rand2]       
+       (emit (addl (CONST (:val rand1))
+                   (munch rand2))))
+
+
+(defmethod munchMap [:minijava.ir/BinaryOp :+ :minijava.exp/expression :minijava.ir/Const ]
+  [exp op rand1 rand2]       
+        (emit (addl (CONST (:val rand2))
+                    (munch rand1))))  
+  
+ ;;BinaryOp :- e1 e2 -> movl e1 e3 subbl e2 e3
+ (comment
+ (defmethod munchMap [:minijava.ir/BinaryOp :+  :minijava.exp/expression :minijava.exp/expression]
+  [x tmp] 	
+  	(let [e1 (munch e1)
+  			  e2 (munch e2)
+  			  d (Temp (minijava.ir.temp.Temp.))]
+  			  (do
+  			  (emit (movl  
+  			  ))))))
