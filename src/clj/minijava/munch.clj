@@ -44,8 +44,6 @@
 		(munch irtree)
 		(reverse  @*instr*)))
 
-
-
 ;;Munch the move statement
 ;;This method contains a bunch of special cases, organized by preference (size), of x86 statements that can 
 ;;do a Move on a Mem and then (any) expression.
