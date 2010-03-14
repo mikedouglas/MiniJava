@@ -2,6 +2,13 @@
   (:use (minijava gas ir munch)
         clojure.test))
 
+(deftest test-Binop
+				(let [tree (BinaryOp :+ (Const 2) (Const 1))]				
+				 (is (= (select tree)
+           (list (CONST 3)))
+				)))
+
+
 (deftest test-Move-Mem-Binop
 				(let [
 				   t1 (Temp (minijava.ir.temp.Temp.))
