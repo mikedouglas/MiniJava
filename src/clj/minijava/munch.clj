@@ -117,7 +117,7 @@
                     (munch rand2))))
 
 
-(defmethod munchMap [:minijava.ir/BinaryOp :+:minijava.ir/Const  :minijava.exp/expression]
+(defmethod munchMap [:minijava.ir/BinaryOp :+ :minijava.exp/expression :minijava.ir/Const ]
   [exp op rand1 rand2]       
         (emit (addl (CONST (:val rand2))
                     (munch rand1))))  
