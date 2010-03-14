@@ -6,8 +6,10 @@
 				(let [
 				   t1 (Temp (minijava.ir.temp.Temp.))
 				   t2 (Temp (minijava.ir.temp.Temp.))
-					tree (Move (Mem (BinaryOp :+ (Const 2) t1)) t2)]
+					tree (Move (t1 Mem (BinaryOp :+ (Const 2))) t2)]
 				
 				 (is (= (select tree)
            '(Movl (MEMORY t1 (CONST 2))t2))
-				))
+				)))
+
+				

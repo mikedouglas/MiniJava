@@ -90,3 +90,13 @@
   	(let [d (Temp (minijava.ir.temp.Temp.))]  				
   				 (emit (movl (CONST value) d))
   				 d)) ;;Since Mem is an expression, it returns a temp.
+  				 
+   				 
+(defmethod munchMap [:minijava.ir/Temp minijava.ir.temp.Temp]
+  [x tmp] 	
+  	d) ;;Leave temps alone
+  	
+ (defmethod munchMap [:minijava.ir/BinaryOp :+ :minijava.exp/expression :minijava.exp/expression]
+  [x tmp] 	
+  	d) ;;Leave temps alone
+ 
