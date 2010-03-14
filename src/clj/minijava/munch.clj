@@ -99,6 +99,10 @@
         (isit? rand2 :minijava.ir/Const)
         (emit (addl (CONST (:val rand2))
                     (munch rand1)))))
+
+(defmethod munchMap [:minijava.ir/Temp minijava.ir.temp.Temp]
+  [exp temp]
+  exp) 
   				 
 (defmethod munchMap [:minijava.ir/Const java.lang.Integer]
   [x value] 	
