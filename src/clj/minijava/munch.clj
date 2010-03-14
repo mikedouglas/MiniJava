@@ -14,7 +14,7 @@
 ;;I'm not sure what the best way to implement this is yet. But emit just appends x to the end of a list, so theres not too much to it.
 ;;emit should return nil.
 	(do
-			(reset! *instr* (cons x (deref *instr*))) 
+			(reset! *instr* (cons x @*instr*)) 
 	nil)
 )
 
@@ -42,7 +42,7 @@
 	(do
 		(reset! *instr* '()) ;;reset instr to empty list
 		(munch irtree)
-		(reverse (@ *instr*))))
+		(reverse  @*instr*)))
 
 
 
