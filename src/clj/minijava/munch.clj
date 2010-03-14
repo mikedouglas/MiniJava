@@ -84,11 +84,9 @@
   				 d)) ;;Since Mem is an expression, it returns a temp.
 
 ;; Handles binop cases
-;(defmulti munchOp (fn [op r1 r2] op))
-;(defmulti munchOp [:+] [op rand1 rand2])
+(defmulti munchOp (fn [op r1 r2] op))
 
-(defmethod munchMap [:minijava.ir/BinaryOp clojure.lang.Keyword :minijava.exp/expression :minijava.exp/expression]
-  [exp op rand1 rand2]
+(defmethod munchOp :+ [op rand1 rand2]
   (cond (and (isit? rand1 :minijava.ir/Const)
              (isit? rand2 :minijava.ir/Const))
         (emit (addl (CONST (:val rand1))
@@ -99,6 +97,10 @@
         (isit? rand2 :minijava.ir/Const)
         (emit (addl (CONST (:val rand2))
                     (munch rand1)))))
+
+(defmethod munchMap [:minijava.ir/BinaryOp clojure.lang.Keyword :minijava.exp/expression :minijava.exp/expression]
+  [exp op rand1 rand2]
+  (munchOp op rand1 rand2))
 
 (defmethod munchMap [:minijava.ir/Temp minijava.ir.temp.Temp]
   [exp temp]
