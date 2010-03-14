@@ -59,6 +59,35 @@
            (list (movl  (Temp (minijava.ir.temp.Temp. "t2")) (Temp (minijava.ir.temp.Temp. "t3")))
            			 (subl (Temp (minijava.ir.temp.Temp. "t1")) (Temp (minijava.ir.temp.Temp. "t3")))))
 				)))
+				
+;;Multiplication		
+(deftest test-Mult
+				(let [tree (BinaryOp :* (Const 2) (Const 1))]				
+				 (is (= (select tree)
+           (list (CONST 2)))
+				)))
+
+(deftest test-Mult-exp-const
+				(let [tree (BinaryOp :* (Temp (minijava.ir.temp.Temp. "t2")) (Const 1))]				
+				 (is (= (select tree)
+           (list (movl   (Temp (minijava.ir.temp.Temp. "t2"))  (Temp (minijava.ir.temp.Temp. "t1")))
+           			 (imull (CONST 1)(Temp (minijava.ir.temp.Temp. "t1"))))
+				))))
+				
+(deftest test-Mult-const-exp
+				(let [tree (BinaryOp :*  (Const 1) (Temp (minijava.ir.temp.Temp. "t2")))]				
+				 (is (= (select tree)
+           (list (movl  (CONST 1) (Temp (minijava.ir.temp.Temp. "t1")))
+           			 (imull (Temp (minijava.ir.temp.Temp. "t2")) (Temp (minijava.ir.temp.Temp. "t1"))))
+				))))				
+
+(deftest test-Mult-exp-exp
+				(let [tree (BinaryOp :* (Temp (minijava.ir.temp.Temp. "t1")) (Temp (minijava.ir.temp.Temp. "t2")) )]				
+				 (is (= (select tree)
+           (list (movl  (Temp (minijava.ir.temp.Temp. "t2")) (Temp (minijava.ir.temp.Temp. "t3")))
+           			 (imull (Temp (minijava.ir.temp.Temp. "t1")) (Temp (minijava.ir.temp.Temp. "t3")))))
+				)))
+				
 
 (deftest test-Move-Mem-Binop
 				(let [

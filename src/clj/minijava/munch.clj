@@ -165,3 +165,30 @@
   			 	(emit (movl  e2 d))
   			 	(emit (subl  e1 d))
   			  d))
+  			  
+  			  
+ ;;Multiplication
+(defmethod munchMap [:minijava.ir/BinaryOp :* :minijava.ir/Const  :minijava.exp/expression]
+ [exp op rand1 rand2]       
+  (let [d (Temp (minijava.ir.temp.Temp.)) ]
+  		 	(emit (movl  (CONST (:val rand1)) d))
+        (emit (imull  (munch rand2) d  ))
+                    d))
+
+(defmethod munchMap [:minijava.ir/BinaryOp :* :minijava.exp/expression :minijava.ir/Const ] 
+  [exp op rand1 rand2]    
+  (let [d (Temp (minijava.ir.temp.Temp.)) ]
+  		 	(emit (movl  (munch rand1) d))
+        (emit (imull (CONST (:val rand2)) d));;note: the ordering here matters, and is different than above, because subtraction is not commutative
+                    d))
+
+ (defmethod munchMap [:minijava.ir/BinaryOp :*  :minijava.exp/expression :minijava.exp/expression]
+  [x op exp1 exp2] 	
+  	(let [e1 (munch exp1)
+  			  e2 (munch exp2)
+  			  d (Temp (minijava.ir.temp.Temp.))]
+  			 	(emit (movl  e2 d))
+  			 	(emit (imull  e1 d))
+  			  d))
+  			  		  
+ 

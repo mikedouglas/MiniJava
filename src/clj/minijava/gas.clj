@@ -28,7 +28,7 @@
   ;;Performs signed multiplication and stores the result in the second operand. 
   ;;If the second operand is left out, it is assumed to be %eax, 
   ;;and the full result is stored in the double-word %edx:%eax.
- (deftype imul [src dst]
+ (deftype imull [src dst]
   clojure.lang.IPersistentMap)
   
   ;;This pushes what would be the next value for %eip onto the stack, and jumps to the destination address. Used for function calls.
