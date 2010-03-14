@@ -114,13 +114,16 @@
 
 (defmethod munchMap [:minijava.ir/BinaryOp :* :minijava.ir/Const  :minijava.ir/Const]
  [exp op rand1 rand2]
-  (emit (CONST (* (:val rand1) (:val rand2)))))
+  (emit (CONST (* (:val rand1) (:val rand2))))) 
     
 ;; Other BinOp cases
+;;Addition
 (defmethod munchMap [:minijava.ir/BinaryOp :+ :minijava.ir/Const  :minijava.exp/expression]
  [exp op rand1 rand2]       
-       (emit (addl (CONST (:val rand1))
-                   (munch rand2))))
+  (let [d (Temp (minijava.ir.temp.Temp.)) ]
+  		 	(emit (movl  (CONST (:val rand1)) d))
+        (emit (addl (munch rand2) d))
+                    d))
 
 (defmethod munchMap [:minijava.ir/BinaryOp :+ :minijava.exp/expression :minijava.ir/Const ]
   [exp op rand1 rand2]    
@@ -129,7 +132,7 @@
         (emit (addl (munch rand1) d))
                     d))
   
- ;;BinaryOp :- e1 e2 -> movl e1 e3 subbl e2 e3
+ ;;BinaryOp :+ e1 e2 -> movl e1 t, addl e2 t
  (defmethod munchMap [:minijava.ir/BinaryOp :+  :minijava.exp/expression :minijava.exp/expression]
   [x op exp1 exp2] 	
   	(let [e1 (munch exp1)
@@ -137,4 +140,28 @@
   			  d (Temp (minijava.ir.temp.Temp.))]
   			 	(emit (movl  e1 d))
   			 	(emit (addl  e2 d))
-  			  ))
+  			  d))
+  			  
+ ;;Subtraction
+(defmethod munchMap [:minijava.ir/BinaryOp :- :minijava.ir/Const  :minijava.exp/expression] ;;first exp - second exp
+ [exp op rand1 rand2]       
+  (let [d (Temp (minijava.ir.temp.Temp.)) ]
+  		 	(emit (movl  (CONST (:val rand1)) d))
+        (emit (subl  (munch rand2) d  ))
+                    d))
+
+(defmethod munchMap [:minijava.ir/BinaryOp :- :minijava.exp/expression :minijava.ir/Const ] ;;first exp - second exp
+  [exp op rand1 rand2]    
+  (let [d (Temp (minijava.ir.temp.Temp.)) ]
+  		 	(emit (movl  (munch rand1) d))
+        (emit (subl (CONST (:val rand2)) d));;note: the ordering here matters, and is different than above, because subtraction is not commutative
+                    d))
+
+ (defmethod munchMap [:minijava.ir/BinaryOp :-  :minijava.exp/expression :minijava.exp/expression];;first exp - second exp
+  [x op exp1 exp2] 	
+  	(let [e1 (munch exp1)
+  			  e2 (munch exp2)
+  			  d (Temp (minijava.ir.temp.Temp.))]
+  			 	(emit (movl  e2 d))
+  			 	(emit (subl  e1 d))
+  			  d))
