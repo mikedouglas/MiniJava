@@ -103,20 +103,29 @@
   				 d)) ;;Since Mem is an expression, it returns a temp.
 
 
+;; Constant operands can be compiled out into a CONST
 (defmethod munchMap [:minijava.ir/BinaryOp :+ :minijava.ir/Const  :minijava.ir/Const]
  [exp op rand1 rand2]
   (emit (CONST (+ (:val rand1) (:val rand2)))))
-     
+
+(defmethod munchMap [:minijava.ir/BinaryOp :- :minijava.ir/Const  :minijava.ir/Const]
+ [exp op rand1 rand2]
+  (emit (CONST (- (:val rand1) (:val rand2)))))
+
+(defmethod munchMap [:minijava.ir/BinaryOp :* :minijava.ir/Const  :minijava.ir/Const]
+ [exp op rand1 rand2]
+  (emit (CONST (* (:val rand1) (:val rand2)))))
+    
+;; Other BinOp cases
 (defmethod munchMap [:minijava.ir/BinaryOp :+ :minijava.ir/Const  :minijava.exp/expression]
  [exp op rand1 rand2]       
        (emit (addl (CONST (:val rand1))
                    (munch rand2))))
 
-
 (defmethod munchMap [:minijava.ir/BinaryOp :+ :minijava.exp/expression :minijava.ir/Const ]
   [exp op rand1 rand2]       
         (emit (addl (CONST (:val rand2))
-                    (munch rand1))))  
+                    (munch rand1))))
   
  ;;BinaryOp :- e1 e2 -> movl e1 e3 subbl e2 e3
  (comment
