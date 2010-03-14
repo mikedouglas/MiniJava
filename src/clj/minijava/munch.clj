@@ -179,7 +179,7 @@
   [exp op rand1 rand2]    
   (let [d (Temp (minijava.ir.temp.Temp.)) ]
   		 	(emit (movl  (munch rand1) d))
-        (emit (imull (CONST (:val rand2)) d));;note: the ordering here matters, and is different than above, because subtraction is not commutative
+        (emit (imull (CONST (:val rand2)) d))
                     d))
 
  (defmethod munchMap [:minijava.ir/BinaryOp :*  :minijava.exp/expression :minijava.exp/expression]
