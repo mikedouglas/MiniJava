@@ -1,6 +1,7 @@
-(ns minijava.x86
+(ns minijava.x86.frame
   (:use clojure.contrib.str-utils
-        minijava.ir))
+        minijava.ir)
+  (:require [minijava.temp :as tm]))
 
 (defprotocol Frame
   (allocLocal [this sym escapes?])
@@ -29,7 +30,7 @@
   (allocLocal [sym escapes?]
     (let [loc (if escapes?
                 (InFrame (swap! fp - 4))
-                (InReg (minijava.ir.temp.Temp.)))]
+                (InReg (tm/temp)))]
       (swap! locals conj loc)
       (swap! syms assoc sym loc)
       loc))

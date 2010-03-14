@@ -1,6 +1,7 @@
 (ns minijava.ir
   "Types for IR language."
-  (:use minijava.label))
+  (:require [minijava.label :as lb]
+            [minijava.temp  :as tm]))
 
 (declare Conditional Const ExpSeq Move Label Statement Temp)
 
@@ -31,9 +32,9 @@
   clojure.lang.IPersistentMap
   Exp
   (unEx []
-    (let [t (label)
-          f (label)
-          r (minijava.ir.temp.Temp.)]
+    (let [t (lb/label)
+          f (lb/label)
+          r (tm/temp)]
       (ExpSeq [(Move (Const 1) (Temp r))
                (unCx this t f)
                (Label f)
@@ -52,14 +53,10 @@
   clojure.lang.IPersistentMap)
 
 (deftype Jump [lbl]
-  clojure.lang.IPersistentMap
-  Object
-  (equals [obj] (= (type obj) :minijava.ir/Jump)))
+  clojure.lang.IPersistentMap)
 
 (deftype Label [lbl]
-  clojure.lang.IPersistentMap
-  Object
-  (equals [obj] (= (type obj) :minijava.ir/Label))) ;; FIXME: needed to test
+  clojure.lang.IPersistentMap)
 
 (deftype Mem [adr]
   clojure.lang.IPersistentMap)
@@ -68,9 +65,7 @@
   clojure.lang.IPersistentMap)
 
 (deftype Name [lbl]
-  clojure.lang.IPersistentMap
-  Object
-  (equals [obj] (= (type obj) :minijava.ir/Name)))
+  clojure.lang.IPersistentMap)
 
 (deftype NoOp [])
 
@@ -81,7 +76,5 @@
   clojure.lang.IPersistentMap)
 
 (deftype Temp [reg]
-  clojure.lang.IPersistentMap
-  Object
-  (equals [obj] (= (type obj) :minijava.ir/Temp)))
+  clojure.lang.IPersistentMap)
 

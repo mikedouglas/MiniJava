@@ -1,6 +1,7 @@
 (ns minijava.test-canon
-  (:use (minijava canon ir interp)
-        clojure.test))
+  (:use (minijava canon interp ir)
+        clojure.test)
+  (:require [minijava.temp :as tm]))
 
 (deftest test-remove-double-eseq
   (let [exp (ExpSeq [(Statement (Const 1))] (ExpSeq [(Statement (Const 2))]
@@ -29,11 +30,13 @@
            5))))
 
 (deftest test-remove-eseq-no-commute
+  (tm/reset-num!)
   (let [exp (BinaryOp :+ (Const 3) (ExpSeq [(Statement (Const 0))] (Const 2)))
-        t (minijava.ir.temp.Temp.)
+        t (tm/temp)
         result [(Move (Const 3) (Temp t))
                 (Statement (Const 0))
                 (BinaryOp :+ (Temp t) (Const 2))]]
+    (tm/reset-num!)
     (is (= (remove-eseq-no-commute exp)
            (seq result))
         "Removes ExpSeq per rule four.")
