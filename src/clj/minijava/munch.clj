@@ -132,12 +132,11 @@
                     d))
   
  ;;BinaryOp :- e1 e2 -> movl e1 e3 subbl e2 e3
- (comment
  (defmethod munchMap [:minijava.ir/BinaryOp :+  :minijava.exp/expression :minijava.exp/expression]
-  [x tmp] 	
-  	(let [e1 (munch e1)
-  			  e2 (munch e2)
+  [x op exp1 exp2] 	
+  	(let [e1 (munch exp1)
+  			  e2 (munch exp2)
   			  d (Temp (minijava.ir.temp.Temp.))]
-  			  (do
-  			  (emit (movl  
-  			  ))))))
+  			 	(emit (movl  e1 d))
+  			 	(emit (addl  e2 d))
+  			  ))
