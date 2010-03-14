@@ -42,7 +42,7 @@
 	(do
 		(reset! *instr* '()) ;;reset instr to empty list
 		(munch irtree)
-		 (deref *instr*)))
+		 (reverse (deref *instr*))))
 
 ;;Munch the move statement
 ;;This method contains a bunch of special cases, organized by preference (size), of x86 statements that can 

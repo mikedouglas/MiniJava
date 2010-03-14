@@ -9,10 +9,10 @@
 				)))
 
 (deftest test-Binop-exp-const
-				(let [tree (BinaryOp :+ (Temp (minijava.ir.temp.Temp.)) (Const 1))]				
+				(let [tree (BinaryOp :+ (Temp (minijava.ir.temp.Temp. "t2")) (Const 1))]				
 				 (is (= (select tree)
-           (list (movl (CONST 1) (Temp (minijava.ir.temp.Temp.)))
-           			 (addl (Temp (minijava.ir.temp.Temp.)) (Temp (minijava.ir.temp.Temp.))))
+           (list (movl (CONST 1) (Temp (minijava.ir.temp.Temp. "t1")))
+           			 (addl (Temp (minijava.ir.temp.Temp. "t2")) (Temp (minijava.ir.temp.Temp. "t1"))))
 				))))
 
 
