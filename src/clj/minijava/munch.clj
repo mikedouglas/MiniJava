@@ -89,8 +89,7 @@
 (defmethod munchOp :+ [op rand1 rand2]
   (cond (and (isit? rand1 :minijava.ir/Const)
              (isit? rand2 :minijava.ir/Const))
-        (emit (addl (CONST (:val rand1))
-                    (CONST (:val rand2))))
+        (emit (CONST (+ (:val rand1) (:val Arand2))))
         (isit? rand1 :minijava.ir/Const)
         (emit (addl (CONST (:val rand1))
                     (munch rand2)))
