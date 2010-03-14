@@ -1,5 +1,5 @@
 (ns minijava.interp
-  (:use (minijava ir)
+  (:use minijava.ir
         clojure.contrib.pprint)
   (:import (minijava.ir.temp.label)))
  
@@ -10,14 +10,19 @@
  
 (defn write-temp [env key val]
   (swap! env (fn [e k v] (assoc-in e [:temps k] v)) key val))
+
 (defn read-temp [env key]
   (get-in @env [:temps key]))
+
 (defn read-label [env key]
   (get-in @env [:labels key]))
+
 (defn write-mem [env addr val]
   (swap! env (fn [e a v] (assoc-in e [:mem a] v)) addr val))
+
 (defn read-mem [env addr]
   (get-in @env [:mem addr]))
+
 (defn read-method [env name]
   (get-in @env [:methods name]))
  
@@ -118,7 +123,7 @@
     (case fn-name
       "print" (println (first args))
       "newObject" (println "Unimplemented stub")
-      "newArray" (println "Unimplemented stub")
+      "newArray" []
       (eval-ir (read-method env fn-name) env))))
  
 (defmethod eval-ir :minijava.ir/Statement [exp env]

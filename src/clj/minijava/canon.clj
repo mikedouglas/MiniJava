@@ -1,8 +1,8 @@
-
 (ns minijava.canon
   "Implementation of the canonicalization algorithms for IR."
-  (:use minijava.ir
-        clojure.contrib.seq))
+  (:use (minijava ir)
+        clojure.contrib.seq)
+  (:require [minijava.temp :as tm]))
 
 (defn remove-double-eseq
   "(ExpSeq s1 (ExpSeq s2 e)) -> [s1 s2 e]"
@@ -20,9 +20,11 @@
         expr (get-in tree [:exp1 :exp])]
     (conj (vec stmt)
           (merge tree [:exp1 expr]))))
- 
- ;;is this correct for CJumps, or just for Binops? As seen in figure 8.1 (3), if a Cjump is fed into this, it should end up with no ESeqs, just Seqs.
-(defn remove-eseq-commute 
+
+ ;; is this correct for CJumps, or just for Binops? As seen in figure
+ ;; 8.1 (3), if a Cjump is fed into this, it should end up with no
+ ;; ESeqs, just Seqs.
+(defn remove-eseq-commute
   "(BinaryOp op e1 (ExpSeq s2 e2)) -> [s2 (BinaryOp op e1 e2)]"
   [tree]
   (let [e1 (get tree :exp1)
@@ -37,7 +39,7 @@
   (let [e1 (get tree :exp1)
         s1 (get-in tree [:exp2 :seqs])
         e2 (get-in tree [:exp2 :exp])
-        t  (minijava.ir.temp.Temp.)]
+        t  (tm/temp)]
     (concat [(Move e1 (Temp t))]
             s1
             [(merge tree [:exp1 (Temp t)]
@@ -50,24 +52,22 @@
 
 (defn matches-eseq-left?
   [s]
-  (or
-   (and (= :minijava.ir/BinaryOp (type s)) ;; the conditions listed in figure 8.1
-        (= :minijava.ir/ExpSeq (type (:exp1 s))))
-   (and (= :minijava.ir/Mem (type s)) 
-        (= :minijava.ir/ExpSeq (type (:adr s))))
-   (and (= :minijava.ir/Jump (type s)) 
-        (= :minijava.ir/ExpSeq (type (:lbl s))))
-   (and (= :minijava.ir/Conditional (type s)) 
-        (= :minijava.ir/ExpSeq (type (:exp1 s))))))
- 
+  (or (and (= :minijava.ir/BinaryOp (type s)) ;; the conditions listed in figure 8.1
+           (= :minijava.ir/ExpSeq (type (:exp1 s))))
+      (and (= :minijava.ir/Mem (type s))
+           (= :minijava.ir/ExpSeq (type (:adr s))))
+      (and (= :minijava.ir/Jump (type s))
+           (= :minijava.ir/ExpSeq (type (:lbl s))))
+      (and (= :minijava.ir/Conditional (type s))
+           (= :minijava.ir/ExpSeq (type (:exp1 s))))))
+
 
 (defn matches-eseq-commute?
   [s]
-  (or
-   (and (= :minijava.ir/BinaryOp (type s)) ;; the conditions listed in figure 8.1
-        (= :minijava.ir/ExpSeq (type (:exp2 s))))
-   (and (= :minijava.ir/Conditional (type s))
-        (= :minijava.ir/ExpSeq (type (:exp2 s))))))
+  (or (and (= :minijava.ir/BinaryOp (type s)) ;; the conditions listed in figure 8.1
+           (= :minijava.ir/ExpSeq (type (:exp2 s))))
+      (and (= :minijava.ir/Conditional (type s))
+           (= :minijava.ir/ExpSeq (type (:exp2 s))))))
 
 (defn isit? [x t]
   (= (type x) t))
