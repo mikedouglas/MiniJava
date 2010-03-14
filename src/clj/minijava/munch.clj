@@ -42,7 +42,7 @@
 	(do
 		(reset! *instr* '()) ;;reset instr to empty list
 		(munch irtree)
-		 @*instr*))
+		(reverse (@*instr*))))
 
 ;;Munch the move statement
 ;;This method contains a bunch of special cases, organized by preference (size), of x86 statements that can 
@@ -123,9 +123,11 @@
                    (munch rand2))))
 
 (defmethod munchMap [:minijava.ir/BinaryOp :+ :minijava.exp/expression :minijava.ir/Const ]
-  [exp op rand1 rand2]       
-        (emit (addl (CONST (:val rand2))
-                    (munch rand1))))
+  [exp op rand1 rand2]    
+  (let [d (Temp (minijava.ir.temp.Temp.)) ]
+  		 	(emit (movl  (CONST (:val rand2)) d))
+        (emit (addl (munch rand1) d))
+                    d))
   
  ;;BinaryOp :- e1 e2 -> movl e1 e3 subbl e2 e3
  (comment

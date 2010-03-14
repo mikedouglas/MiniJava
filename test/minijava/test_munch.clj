@@ -8,6 +8,13 @@
            (list (CONST 3)))
 				)))
 
+(deftest test-Binop-exp-const
+				(let [tree (BinaryOp :+ (Temp (minijava.ir.temp.Temp. "t2")) (Const 1))]				
+				 (is (= (select tree)
+           (list (movl (CONST 1) (Temp (minijava.ir.temp.Temp. "t1")))
+           			 (addl (Temp (minijava.ir.temp.Temp. "t2")) (Temp (minijava.ir.temp.Temp. "t1"))))
+				))))
+
 
 (deftest test-Move-Mem-Binop
 				(let [
