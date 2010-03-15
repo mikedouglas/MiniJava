@@ -98,7 +98,7 @@
 (deftest tests-array-assign-lookup
   (let [frame (new-x86 0 [])
         val (parse-stm "int[] a; a = new int[5]; a[0] = 3; a[4] = 2; a[1] = a[0];")
-
+        
         res1
         (do (tm/reset-num!)
             (Move (Const 3)
@@ -110,13 +110,14 @@
         (Move (Const 2) (Mem (BinaryOp :+ (Temp (tm/temp))
                                        (BinaryOp :* (Const (word-size frame))
                                                  (Const 4)))))
+                
         tmp (tm/temp)
         res3
         (Move (Mem (BinaryOp :+ (Temp tmp)
                              (BinaryOp :* (Const (word-size frame))
                                        (Const 0))))
               (Mem (BinaryOp :+ (Temp tmp) (BinaryOp :* (Const (word-size frame))
-                                                            (Const 1)))))]
+                                                     (Const 1)))))]
     (tm/reset-num!)
     (is (= res1 (last (butlast (butlast (tree-prog val))))))
     (is (= res2 (last (butlast (tree-prog val)))))
