@@ -119,7 +119,7 @@
 (defmethod munchMap [:minijava.ir/Call :minijava.ir/Label clojure.lang.IPersistentList]
   [x label args] 	
   	;;munch the arguments into temps.
-  	(let [formals (apply munch args) ;;where do the temps from these formals end up? 
+  	(let [formals (map munch args) ;;where do the temps from these formals end up? 
   	;;According to the book, we aren't going to use these temps explicitly here (in any emited x86). But register allocation will
   	;;later determine which ones to put into registers and which to put into the stack, and
   	;;at that point the appropriate movl code will be inserted here.
@@ -130,7 +130,7 @@
   	;;in the function itself.  	
   				ret (Temp (tm/temp))]
   			 (emit (call (munch label)))  			 
-  			 (emit (movl  (Temp :eax) ret))
+  			 (emit (movl  (Temp (tm/temp :eax)) ret))
   			 ;;want to return the return value as a temp from this function.
   			 ;;liveness analysis will probably remove this movl instruction later, but for now, thats what we'll do.
   			 ;;this depends upon the convention that return values always go in eax, so we can pre-color the temp above.

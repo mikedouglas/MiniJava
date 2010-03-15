@@ -128,3 +128,14 @@
                  (cmpl (Temp (tm/temp 1)) (Temp (tm/temp 2)))
                  (jcc := (Name (tm/label 1)))
                  (jmp (Name (tm/label 2))))))))
+
+                 
+ ;;Call - Note, this test is provisional, and may have to be changed for parts 5 or 6
+ (deftest test-call
+  (tm/reset-num!)
+  		(let [function (Label (tm/label))
+  					args (list (Temp (tm/temp)) (Temp (tm/temp)))]
+  			(is (= (select (Call function args))
+  						 (list (call function)
+  						 		(movl  (Temp (tm/temp :eax)) (Temp (tm/temp 4))))))
+  ))
