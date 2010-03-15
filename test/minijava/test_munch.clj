@@ -18,8 +18,8 @@
   (tm/reset-num!)
 				(let [tree (BinaryOp :+ (Temp (tm/temp 2)) (Const 1))]				
 				 (is (= (select tree)
-           (list (movl (CONST 1) (Temp (tm/temp 1)))
-           			 (addl (Temp (tm/temp 2)) (Temp (tm/temp 1))))
+           (list (movl (CONST 1)  (tm/temp 1))
+           			 (addl  (tm/temp 2)  (tm/temp 1)))
 				))))
 
 						
@@ -27,8 +27,8 @@
 	(tm/reset-num!)
 				(let [tree (BinaryOp :+  (Const 1) (Temp (tm/temp 2)))]				
 				 (is (= (select tree)
-           (list (movl (CONST 1) (Temp (tm/temp 1)))
-           			 (addl (Temp (tm/temp 2)) (Temp (tm/temp 1))))
+           (list (movl (CONST 1)  (tm/temp 1))
+           			 (addl  (tm/temp 2)  (tm/temp 1)))
 				))))						
 				
 		
@@ -37,8 +37,8 @@
   (tm/reset-num!)
 				(let [tree (BinaryOp :+ (Temp (tm/temp)) (Temp (tm/temp)) )]				
 				 (is (= (select tree)
-           (list (movl  (Temp (tm/temp 1)) (Temp (tm/temp 3)))
-           			 (addl (Temp (tm/temp 2)) (Temp (tm/temp 3)))))
+           (list (movl   (tm/temp 1)  (tm/temp 3))
+           			 (addl  (tm/temp 2)  (tm/temp 3))))
 				)))
 
 (deftest test-Minus
@@ -52,24 +52,24 @@
   (tm/reset-num!)
 				(let [tree (BinaryOp :- (Temp (tm/temp 2)) (Const 1))]				
 				 (is (= (select tree)
-           (list (movl   (Temp (tm/temp 2))  (Temp (tm/temp 1)))
-           			 (subl (CONST 1)(Temp (tm/temp 1))))
+           (list (movl    (tm/temp 2)   (tm/temp 1))
+           			 (subl (CONST 1) (tm/temp 1)))
 				))))
 				
 (deftest test-Minus-const-exp
   (tm/reset-num!)
 				(let [tree (BinaryOp :-  (Const 1) (Temp (tm/temp 2)))]				
 				 (is (= (select tree)
-           (list (movl  (CONST 1) (Temp (tm/temp 1)))
-           			 (subl (Temp (tm/temp 2)) (Temp (tm/temp 1))))
+           (list (movl  (CONST 1)  (tm/temp 1))
+           			 (subl  (tm/temp 2)  (tm/temp 1)))
 				))))				
 
 (deftest test-Minus-exp-exp
   (tm/reset-num!)
 				(let [tree (BinaryOp :- (Temp (tm/temp)) (Temp (tm/temp)) )]				
 				 (is (= (select tree)
-           (list (movl  (Temp (tm/temp 2)) (Temp (tm/temp 3)))
-           			 (subl (Temp (tm/temp 1)) (Temp (tm/temp 3)))))
+           (list (movl   (tm/temp 2)  (tm/temp 3))
+           			 (subl  (tm/temp 1)  (tm/temp 3))))
 				)))
 				
 ;;Multiplication		
@@ -84,33 +84,33 @@
   (tm/reset-num!)
 				(let [tree (BinaryOp :* (Temp (tm/temp 2)) (Const 1))]				
 				 (is (= (select tree)
-           (list (movl   (Temp (tm/temp 2))  (Temp (tm/temp 1)))
-           			 (imull (CONST 1)(Temp (tm/temp 1))))
+           (list (movl    (tm/temp 2)   (tm/temp 1))
+           			 (imull (CONST 1) (tm/temp 1)))
 				))))
 				
 (deftest test-Mult-const-exp
   (tm/reset-num!)
 				(let [tree (BinaryOp :*  (Const 1) (Temp (tm/temp 2)))]				
 				 (is (= (select tree)
-           (list (movl  (CONST 1) (Temp (tm/temp 1)))
-           			 (imull (Temp (tm/temp 2)) (Temp (tm/temp 1))))
+           (list (movl  (CONST 1)  (tm/temp 1))
+           			 (imull  (tm/temp 2)  (tm/temp 1)))
 				))))				
 
 (deftest test-Mult-exp-exp
   (tm/reset-num!)
 				(let [tree (BinaryOp :* (Temp (tm/temp)) (Temp (tm/temp)) )]				
 				 (is (= (select tree)
-           (list (movl  (Temp (tm/temp 2)) (Temp (tm/temp 3)))
-           			 (imull (Temp (tm/temp 1)) (Temp (tm/temp 3)))))
+           (list (movl   (tm/temp 2)  (tm/temp 3))
+           			 (imull  (tm/temp 1)  (tm/temp 3))))
 				)))
 				
 
 (deftest test-Move-Mem-Binop
   (tm/reset-num!)
 				(let [
-				   t1 (Temp (tm/temp))
-				   t2 (Temp (tm/temp))
-					tree (Move t1 (Mem (BinaryOp :+ (Const 2)  t2)))]
+				   t1 (tm/temp)
+				   t2 (tm/temp)
+					tree (Move (Temp t1) (Mem (BinaryOp :+ (Const 2) (Temp t2))))]
 				
 				 (is (= (select tree)
           (list(movl (MEMORY t2 2)t1)))
@@ -123,19 +123,19 @@
                           (Name (tm/label 1)) (Name (tm/label 2)))]
     (tm/reset-num!)
     (is (= (select tree)
-           (list (movl (CONST 5) (Temp (tm/temp 1)))
-                 (movl (CONST 5) (Temp (tm/temp 2)))
-                 (cmpl (Temp (tm/temp 1)) (Temp (tm/temp 2)))
-                 (jcc := (Name (tm/label 1)))
-                 (jmp (Name (tm/label 2))))))))
+           (list (movl (CONST 5)  (tm/temp 1))
+                 (movl (CONST 5)  (tm/temp 2))
+                 (cmpl  (tm/temp 1)  (tm/temp 2))
+                 (jcc :=  (tm/label 1))
+                 (jmp  (tm/label 2)))))))
 
                  
  ;;Call - Note, this test is provisional, and may have to be changed for parts 5 or 6
  (deftest test-call
   (tm/reset-num!)
-  		(let [function (Label (tm/label))
+  		(let [function (tm/label)
   					args (list (Temp (tm/temp)) (Temp (tm/temp)))]
-  			(is (= (select (Call function args))
+  			(is (= (select (Call (Name function) args))
   						 (list (call function)
-  						 		(movl  (Temp (tm/temp :eax)) (Temp (tm/temp 4))))))
+  						 		(movl   (tm/temp :eax)(tm/temp 4)))))
   ))

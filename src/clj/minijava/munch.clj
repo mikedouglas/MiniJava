@@ -86,25 +86,27 @@
   (defmethod munchMap [:minijava.ir/Mem :minijava.exp/expression]
   [x adr] 	
   	;;Mem(addr) -> Movl [adr] Temp 
-  	(let [d (Temp (tm/temp))
+  	(let [d  (tm/temp)
   	  		s (munch adr)]  				
   				 (emit (movl s d))
   				 d)) ;;Since Mem is an expression, it returns a temp.
 
 (defmethod munchMap [:minijava.ir/Temp :minijava.temp/Temp]
   [exp temp]
-  exp) ;;Leave temps alone
+  temp) ;;Unwrap the temp
 
 (defmethod munchMap [:minijava.ir/Label :minijava.temp/Label]
-  [exp temp]
-  exp) ;;Leave labels alone (?)
-
-
+  [exp lbl]
+  lbl) ;;Unwarp the label
+  
+ (defmethod munchMap [:minijava.ir/Name :minijava.temp/Label]
+  [exp lbl]
+  lbl) ;;Unwarp the label (out of the name)
   				 
 (defmethod munchMap [:minijava.ir/Const java.lang.Integer]
   [x value] 	
   	;;Const(i) -> Movl $i Temp 
-  	(let [d (Temp (tm/temp))]  				
+  	(let [d  (tm/temp)]  				
   				 (emit (movl (CONST value) d))
   				 d)) ;;Since Mem is an expression, it returns a temp.
 
@@ -113,10 +115,7 @@
   [x value] 	
   	nil)
   	
-  	
- 
-
-(defmethod munchMap [:minijava.ir/Call :minijava.ir/Label clojure.lang.IPersistentList]
+ (defmethod munchMap [:minijava.ir/Call :minijava.ir/Name clojure.lang.IPersistentList]
   [x label args] 	
   	;;munch the arguments into temps.
   	(let [formals (map munch args) ;;where do the temps from these formals end up? 
@@ -128,13 +127,14 @@
   	;;liveness analysis recognizes these temps as live during the function call,
   	;;and secondly, we will need to faciliate the connection between these temps and the equivelent temps
   	;;in the function itself.  	
-  				ret (Temp (tm/temp))]
+  				ret  (tm/temp)]
   			 (emit (call (munch label)))  			 
-  			 (emit (movl  (Temp (tm/temp :eax)) ret))
+  			 (emit (movl (tm/temp :eax) ret))
   			 ;;want to return the return value as a temp from this function.
   			 ;;liveness analysis will probably remove this movl instruction later, but for now, thats what we'll do.
   			 ;;this depends upon the convention that return values always go in eax, so we can pre-color the temp above.
   	ret))
+
 
 ;; Constant operands can be compiled out into a CONST
 (defmethod munchMap [:minijava.ir/BinaryOp :+ :minijava.ir/Const  :minijava.ir/Const]
@@ -153,14 +153,14 @@
 ;;Addition
 (defmethod munchMap [:minijava.ir/BinaryOp :+ :minijava.ir/Const  :minijava.exp/expression]
  [exp op rand1 rand2]       
-  (let [d (Temp (tm/temp)) ]
+  (let [d  (tm/temp) ]
   		 	(emit (movl  (CONST (:val rand1)) d))
         (emit (addl (munch rand2) d))
                     d))
 
 (defmethod munchMap [:minijava.ir/BinaryOp :+ :minijava.exp/expression :minijava.ir/Const ]
   [exp op rand1 rand2]    
-  (let [d (Temp (tm/temp)) ]
+  (let [d  (tm/temp) ]
   		 	(emit (movl  (CONST (:val rand2)) d))
         (emit (addl (munch rand1) d))
                     d))
@@ -170,7 +170,7 @@
   [x op exp1 exp2] 	
   	(let [e1 (munch exp1)
   			  e2 (munch exp2)
-  			  d (Temp (tm/temp))]
+  			  d  (tm/temp)]
   			 	(emit (movl  e1 d))
   			 	(emit (addl  e2 d))
   			  d))
@@ -178,14 +178,14 @@
  ;;Subtraction
 (defmethod munchMap [:minijava.ir/BinaryOp :- :minijava.ir/Const  :minijava.exp/expression] ;;first exp - second exp
  [exp op rand1 rand2]       
-  (let [d (Temp (tm/temp)) ]
+  (let [d  (tm/temp) ]
   		 	(emit (movl  (CONST (:val rand1)) d))
         (emit (subl  (munch rand2) d  ))
                     d))
 
 (defmethod munchMap [:minijava.ir/BinaryOp :- :minijava.exp/expression :minijava.ir/Const ] ;;first exp - second exp
   [exp op rand1 rand2]    
-  (let [d (Temp (tm/temp)) ]
+  (let [d  (tm/temp) ]
   		 	(emit (movl  (munch rand1) d))
         (emit (subl (CONST (:val rand2)) d));;note: the ordering here matters, and is different than above, because subtraction is not commutative
                     d))
@@ -194,7 +194,7 @@
   [x op exp1 exp2] 	
   	(let [e1 (munch exp1)
   			  e2 (munch exp2)
-  			  d (Temp (tm/temp))]
+  			  d  (tm/temp)]
   			 	(emit (movl  e2 d))
   			 	(emit (subl  e1 d))
   			  d))
@@ -203,14 +203,14 @@
  ;;Multiplication
 (defmethod munchMap [:minijava.ir/BinaryOp :* :minijava.ir/Const  :minijava.exp/expression]
  [exp op rand1 rand2]       
-  (let [d (Temp (tm/temp)) ]
+  (let [d  (tm/temp) ]
   		 	(emit (movl  (CONST (:val rand1)) d))
         (emit (imull  (munch rand2) d  ))
                     d))
 
 (defmethod munchMap [:minijava.ir/BinaryOp :* :minijava.exp/expression :minijava.ir/Const ] 
   [exp op rand1 rand2]    
-  (let [d (Temp (tm/temp)) ]
+  (let [d  (tm/temp) ]
   		 	(emit (movl  (munch rand1) d))
         (emit (imull (CONST (:val rand2)) d))
                     d))
@@ -219,7 +219,7 @@
   [x op exp1 exp2] 	
   	(let [e1 (munch exp1)
   			  e2 (munch exp2)
-  			  d (Temp (tm/temp))]
+  			  d  (tm/temp)]
   			 	(emit (movl  e2 d))
   			 	(emit (imull  e1 d))
   			  d))
@@ -232,5 +232,5 @@
   (let [t1 (munch rand1)
         t2 (munch rand2)]
     (emit (cmpl t1 t2))
-    (emit (jcc op then))
-    (emit (jmp else))))
+    (emit (jcc op (munch then)))
+    (emit (jmp (munch else)))))
