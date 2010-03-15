@@ -112,16 +112,29 @@
 (defmethod munchMap [:minijava.ir/NoOp]
   [x value] 	
   	nil)
+  	
+  	
+ 
 
 (defmethod munchMap [:minijava.ir/Call :minijava.ir/Label clojure.lang.IPersistentList]
   [x label args] 	
   	;;munch the arguments into temps.
-  	(let [formals (apply munch args)]  			
-  			;;is there any code we have to insert before or after the call (or will this be taken care of after liveness analysis/register selection)?
-  			 (emit (call (munch label)))
-  			 ;;want to return the return value as a temp here from this function
-  	(Temp (tm/temp :eax)))) ;;is this the right way to do this?
-
+  	(let [formals (apply munch args) ;;where do the temps from these formals end up? 
+  	;;According to the book, we aren't going to use these temps explicitly here (in any emited x86). But register allocation will
+  	;;later determine which ones to put into registers and which to put into the stack, and
+  	;;at that point the appropriate movl code will be inserted here.
+  	;;however we still have two things that we will have to do (for stage 5 or 6, so not required yet):
+  	;;we need to designate these temps as 'sources' of the call isntruction (the books terminology) so that
+  	;;liveness analysis recognizes these temps as live during the function call,
+  	;;and secondly, we will need to faciliate the connection between these temps and the equivelent temps
+  	;;in the function itself.  	
+  				ret (Temp (tm/temp))]
+  			 (emit (call (munch label)))  			 
+  			 (emit (movl  (Temp :eax) ret))
+  			 ;;want to return the return value as a temp from this function.
+  			 ;;liveness analysis will probably remove this movl instruction later, but for now, thats what we'll do.
+  			 ;;this depends upon the convention that return values always go in eax, so we can pre-color the temp above.
+  	ret))
 
 ;; Constant operands can be compiled out into a CONST
 (defmethod munchMap [:minijava.ir/BinaryOp :+ :minijava.ir/Const  :minijava.ir/Const]
