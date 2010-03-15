@@ -95,6 +95,11 @@
   [exp temp]
   exp) ;;Leave temps alone
 
+(defmethod munchMap [:minijava.ir/Label :minijava.temp/Label]
+  [exp temp]
+  exp) ;;Leave labels alone (?)
+
+
   				 
 (defmethod munchMap [:minijava.ir/Const java.lang.Integer]
   [x value] 	
@@ -102,6 +107,20 @@
   	(let [d (Temp (tm/temp))]  				
   				 (emit (movl (CONST value) d))
   				 d)) ;;Since Mem is an expression, it returns a temp.
+
+;;emit nothing
+(defmethod munchMap [:minijava.ir/NoOp]
+  [x value] 	
+  	nil)
+
+(defmethod munchMap [:minijava.ir/Call :minijava.ir/Label clojure.lang.IPersistentList]
+  [x label args] 	
+  	;;munch the arguments into temps.
+  	(let [formals (apply munch args)]  			
+  			;;is there any code we have to insert before or after the call (or will this be taken care of after liveness analysis/register selection)?
+  			 (emit (call (munch label)))
+  			 ;;want to return the return value as a temp here from this function
+  	(Temp (tm/temp :eax)))) ;;is this the right way to do this?
 
 
 ;; Constant operands can be compiled out into a CONST
