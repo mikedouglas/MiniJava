@@ -115,3 +115,16 @@
 				 (is (= (select tree)
           (list(movl (MEMORY t2 2)t1)))
 				)))
+
+;; Conditional
+(deftest test-cond
+  (tm/reset-num!)
+  (let [tree (Conditional := (Const 5) (Const 5) 
+                          (Name (tm/label 1)) (Name (tm/label 2)))]
+    (tm/reset-num!)
+    (is (= (select tree)
+           (list (movl (CONST 5) (Temp (tm/temp 1)))
+                 (movl (CONST 5) (Temp (tm/temp 2)))
+                 (cmpl (Temp (tm/temp 1)) (Temp (tm/temp 2)))
+                 (jcc := (Name (tm/label 1)))
+                 (jmp (Name (tm/label 2))))))))

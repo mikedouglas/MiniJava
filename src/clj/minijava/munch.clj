@@ -1,6 +1,6 @@
 (ns minijava.munch
   (:use (minijava exp ir gas))
-   (:require [minijava.temp  :as tm]))
+  (:require [minijava.temp :as tm]))
 
 
 ;;helper method to do instanceof
@@ -224,5 +224,13 @@
   			 	(emit (imull  e1 d))
   			  d))
   			  		  
- 
- 
+;; Conditional
+
+(defmethod munchMap [:minijava.ir/Conditional := :minijava.exp/expression
+                     :minijava.exp/expression :minijava.ir/Name :minijava.ir/Name]
+  [exp op rand1 rand2 then else]
+  (let [t1 (munch rand1)
+        t2 (munch rand2)]
+    (emit (cmpl t1 t2))
+    (emit (jcc op then))
+    (emit (jmp else))))
