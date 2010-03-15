@@ -42,7 +42,9 @@
 (defn select [irtree]
 	(do
 		(reset! *instr* '()) ;;reset instr to empty list
-		(munch irtree)
+		(if (list? irtree)
+				(doall (map munch irtree))	;;munch each ir statemnet in this list of ir statements.
+				(munch irtree))  ;;just munch this single ir statement				
 		(reverse  @*instr*)))
 
 ;;Munch the move statement
@@ -97,11 +99,12 @@
 
 (defmethod munchMap [:minijava.ir/Label :minijava.temp/Label]
   [exp lbl]
-  lbl) ;;Unwarp the label
+  (emit (LABEL lbl))) ;;Emit a label marker. Note (important for stage 5 or 6) This code 'defines' a label, but results in no x86 code directly. 
+  
   
  (defmethod munchMap [:minijava.ir/Name :minijava.temp/Label]
   [exp lbl]
-  lbl) ;;Unwarp the label (out of the name)
+  lbl) ;;Unwrap the label (out of the name)
   				 
 (defmethod munchMap [:minijava.ir/Const java.lang.Integer]
   [x value] 	
@@ -110,11 +113,12 @@
   				 (emit (movl (CONST value) d))
   				 d)) ;;Since Mem is an expression, it returns a temp.
 
-;;emit nothing
+;;emit nothing for NoOp
 (defmethod munchMap [:minijava.ir/NoOp]
   [x value] 	
   	nil)
-  	
+  
+  ;;Call
  (defmethod munchMap [:minijava.ir/Call :minijava.ir/Name clojure.lang.IPersistentList]
   [x label args] 	
   	;;munch the arguments into temps.
@@ -223,9 +227,13 @@
   			 	(emit (movl  e2 d))
   			 	(emit (imull  e1 d))
   			  d))
-  			  		  
-;; Conditional
-
+  			  	
+  			  	
+;;Note - there are some optimizations we can make here. If either argument is a const, we dont need to move it 
+;;into a constant. However we have to be careful with that; only the first argument to cmpl may be a const.
+;;if BOTH arguments are constants, then we can simplify the conditional right out, statically.	  
+;;also, if we're really fancy, we can drop the last jmp if the code is known to be followed by its false statement (but that probably is not something we should do in munch - we can either do it after the code is munched, or directly in the ir in advance (then it would be implemented in canon)).
+;;Conditional
 (defmethod munchMap [:minijava.ir/Conditional := :minijava.exp/expression
                      :minijava.exp/expression :minijava.ir/Name :minijava.ir/Name]
   [exp op rand1 rand2 then else]
@@ -234,3 +242,17 @@
     (emit (cmpl t1 t2))
     (emit (jcc op (munch then)))
     (emit (jmp (munch else)))))
+
+ ;;Statement 
+ (defmethod munchMap [:minijava.ir/Statement :minijava.exp/expression]
+  [stm exp]
+ 	(do
+ 		(munch exp)
+ 		nil)) ;;return nothing from a Statement
+ 		
+ 		
+ (defmethod munchMap [:minijava.ir/Jump :minijava.ir/Name]
+  [stm dst]
+    (emit (jmp (munch dst))))
+    
+    

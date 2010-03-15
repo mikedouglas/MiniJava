@@ -139,3 +139,34 @@
   						 (list (call function)
   						 		(movl   (tm/temp :eax)(tm/temp 4)))))
   ))
+  
+  
+  ;;if we optimize conditional, this test will have to change
+ (deftest test-Simple
+   (tm/reset-num!)
+   (let [t (tm/label)
+         f (tm/label)
+         other (tm/label)
+        		 
+        prog ;;this program is already linearized
+   			(list
+  		 	(Label other)
+  		 	(Conditional := (Const 3) (Const 4) (Name t) (Name f))
+  		 	(Label t)
+  		 	(Jump (Name other))
+  		 	(Label f)
+  		 )]
+  		   		 
+   (is (=  (select prog) 
+   (list
+   	(LABEL other)
+   	(movl (CONST 3) (tm/temp 4))
+   	(movl (CONST 4) (tm/temp 5))
+   	(cmpl (tm/temp 4) (tm/temp 5))
+   	(jcc := t)
+   	(jmp f)
+   	(LABEL t)
+   	(jmp other)
+   	(LABEL f)
+   ))) ;;apply munch to each ir statement              
+ ))

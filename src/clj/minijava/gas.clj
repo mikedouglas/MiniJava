@@ -15,7 +15,10 @@
   (deftype MEMORY [adr offset?]
       clojure.lang.IPersistentMap)   
    
-
+   ;;this is NOT an x86 instruction - it is just a marker that this position is the destination of a label
+  (deftype LABEL [lbl]
+      clojure.lang.IPersistentMap)   
+   
       
   ;;Adds the first operand to the second, storing the result in the second
  (deftype addl [src dst]

@@ -52,3 +52,25 @@
     (is (commutes? m))
     (is (commutes? m2))
     (is (not (commutes? m3)))) )
+    
+   
+  (deftest test-simple
+  			(let [t (tm/label)
+        		 f (tm/label)
+        		 other (tm/label)
+        		 prog	(Seq [(Label other)
+            (Conditional :< (Const 3) (Const 4) (Name t) (Name f))
+            (Label t)
+            (Seq []) 
+            (Jump (Name other))
+            (Label f)])]
+  		 (is (= (canon prog) 
+  		 	(list
+  		 	(Label other)
+  		 	(Conditional :< (Const 3) (Const 4) (Name t) (Name f))
+  		 	(Label t)
+  		 	(Jump (Name other))
+  		 	(Label f)
+  		 )))
+  
+  ))
