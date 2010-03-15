@@ -11,7 +11,9 @@
 
 (deftype Temp [id color]
   Colorable
-  (setColor [] nil)) ;; TODO
+  (setColor [] nil)
+  Object
+  (toString [] (str id))) ;; TODO
 
 (defn temp
   ([] (Temp (swap! *num* inc) nil))
