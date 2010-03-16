@@ -116,16 +116,46 @@
           (list(movl (MEMORY t2 2)t1)))
 				)))
 
-;; Conditional
-(deftest test-cond
+;; Conditional 
+(deftest test-cond-const-const
   (tm/reset-num!)
   (let [tree (Conditional := (Const 5) (Const 5) 
                           (Name (tm/label 1)) (Name (tm/label 2)))]
     (tm/reset-num!)
     (is (= (select tree)
-           (list (movl (CONST 5)  (tm/temp 1))
-                 (movl (CONST 5)  (tm/temp 2))
-                 (cmpl  (tm/temp 1)  (tm/temp 2))
+           (list (jmp  (tm/label 1)))))))
+
+
+
+(deftest test-cond-const-exp
+  (tm/reset-num!)
+  (let [tree (Conditional := (Const 5) (Temp (tm/temp 2)) 
+                          (Name (tm/label 1)) (Name (tm/label 2)))]
+    (tm/reset-num!)
+    (is (= (select tree)
+           (list (cmpl (CONST 5)  (tm/temp 2))
+                 (jcc :=  (tm/label 1))
+                 (jmp  (tm/label 2)))))))
+
+
+(deftest test-cond-exp-const
+  (tm/reset-num!)
+  (let [tree (Conditional :> (Temp (tm/temp 2)) (Const 5)
+                          (Name (tm/label 1)) (Name (tm/label 2)))]
+    (tm/reset-num!)
+    (is (= (select tree)
+           (list (cmpl (CONST 5)  (tm/temp 2))
+                 (jcc :<  (tm/label 1)) ;;note the operation is swapped
+                 (jmp  (tm/label 2)))))))
+
+;; Conditional 
+(deftest test-cond-exp-exp
+  (tm/reset-num!)
+  (let [tree (Conditional := (Temp (tm/temp 1)) (Temp (tm/temp 2)) 
+                          (Name (tm/label 1)) (Name (tm/label 2)))]
+    (tm/reset-num!)
+    (is (= (select tree)
+           (list (cmpl  (tm/temp 1)  (tm/temp 2))
                  (jcc :=  (tm/label 1))
                  (jmp  (tm/label 2)))))))
 
@@ -146,12 +176,14 @@
    (tm/reset-num!)
    (let [t (tm/label)
          f (tm/label)
+          a (tm/temp)
+          b (tm/temp)
          other (tm/label)
         		 
         prog ;;this program is already linearized
    			(list
   		 	(Label other)
-  		 	(Conditional := (Const 3) (Const 4) (Name t) (Name f))
+  		 	(Conditional := (Temp a) (Temp b) (Name t) (Name f))
   		 	(Label t)
   		 	(Jump (Name other))
   		 	(Label f)
@@ -160,9 +192,7 @@
    (is (=  (select prog) 
    (list
    	(LABEL other)
-   	(movl (CONST 3) (tm/temp 4))
-   	(movl (CONST 4) (tm/temp 5))
-   	(cmpl (tm/temp 4) (tm/temp 5))
+   	(cmpl (tm/temp 3) (tm/temp 4))
    	(jcc := t)
    	(jmp f)
    	(LABEL t)

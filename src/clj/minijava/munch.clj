@@ -111,7 +111,7 @@
   	;;Const(i) -> Movl $i Temp 
   	(let [d  (tm/temp)]  				
   				 (emit (movl (CONST value) d))
-  				 d)) ;;Since Mem is an expression, it returns a temp.
+  				 d)) ;;Since Const is an expression, it returns a temp.
 
 ;;emit nothing for NoOp
 (defmethod munchMap [:minijava.ir/NoOp]
@@ -242,6 +242,55 @@
     (emit (cmpl t1 t2))
     (emit (jcc op (munch then)))
     (emit (jmp (munch else)))))
+
+;;(Conditional op (Const i) e2 true false) -> movl e2 t2, cmpl $i t2, jcc op true, jmp false
+(defmethod munchMap [:minijava.ir/Conditional := :minijava.ir/Const
+                     :minijava.exp/expression :minijava.ir/Name :minijava.ir/Name]
+  [exp op rand1 rand2 then else]
+  (let [t2 (munch rand2)]
+    (emit (cmpl (CONST (:val rand1)) t2))
+    (emit (jcc op (munch then)))
+    (emit (jmp (munch else)))))
+
+   
+;;(Conditional op e1 (Const i) true false) -> movl e2 t2, cmpl $i t2, jcc (negated op) true, jmp false
+(defmethod munchMap [:minijava.ir/Conditional :> :minijava.exp/expression 
+                     :minijava.ir/Const :minijava.ir/Name :minijava.ir/Name]
+  [exp op rand1 rand2 then else]
+  (let [t1 (munch rand1)
+  			negop (case op ;;since we're switching the order of the comparison (because cmpl can only take a constant in the first argument), we need to change the comparison accordingly
+  								:> :<
+  								:< :>
+  								:<= :=>
+  								:>= :<=
+  								:= :=
+  								:!= :!=
+  						)
+  			]
+    (emit (cmpl (CONST (:val rand2)) t1))
+    (emit (jcc negop (munch then)))
+    (emit (jmp (munch else)))))
+
+
+;;Statically resolve the conditional
+;;(Conditional op (Const i) (Const g) true false) ->  jmp (true or false)
+(defmethod munchMap [:minijava.ir/Conditional := :minijava.ir/Const
+                     :minijava.ir/Const :minijava.ir/Name :minijava.ir/Name]
+  [exp op rand1 rand2 then else]
+ (let [v1 (:val rand1)
+ 			 v2 (:val rand2)
+ 			 dst (case op
+  	:> (if (> v1 v2) then else)
+  	:< (if (< v1 v2) then else)
+  	:>= (if (>= v1 v2) then else)
+  	:<= (if (<= v1 v2) then else)
+  	:= (if (= v1 v2) then else)
+  	:!= (if (not (= v1 v2)) then else)
+  )]
+  (emit (jmp (munch dst)))))
+  
+
+
 
  ;;Statement 
  (defmethod munchMap [:minijava.ir/Statement :minijava.exp/expression]
