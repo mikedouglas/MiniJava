@@ -18,8 +18,8 @@
   (tm/reset-num!)
 				(let [tree (BinaryOp :+ (Temp (tm/temp 2)) (Const 1))]				
 				 (is (= (select tree)
-           (list (movl (CONST 1)  (tm/temp 1))
-           			 (addl  (tm/temp 2)  (tm/temp 1)))
+           (list (movl  (tm/temp 2) (tm/temp 1))
+           			 (addl (CONST 1)   (tm/temp 1)))
 				))))
 
 						
@@ -37,8 +37,8 @@
   (tm/reset-num!)
 				(let [tree (BinaryOp :+ (Temp (tm/temp)) (Temp (tm/temp)) )]				
 				 (is (= (select tree)
-           (list (movl   (tm/temp 1)  (tm/temp 3))
-           			 (addl  (tm/temp 2)  (tm/temp 3))))
+           (list (movl   (tm/temp 2)  (tm/temp 3))
+           			 (addl  (tm/temp 1)  (tm/temp 3))))
 				)))
 
 (deftest test-Minus

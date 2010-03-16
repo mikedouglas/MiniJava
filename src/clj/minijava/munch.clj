@@ -31,7 +31,7 @@
 ;;ir is the root of the ir tree to munch; args is an (optional) list of the 'children' of the root node, for pattern matching purposes.
 ;;its ok to omit args.
 ;;Munch rules for statements return nil, munch rules for expressions return Temps
-(defmulti munchMap (fn [ir & args] (vec (map symbol-or-type (cons ir args)))))
+(defmulti munchMap (fn [ir & args] (vec (map type (cons ir args)))))
 
 
 (defn munch 
@@ -140,93 +140,51 @@
   	ret))
 
 
+(defn getCmd [op]
+	(case op
+			:+ addl
+			:- subl
+			:* imull))
+
 ;; Constant operands can be compiled out into a CONST
-(defmethod munchMap [:minijava.ir/BinaryOp :+ :minijava.ir/Const  :minijava.ir/Const]
+(defmethod munchMap [:minijava.ir/BinaryOp clojure.lang.Keyword :minijava.ir/Const  :minijava.ir/Const]
  [exp op rand1 rand2]
-  (emit (CONST (+ (:val rand1) (:val rand2)))))
+ (case op
+ 	:+  (emit (CONST (+ (:val rand1) (:val rand2))))
 
-(defmethod munchMap [:minijava.ir/BinaryOp :- :minijava.ir/Const  :minijava.ir/Const]
- [exp op rand1 rand2]
-  (emit (CONST (- (:val rand1) (:val rand2)))))
+  :- (emit (CONST (- (:val rand1) (:val rand2))))
 
-(defmethod munchMap [:minijava.ir/BinaryOp :* :minijava.ir/Const  :minijava.ir/Const]
- [exp op rand1 rand2]
-  (emit (CONST (* (:val rand1) (:val rand2))))) 
+  :* (emit (CONST (* (:val rand1) (:val rand2)))))) 
     
-;; Other BinOp cases
-;;Addition
-(defmethod munchMap [:minijava.ir/BinaryOp :+ :minijava.ir/Const  :minijava.exp/expression]
- [exp op rand1 rand2]       
-  (let [d  (tm/temp) ]
-  		 	(emit (movl  (CONST (:val rand1)) d))
-        (emit (addl (munch rand2) d))
-                    d))
 
-(defmethod munchMap [:minijava.ir/BinaryOp :+ :minijava.exp/expression :minijava.ir/Const ]
-  [exp op rand1 rand2]    
-  (let [d  (tm/temp) ]
-  		 	(emit (movl  (CONST (:val rand2)) d))
-        (emit (addl (munch rand1) d))
-                    d))
-  
- ;;BinaryOp :+ e1 e2 -> movl e1 t, addl e2 t
- (defmethod munchMap [:minijava.ir/BinaryOp :+  :minijava.exp/expression :minijava.exp/expression]
-  [x op exp1 exp2] 	
-  	(let [e1 (munch exp1)
-  			  e2 (munch exp2)
-  			  d  (tm/temp)]
-  			 	(emit (movl  e1 d))
-  			 	(emit (addl  e2 d))
-  			  d))
-  			  
  ;;Subtraction
-(defmethod munchMap [:minijava.ir/BinaryOp :- :minijava.ir/Const  :minijava.exp/expression] ;;first exp - second exp
+(defmethod munchMap [:minijava.ir/BinaryOp clojure.lang.Keyword :minijava.ir/Const  :minijava.exp/expression] ;;first exp - second exp
  [exp op rand1 rand2]       
-  (let [d  (tm/temp) ]
+  (let [cmd (getCmd op)
+  			d  (tm/temp) ]
   		 	(emit (movl  (CONST (:val rand1)) d))
-        (emit (subl  (munch rand2) d  ))
+        (emit (cmd  (munch rand2) d  ))
                     d))
 
-(defmethod munchMap [:minijava.ir/BinaryOp :- :minijava.exp/expression :minijava.ir/Const ] ;;first exp - second exp
+(defmethod munchMap [:minijava.ir/BinaryOp clojure.lang.Keyword :minijava.exp/expression :minijava.ir/Const ] ;;first exp - second exp
   [exp op rand1 rand2]    
-  (let [d  (tm/temp) ]
+  (let [cmd (getCmd op)
+  			d  (tm/temp) ]
   		 	(emit (movl  (munch rand1) d))
-        (emit (subl (CONST (:val rand2)) d));;note: the ordering here matters, and is different than above, because subtraction is not commutative
+        (emit (cmd (CONST (:val rand2)) d));;note: the ordering here matters, and is different than above, because subtraction is not commutative
                     d))
 
- (defmethod munchMap [:minijava.ir/BinaryOp :-  :minijava.exp/expression :minijava.exp/expression];;first exp - second exp
+ (defmethod munchMap [:minijava.ir/BinaryOp clojure.lang.Keyword  :minijava.exp/expression :minijava.exp/expression];;first exp - second exp
   [x op exp1 exp2] 	
-  	(let [e1 (munch exp1)
+  	(let [cmd (getCmd op)
+  				e1 (munch exp1)
   			  e2 (munch exp2)
   			  d  (tm/temp)]
   			 	(emit (movl  e2 d))
-  			 	(emit (subl  e1 d))
+  			 	(emit (cmd  e1 d))
   			  d))
   			  
-  			  
- ;;Multiplication
-(defmethod munchMap [:minijava.ir/BinaryOp :* :minijava.ir/Const  :minijava.exp/expression]
- [exp op rand1 rand2]       
-  (let [d  (tm/temp) ]
-  		 	(emit (movl  (CONST (:val rand1)) d))
-        (emit (imull  (munch rand2) d  ))
-                    d))
-
-(defmethod munchMap [:minijava.ir/BinaryOp :* :minijava.exp/expression :minijava.ir/Const ] 
-  [exp op rand1 rand2]    
-  (let [d  (tm/temp) ]
-  		 	(emit (movl  (munch rand1) d))
-        (emit (imull (CONST (:val rand2)) d))
-                    d))
-
- (defmethod munchMap [:minijava.ir/BinaryOp :*  :minijava.exp/expression :minijava.exp/expression]
-  [x op exp1 exp2] 	
-  	(let [e1 (munch exp1)
-  			  e2 (munch exp2)
-  			  d  (tm/temp)]
-  			 	(emit (movl  e2 d))
-  			 	(emit (imull  e1 d))
-  			  d))
+  
   			  	
   			  	
 ;;Note - there are some optimizations we can make here. If either argument is a const, we dont need to move it 
@@ -234,7 +192,7 @@
 ;;if BOTH arguments are constants, then we can simplify the conditional right out, statically.	  
 ;;also, if we're really fancy, we can drop the last jmp if the code is known to be followed by its false statement (but that probably is not something we should do in munch - we can either do it after the code is munched, or directly in the ir in advance (then it would be implemented in canon)).
 ;;Conditional
-(defmethod munchMap [:minijava.ir/Conditional := :minijava.exp/expression
+(defmethod munchMap [:minijava.ir/Conditional  clojure.lang.Keyword :minijava.exp/expression
                      :minijava.exp/expression :minijava.ir/Name :minijava.ir/Name]
   [exp op rand1 rand2 then else]
   (let [t1 (munch rand1)
@@ -244,7 +202,7 @@
     (emit (jmp (munch else)))))
 
 ;;(Conditional op (Const i) e2 true false) -> movl e2 t2, cmpl $i t2, jcc op true, jmp false
-(defmethod munchMap [:minijava.ir/Conditional := :minijava.ir/Const
+(defmethod munchMap [:minijava.ir/Conditional  clojure.lang.Keyword :minijava.ir/Const
                      :minijava.exp/expression :minijava.ir/Name :minijava.ir/Name]
   [exp op rand1 rand2 then else]
   (let [t2 (munch rand2)]
@@ -254,7 +212,7 @@
 
    
 ;;(Conditional op e1 (Const i) true false) -> movl e2 t2, cmpl $i t2, jcc (negated op) true, jmp false
-(defmethod munchMap [:minijava.ir/Conditional :> :minijava.exp/expression 
+(defmethod munchMap [:minijava.ir/Conditional  clojure.lang.Keyword :minijava.exp/expression 
                      :minijava.ir/Const :minijava.ir/Name :minijava.ir/Name]
   [exp op rand1 rand2 then else]
   (let [t1 (munch rand1)
@@ -274,7 +232,7 @@
 
 ;;Statically resolve the conditional
 ;;(Conditional op (Const i) (Const g) true false) ->  jmp (true or false)
-(defmethod munchMap [:minijava.ir/Conditional := :minijava.ir/Const
+(defmethod munchMap [:minijava.ir/Conditional  clojure.lang.Keyword :minijava.ir/Const
                      :minijava.ir/Const :minijava.ir/Name :minijava.ir/Name]
   [exp op rand1 rand2 then else]
  (let [v1 (:val rand1)
