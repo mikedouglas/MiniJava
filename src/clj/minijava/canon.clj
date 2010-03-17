@@ -114,11 +114,15 @@
 
 (defn split-block
   [lst match]
-  (if (or (empty? lst) (= (type (first match)) :minijava.ir/Jump)
-          (= (type (first match)) :minijava.ir/Conditional)
-          (= (type (first lst)) :minijava.ir/Label))
-    [(reverse match) lst]
-    (split-block (rest lst) (cons (first lst) match))))
+  (cond
+   (or (empty? lst)
+       (= (type (first match)) :minijava.ir/Jump)
+       (= (type (first match)) :minijava.ir/Conditional))
+     [(reverse match) lst]
+   (= (type (first lst)) :minijava.ir/Label)
+     [(reverse (cons (Jump (:lbl (first lst))) match)) lst]
+   :else
+     (recur (rest lst) (cons (first lst) match))))
 
 (defn basic-blocks
   [[x & xs]]
@@ -127,8 +131,8 @@
              (list (Label (tm/label)) x))
         [match rest] (split-block xs '())]
     (if (seq rest)
-      (cons (concat nx match) (list (basic-blocks rest)))
+      (cons (concat nx match) (basic-blocks rest))
       (if (or (= (type (last match)) :minijava.ir/Jump)
               (= (type (last match)) :minijava.ir/Conditional))
         (list (concat nx match))
-        (concat (concat nx match) (list (Jump (Name "done"))))))))
+        (list (concat (concat nx match) (list (Jump (Name "done")))))))))
