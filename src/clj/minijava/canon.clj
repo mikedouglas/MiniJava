@@ -89,6 +89,10 @@
   [s]
   (commutes (second (first s)) (second (second s))))
 
+(defn linearize-conditional
+  [s]
+  )
+
 (defn canon
   "Converts a Seq to linear IR form."
   [seqs]
@@ -106,3 +110,25 @@
        (list (canon (:seqs s)) (:exp s))
      :else s))))
 
+;; BASIC BLOCKS
+
+(defn split-block
+  [lst match]
+  (if (or (empty? lst) (= (type (first match)) :minijava.ir/Jump)
+          (= (type (first match)) :minijava.ir/Conditional)
+          (= (type (first lst)) :minijava.ir/Label))
+    [(reverse match) lst]
+    (split-block (rest lst) (cons (first lst) match))))
+
+(defn basic-blocks
+  [[x & xs]]
+  (let [nx (if (= (type x) :minijava.ir/Label)
+             (list x)
+             (list (Label (tm/label)) x))
+        [match rest] (split-block xs '())]
+    (if (seq rest)
+      (cons (concat nx match) (list (basic-blocks rest)))
+      (if (or (= (type (last match)) :minijava.ir/Jump)
+              (= (type (last match)) :minijava.ir/Conditional))
+        (list (concat nx match))
+        (concat (concat nx match) (list (Jump (Name "done"))))))))

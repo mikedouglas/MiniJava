@@ -51,4 +51,28 @@
         m3 (Move s2 (Statement (Const 2)))]
     (is (commutes? m))
     (is (commutes? m2))
-    (is (not (commutes? m3)))) )
+    (is (not (commutes? m3)))))
+
+(deftest test-bb-no-starting-label
+  (tm/reset-num!)
+  (let [exp (list (Statement (Const 3))
+                  (Jump (Name "test")))
+        res (list (list (Label (tm/label))
+                        (Statement (Const 3))
+                        (Jump (Name "test"))))]
+    (tm/reset-num!)
+    (is (= (basic-blocks exp) res))))
+
+(deftest test-bb-split-at-jump
+  (tm/reset-num!)
+  (let [exp (list (Statement (Const 3))
+                  (Jump (Name "test"))
+                  (Statement (Const 4)))
+        res (list (list (Label (tm/label))
+                        (Statement (Const 3))
+                        (Jump (Name "test")))
+                  (list (Label (tm/label))
+                        (Statement (Const 4))
+                        (Jump (Name "done"))))]
+    (tm/reset-num!)
+    (is (= (basic-blocks exp) res))))
