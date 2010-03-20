@@ -54,7 +54,7 @@
 
 (deftest test-Minus-exp-exp
   (tm/reset-num!)
-  (let [tree (BinaryOp :- (Temp (tm/temp)) (Temp (tm/temp)) )]				
+  (let [tree (BinaryOp :- (Temp (tm/temp)) (Temp (tm/temp)))]				
     (is (= (select tree)
            (list (movl (tm/temp 2) (tm/temp 3))
                  (subl (tm/temp 1) (tm/temp 3)))))))
