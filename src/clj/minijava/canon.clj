@@ -125,6 +125,7 @@
      (recur (rest lst) (cons (first lst) match))))
 
 (defn basic-blocks
+  "Takes a list of IR, and breaks into blocks w/ one entry and one exit."
   [[x & xs]]
   (let [nx (if (= (type x) :minijava.ir/Label)
              (list x)
@@ -133,6 +134,33 @@
     (if (seq rest)
       (cons (concat nx match) (basic-blocks rest))
       (if (or (= (type (last match)) :minijava.ir/Jump)
-              (= (type (last match)) :minijava.ir/Conditional))
+              (= (type (last match)) :minijava.ir/Conditional)
+              (= (type x) :minijava.ir/Jump)
+              (= (type x) :minijava.ir/Conditional))
         (list (concat nx match))
         (list (concat (concat nx match) (list (Jump (Name "done")))))))))
+
+;; TRACING
+
+(defn walk
+  "Returns a label to the immediate successor of blk."
+  [blk]
+  (let [lst (last blk)]
+    (case (type lst)
+      :minijava.ir/Jump        (Label (:lbl lst))
+      :minijava.ir/Conditional (Label (:f lst)))))
+
+;; right now I'm walking throught the blocks, trying to find match forward jumps
+;; or false conditionals. This could probably be improved.
+;; note: concat shouldn't be that expensive, it's only performed once we walk through
+;; the first list, amortizing the O(n) cost.
+(defn trace
+  "Rearranges blocks to limit distance of forward jumps and false conditionals."
+  [blks sorted]
+  (if (seq blks)
+    (let [next (walk (first blks))
+          [before after] (split-with #(not (= next (first %))) (rest blks))]
+      (if (seq after)
+        (trace (concat (rest after) before) (conj sorted (first blks) (first after)))
+        (trace before (conj sorted (first blks)))))
+    sorted))
