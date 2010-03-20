@@ -2,8 +2,9 @@
   (:use clojure.test
         clojure.contrib.def
         minijava.x86.frame
-        (minijava interp label tree typechecker utility))
-  (:require [minijava.ir :as ir]))
+        (minijava interp tree typechecker utility))
+  (:require [minijava.ir :as ir]
+  					[minijava.temp :as tm]))
  
 (import-ast-classes)
 
@@ -22,13 +23,13 @@
     (is (= 25 (eval-ir times empty-env)))))
  
 (deftest test-temp
-  (let [tmp (minijava.ir.temp.Temp.)
+  (let [tmp (tm/temp)
         prog (list (ir/Move (ir/Const 5) (ir/Temp tmp))
                    (ir/Temp tmp))]
     (is (= 5 (eval-prog prog)))))
  
 (deftest test-labels
-   (let [t (label)
+   (let [t (tm/label)
          prog (list (ir/Const 7)
                     (ir/Label t)
                     (ir/Const 5))]
@@ -36,8 +37,8 @@
             (hash-map t (list (ir/Const 5)))))))
  
 (deftest test-jump
-   (let [t (label)
-         tmp (minijava.ir.temp.Temp.)
+   (let [t (tm/label)
+         tmp (tm/temp)
          prog (list (ir/Move (ir/Const 0) (ir/Temp tmp))
                     (ir/Jump t)
                     (ir/Move (ir/Const 5) (ir/Temp tmp))
@@ -48,10 +49,10 @@
             (hash-map t (list (ir/Temp tmp)))))))
 
 (deftest test-cond
-  (let [t (label)
-        f (label)
-        d (label)
-        tmp (minijava.ir.temp.Temp.)
+  (let [t (tm/label)
+        f (tm/label)
+        d (tm/label)
+        tmp (tm/temp)
         prog1 (list (ir/Conditional := (ir/Const 10) (ir/Const 10)
                        (ir/Name t) (ir/Name f))
                    (ir/Label t)
@@ -72,10 +73,10 @@
     (is (= 2 (eval-prog prog2)))))
 
 (deftest test-while
-  (let [t (label)
-        f (label)
-        s (label)
-        tmp (minijava.ir.temp.Temp.)
+  (let [t (tm/label)
+        f (tm/label)
+        s (tm/label)
+        tmp (tm/temp)
         prog (list (ir/Move (ir/Const 0) (ir/Temp tmp))
                    (ir/Label s)
                    (ir/Conditional :< (ir/Temp tmp) (ir/Const 10)
@@ -128,10 +129,9 @@
 
 ;; sanity checks
 (deftest test-label
-  (let [t (label)
+  (let [t (tm/label)
         prog (list (ir/Label t))]
     (is (= (ir/Label t)
            (first prog)))
     (is (= (hash-map t 5)
            (hash-map (:lbl (first prog)) 5)))))
-

@@ -1,6 +1,5 @@
 (ns minijava.test-x86
   (:use clojure.test
-        minijava.label
         minijava.x86.frame))
 
 (deftest tests-uni-no-formals
