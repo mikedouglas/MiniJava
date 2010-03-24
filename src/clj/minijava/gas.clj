@@ -22,7 +22,6 @@
 (deftype LABEL [lbl]
   clojure.lang.IPersistentMap)   
 
-
 ;;Adds the first operand to the second, storing the result in the
 ;;second
 (deftype addl [src dst]
