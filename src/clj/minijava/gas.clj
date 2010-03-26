@@ -89,7 +89,10 @@
  	 		:minijava.gas/subl (hash-set (:src instr) (:dst instr))
  	 		:minijava.gas/addl (hash-set (:src instr) (:dst instr))
  	 		:minijava.gas/movl (hash-set (:src instr) (:dst instr))
- 	 		:default nil ;;catch LABEL, MEMORY, CONST
+ 	 		:minijava.gas/LABEL nil
+ 	 		:minijava.gas/MEMORY nil
+ 	 		:minijava.gas/CONST nil
+ 	 		:default nil
  ))
  
  ;;the set of temps defined by this instruction
@@ -104,5 +107,8 @@
  	 		:minijava.gas/subl (hash-set (:dst instr))
  	 		:minijava.gas/addl (hash-set (:dst instr))
  	 		:minijava.gas/movl (hash-set (:dst instr))
- 	 		:default nil ;;catch LABEL, MEMORY, CONST
+ 	 		:minijava.gas/LABEL nil
+ 	 		:minijava.gas/MEMORY nil
+ 	 		:minijava.gas/CONST nil
+ 	 		:default nil 
  ))
