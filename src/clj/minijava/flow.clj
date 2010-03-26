@@ -16,7 +16,7 @@
 						labelMap
 					(isit? (first instrs) :minijava.gas/LABEL)
 						 (recur (rest instrs)  (assoc labelMap (:lbl (first instrs)) (second instrs)))
-					(true)
+					true
 						(recur (rest instrs)  labelMap))))
 
 (defn addSuccessor [succMap mapKey succ]
