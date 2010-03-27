@@ -13,7 +13,9 @@
   (BinaryOp op (-> x .e1 (tree frame) unEx)
             (-> x .e2 (tree frame) unEx)))
 
-(defn tree-prog [seq]
+(defn tree-prog
+  "Walks through a program, applying tree."
+  [seq]
   (let [frame (new-x86 0 [])]
     (for [s seq] (tree s frame))))
 
@@ -80,7 +82,8 @@
   [x frame]
   {(.name x)
    (into {} (for [i ($ (.methods x))]
-              (let [frame (new-x86 0 (map #(. % name) ($ (.vars i))))
+              (let [args  (map #(. % name) (-> i .formals $ reverse))
+                    frame (new-x86 0 (cons "obj" args))
                     name  (str (.name x) "_" (.name i))]
                 [name (Seq (cons (Label name) (tree i frame)))])))})
 
@@ -115,8 +118,8 @@
 
 (deftree minijava.ast.MethodDecl
   [x frame]
-  (map #(tree % frame) (concat (-> x .vars $)
-                               (-> x .statements $))))
+  (doseq [v (-> x .vars $)] (allocLocal frame (.name v) false))
+  (map #(tree % frame) (-> x .statements $)))
 
 (deftree minijava.ast.Minus
   [x frame]
@@ -152,8 +155,7 @@
 
 (deftree minijava.ast.Program
   [x frame]
-  (apply merge (map #(tree % nil)
-                    (cons (.mainClass x) ($ (.classes x))) (repeat nil))))
+  (apply merge (map #(tree % nil) (cons (.mainClass x) ($ (.classes x))))))
 
 (deftree minijava.ast.This
   [x frame]
@@ -165,10 +167,9 @@
 
 (deftree minijava.ast.VarDecl
   [x frame]
-  (condp = (.kind x)
-    minijava.ast.VarDecl$Kind/LOCAL  (do (allocLocal frame (.name x) false) (NoOp))
-    minijava.ast.VarDecl$Kind/FIELD  (throw (Exception. "shouldn't be called"))
-    minijava.ast.VarDecl$Kind/FORMAL (throw (Exception. "shouldn't be called"))))
+  (assert (= (.kind x) minijava.ast.VarDecl$Kind/LOCAL))
+  (allocLocal frame (.name x) false)
+  (NoOp))
 
 (deftree minijava.ast.While
   [x frame]

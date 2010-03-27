@@ -4,16 +4,16 @@
   (:require [minijava.temp :as tm]))
 
 (defprotocol Frame
-  (allocLocal [this sym escapes?])
-  (lookup [this sym])
-  (obj [this])
-  (fp [this])
-  (rv [this])
-  (formals [this])
-  (word-size [this]))
+  (allocLocal [x sym escapes?])
+  (lookup [x sym])
+  (obj [x])
+  (fp [x])
+  (rv [x])
+  (formals [x])
+  (word-size [x]))
 
 (defprotocol Access
-  (exp [this]))
+  (exp [x]))
 
 (deftype InFrame [offset]
   Access
