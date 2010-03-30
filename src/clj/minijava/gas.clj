@@ -84,25 +84,24 @@
      :minijava.gas/jcc   nil
      :minijava.gas/jmp   nil
      :minijava.gas/call  nil
-     :minijava.gas/cmpl  (hash-set (:a instr) (:b instr))
+     :minijava.gas/cmpl  (hash-set (:a instr)   (:b instr))
      :minijava.gas/imull (hash-set (:src instr) (:dst instr))
      :minijava.gas/subl  (hash-set (:src instr) (:dst instr))
      :minijava.gas/addl  (hash-set (:src instr) (:dst instr))
      :minijava.gas/movl  (hash-set (:src instr) (:dst instr))
-     :default            nil ;;catch LABEL, MEMORY, CONST
- ))
- 
+     :default            nil)) ;;catch LABEL, MEMORY, CONST
+  
  ;;the set of temps defined by this instruction
  (defn defs [instr]
-         (case (type instr)
-           :minijava.gas/ret   (hash-set (tm/temp :eip))
-           :minijava.gas/jcc   nil
-           :minijava.gas/jmp   nil
-           :minijava.gas/call  nil
-           :minijava.gas/cmpl  nil
-           :minijava.gas/imull (hash-set (:dst instr))
-           :minijava.gas/subl  (hash-set (:dst instr))
-           :minijava.gas/addl  (hash-set (:dst instr))
-           :minijava.gas/movl  (hash-set (:dst instr))
-           :default            nil ;;catch LABEL, MEMORY, CONST
- ))
+   (case (type instr)
+     :minijava.gas/ret   (hash-set (tm/temp :eip))
+     :minijava.gas/jcc   nil
+     :minijava.gas/jmp   nil
+     :minijava.gas/call  nil
+     :minijava.gas/cmpl  nil
+     :minijava.gas/imull (hash-set (:dst instr))
+     :minijava.gas/subl  (hash-set (:dst instr))
+     :minijava.gas/addl  (hash-set (:dst instr))
+     :minijava.gas/movl  (hash-set (:dst instr))
+     :default            nil)) ;;catch LABEL, MEMORY, CONST
+
