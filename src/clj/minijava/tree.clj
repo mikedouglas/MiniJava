@@ -1,7 +1,7 @@
 (ns minijava.tree
   "Functions to convert the AST to IR as directly as possible."
   (:use minijava.x86.frame
-        (minijava ast exp ir))
+        (minijava access ast exp ir obj))
   (:require [minijava.temp :as tm]))
 
 (defprotocol Treeable
@@ -16,7 +16,7 @@
 (defn tree-prog
   "Walks through a program, applying tree."
   [seq]
-  (let [frame (new-x86 0 [])]
+  (let [frame (new-x86 0 [] nil)]
     (for [s seq] (tree s frame))))
 
 (defmacro deftree [type [obj frame] & body]
@@ -81,11 +81,12 @@
 (deftree minijava.ast.ClassDecl
   [x frame]
   {(.name x)
-   (into {} (for [i ($ (.methods x))]
-              (let [args  (map #(. % name) (-> i .formals $ reverse))
-                    frame (new-x86 0 (cons "obj" args))
-                    name  (str (.name x) "_" (.name i))]
-                [name (Seq (cons (Label name) (tree i frame)))])))})
+   (let [obj (new-obj (for [v ($ (.vars x))] (.name v)))]
+     (into {} (for [i ($ (.methods x))]
+                (let [args  (map #(. % name) (-> i .formals $ reverse))
+                      frame (new-x86 0 (cons "obj" args) obj)
+                      name  (str (.name x) "_" (.name i))]
+                  [name (Seq (cons (Label name) (tree i frame)))]))))})
 
 (deftree minijava.ast.IdentifierExp
   [x frame]
@@ -114,7 +115,7 @@
 
 (deftree minijava.ast.MainClass
   [x frame]
-  {"main" (tree (.statement x) (new-x86 0 ["obj"]))})
+  {"main" (tree (.statement x) (new-x86 0 ["obj"] nil))})
 
 (deftree minijava.ast.MethodDecl
   [x frame]

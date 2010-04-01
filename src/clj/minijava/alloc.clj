@@ -3,6 +3,8 @@
    See Poletto and Sarkar[1999]"
   (:use [minijava flow gas]))
 
+(declare expire spill)
+
 (defn scan
   "Scan through register intervals, allocating a register/stack pointer
 to each."

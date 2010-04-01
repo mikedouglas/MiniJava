@@ -2,18 +2,18 @@
   (:use clojure.test
         clojure.contrib.def
         minijava.x86.frame
-        (minijava interp tree typechecker utility))
+        (minijava interp obj tree typechecker utility))
   (:require [minijava.ir :as ir]
-  					[minijava.temp :as tm]))
- 
+            [minijava.temp :as tm]))
+
 (import-ast-classes)
 
-(defonce- empty-frame (new-x86 0 ["obj"]))
+(defonce- empty-frame (new-x86 0 ["obj"] (new-obj [])))
 
 (deftest test-eval-const
   (let [const (tree (parse-int "5") empty-frame)]
     (is (= 5 (eval-ir const empty-env)))))
- 
+
 (deftest test-eval-binop
   (let [plus  (tree (parse-int "5 + 5") empty-frame)
         minus (tree (parse-int "5 - 5") empty-frame)
@@ -21,13 +21,13 @@
     (is (= 10 (eval-ir plus empty-env)))
     (is (= 0 (eval-ir minus empty-env)))
     (is (= 25 (eval-ir times empty-env)))))
- 
+
 (deftest test-temp
   (let [tmp (tm/temp)
         prog (list (ir/Move (ir/Const 5) (ir/Temp tmp))
                    (ir/Temp tmp))]
     (is (= 5 (eval-prog prog)))))
- 
+
 (deftest test-labels
    (let [t (tm/label)
          prog (list (ir/Const 7)
@@ -35,7 +35,7 @@
                     (ir/Const 5))]
      (is (= (build-label-map prog (hash-map))
             (hash-map t (list (ir/Const 5)))))))
- 
+
 (deftest test-jump
    (let [t (tm/label)
          tmp (tm/temp)
@@ -98,7 +98,7 @@
                    (ir/Jump s)
                    (ir/Label f)
                    (ir/Temp tmp))
-             t 
+             t
              (list (ir/Move (ir/BinaryOp :+ (ir/Temp tmp) (ir/Const 1))
                             (ir/Temp tmp))
                    (ir/Jump s)
@@ -108,14 +108,14 @@
              (list (ir/Temp tmp)))))))
 
 ;; (deftest test-classes
-;;   (let [prog (tree (minijava.ast.ClassDecl. 
-;;                     "hello" nil [] 
-;;                      [(parse-meth "public int func() { 
-;;                                     int b; 
-;;                                     boolean a; 
-;;                                     a = true; 
-;;                                     System.out.println(3); 
-;;                                     return 5; 
+;;   (let [prog (tree (minijava.ast.ClassDecl.
+;;                     "hello" nil []
+;;                      [(parse-meth "public int func() {
+;;                                     int b;
+;;                                     boolean a;
+;;                                     a = true;
+;;                                     System.out.println(3);
+;;                                     return 5;
 ;;                                    }")])
 ;;                    nil)
 ;;         entry-point (list (ir/Call (ir/Name "hello_func") []))]

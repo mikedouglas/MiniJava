@@ -2,7 +2,7 @@
         "Instructions of GNU x86 assembly"
   (:use (minijava ir))
   (:require [minijava.temp :as tm]))
-  
+
 ;;this is NOT an x86 instruction - it is a constant argument to an
 ;;instruction (ie addl $2 %eax)
 (deftype CONST [value]
@@ -12,12 +12,12 @@
 ;;for an instruction (ie addl 2(%edx) %eax) offset is optional; its
 ;;the number of bytes off from the address to read from
 (deftype MEMORY [adr offset?]
-  clojure.lang.IPersistentMap)   
+  clojure.lang.IPersistentMap)
 
 ;;this is NOT an x86 instruction - it is just a marker that this
 ;;position is the destination of a label
 (deftype LABEL [lbl]
-  clojure.lang.IPersistentMap)   
+  clojure.lang.IPersistentMap)
 
 ;;movl %eax, %ebx copies the contents of %eax to %ebx
 (deftype movl [src dst]
@@ -76,8 +76,8 @@
 ;;to return from function calls.
 (deftype ret []
    clojure.lang.IPersistentMap)
-  
-  ;;returns a list of all temps used by this instruction 
+
+  ;;returns a list of all temps used by this instruction
  (defn uses [instr]
    (case (type instr)
      :minijava.gas/ret   (hash-set (tm/temp :eip))
@@ -89,8 +89,8 @@
      :minijava.gas/subl  (hash-set (:src instr) (:dst instr))
      :minijava.gas/addl  (hash-set (:src instr) (:dst instr))
      :minijava.gas/movl  (hash-set (:src instr) (:dst instr))
-     :default            nil)) ;;catch LABEL, MEMORY, CONST
-  
+     nil)) ;;catch LABEL, MEMORY, CONST
+
  ;;the set of temps defined by this instruction
  (defn defs [instr]
    (case (type instr)
@@ -103,5 +103,5 @@
      :minijava.gas/subl  (hash-set (:dst instr))
      :minijava.gas/addl  (hash-set (:dst instr))
      :minijava.gas/movl  (hash-set (:dst instr))
-     :default            nil)) ;;catch LABEL, MEMORY, CONST
+     nil)) ;;catch LABEL, MEMORY, CONST
 
