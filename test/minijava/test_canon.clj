@@ -92,7 +92,8 @@
                    (Call "print" [(Const 5)]))
         res (list (list (Label frst)
                         (Statement (Const 3))
-                        (Conditional :< (Const 3) (Const 4) (Name "t") (Name "f")))
+                        (Conditional :< (Const 3) (Const 4)
+                                     (Name "t") (Name "f")))
                   (list (Label (Name "t"))
                         (Call "print" [(Const 3)])
                         (Jump done))
@@ -104,21 +105,29 @@
                         (Jump (Name "done"))))]
     (tm/reset-num!)
     (is (= (basic-blocks exp) res))))
-   
-  (deftest test-simple
-    (let [t (tm/label)
-          f (tm/label)
-          other (tm/label)
-          prog	(Seq [(Label other)
-                      (Conditional :< (Const 3) (Const 4) (Name t) (Name f))
-                      (Label t)
-                      (Seq []) 
-                      (Jump (Name other))
-                      (Label f)])]
-      (is (= (canon prog) 
-             (list
-              (Label other)
-              (Conditional :< (Const 3) (Const 4) (Name t) (Name f))
-              (Label t)
-              (Jump (Name other))
-              (Label f))))))
+
+(deftest test-simple
+  (let [t (tm/label)
+        f (tm/label)
+        other (tm/label)
+        prog  (Seq [(Label other)
+                    (Conditional :< (Const 3) (Const 4) (Name t) (Name f))
+                    (Label t)
+                    (Seq [])
+                    (Jump (Name other))
+                    (Label f)])]
+    (is (= (canon prog)
+           (list
+            (Label other)
+            (Conditional :< (Const 3) (Const 4) (Name t) (Name f))
+            (Label t)
+            (Jump (Name other))
+            (Label f))))))
+
+(deftest test-trace
+  (let [t (tm/label)
+        f (tm/label)
+        other (tm/label)
+        prog (Seq [(Label other)
+                   (Conditional :< (Const 3) (Const 4) (Name t) (Name f))
+                   ])]))
