@@ -94,7 +94,7 @@
 ;;the set of temps defined by this instruction
 (defn defs [instr]
   (case (type instr)
-    :minijava.gas/ret   (hash-set (tm/temp :eip))
+    :minijava.gas/ret   (hash-set (tm/temp :EIP))
     :minijava.gas/jcc   nil
     :minijava.gas/jmp   nil
     :minijava.gas/call  nil
