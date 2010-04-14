@@ -49,3 +49,22 @@
           (addl b c)         #{c b}
           (movl c a)         #{c b a}
           (jmp l1)           #{c b a})))))
+
+;; test live map to interval conversion
+(deftest test-conversion-1
+  (tm/reset-num!)
+  (let [l1 (tm/label)
+        a (tm/temp)
+        b (tm/temp)
+        c (tm/temp)
+        prog  (list
+               (LABEL l1)
+               (addl (CONST 3) c)
+               (addl (CONST 5) b)
+               (addl b c)
+               (movl c a)
+               (jmp l1))]
+    (= (livemap->liveintervals prog (live prog))
+       {{:id c, :start 1, :end 5}
+        {:id b, :start 2, :end 5}
+        {:id a, :start 4, :end 5}})))

@@ -47,3 +47,9 @@
 
 (defn live [program]
   (live-loop (reverse program)))
+
+;; this function converts from this liveness map to live intervals
+;; in preparation for the register allocation algorithm
+;; TODO: stub
+(defn livemap->liveintervals [program map]
+  nil)
