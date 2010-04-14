@@ -3,9 +3,12 @@
         clojure.test))
 
 (deftest tests-no-spilled-no-dead
-  (let [val [{:start 0, :end 1}
-             {:start 0, :end 2}
-             {:start 1, :end 3}]
+  (let [val [{:start 0, :end 3}
+             {:start 0, :end 4}
+             {:start 1, :end 3}
+             {:start 1, :end 7}
+             {:start 2, :end 6}
+             {:start 2, :end 5}]
         {:keys [inreg spilled]} (scan val)]
     (is (= (count val) (count inreg)) "Every interval is allocated to reg.")
     (is (distinct? (map :reg inreg)) "Interval is given a unique register.")
@@ -32,6 +35,9 @@
 (deftest tests-spilled
   (let [val [{:start 0, :end 3}
              {:start 0, :end 2}
+             {:start 0, :end 4}
+             {:start 1, :end 5}
+             {:start 1, :end 6}
              {:start 1, :end 4}
              {:start 2, :end 6}]
         {:keys [inreg spilled]} (scan val)
