@@ -1,7 +1,8 @@
 (ns minijava.alloc
   "Register allocation, using a linear scan algorithm.
    See Poletto and Sarkar[1999]"
-  (:use [minijava flow gas]))
+  (:use [minijava flow gas])
+  (:require [clojure.set :as set]))
 
 (declare expire spill)
 
@@ -20,7 +21,7 @@ to each. Returns allocated intervals."
       (swap! active expire i dead)
       (if (= (count @active) (count regs))
         (swap! spilled conj (spill i active))
-        (let [reg (first (clojure.set/difference regs @allocd))
+        (let [reg (first (set/difference regs @allocd))
               i   (assoc i :reg reg)]
           (swap! allocd conj reg)
           (swap! active conj i))))
@@ -29,7 +30,8 @@ to each. Returns allocated intervals."
 (defn- expire
   "Expire registers that've been freed from intrvl and intrvl - 1."
   [active intrvl dead]
-  (let [[active died] (split-with #(>= (:end %) (:start intrvl)) active)]
+  (let [[active died] (split-with #(>= (:end %) (:start intrvl))
+                                  (sort-by :end active))]
     (swap! dead concat died)
     active))
 
