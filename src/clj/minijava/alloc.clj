@@ -7,28 +7,31 @@
 
 (def regs #{:EAX :EBX :EDX})
 
-;; liveness interval {:reg REGS, :loc bool, :start lineno, :end lineno}
+;; liveness interval {:reg REGS, :start lineno, :end lineno}
 (defn scan
   "Scan through register intervals, allocating a register/stack pointer
 to each. Returns allocated intervals."
   [intrvls]
-  (let [active (atom '())
-        spilled (for [i (sort-by :start intrvals)]
-                  (expire i active)
-                  (if (= (count @active) (count regs))
-                    (spill i active)
-                    (let [reg (first (clojure.set/difference regs @active))
-                          i   (assoc i :reg reg)]
-                      (swap! active conj i)
-                      nil)))]
-    {:active active, :spilled (remove nil? spilled)}))
+  (let [dead    (atom '())
+        allocd  (atom #{})
+        active  (atom '())
+        spilled (atom '())]
+    (doseq [i (sort-by :start intrvls)]
+      (swap! active expire i dead)
+      (if (= (count @active) (count regs))
+        (swap! spilled conj (spill i active))
+        (let [reg (first (clojure.set/difference regs @allocd))
+              i   (assoc i :reg reg)]
+          (swap! allocd conj reg)
+          (swap! active conj i))))
+    {:inreg (concat @dead @active), :spilled @spilled}))
 
 (defn- expire
   "Expire registers that've been freed from intrvl and intrvl - 1."
-  [intrvl active]
-  (for [a (sort-by :end @active)
-          :when (>= (:end a) (:start i))]
-    a))
+  [active intrvl dead]
+  (let [[active died] (split-with #(>= (:end %) (:start intrvl)) active)]
+    (swap! dead concat died)
+    active))
 
 (defn- spill
   "Spill register with longest time left."
@@ -38,4 +41,4 @@ to each. Returns allocated intervals."
       (let [intrvl (assoc intrvl :reg (:reg spill))]
         (reset! active (conj (rest @active) intrvl))
         intrvl)
-      (assoc intrvl :loc true))))
+      intrvl)))
