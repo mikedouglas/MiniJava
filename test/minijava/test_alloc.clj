@@ -35,12 +35,8 @@
              {:start 1, :end 4}
              {:start 2, :end 6}]
         {:keys [inreg spilled]} (scan val)
-        comp (reify java.util.Comparator
-               (compare [o1 o2]
-                 (cond (< (:end o1) (:end o2)) 1
-                       (= (:end o1) (:end o2)) 0
-                       (> (:end o1) (:end o2)) -1)))
-        longest-lived (first (sort comp val))]
+        longest-lived (first (reverse (sort-by :reg val)))]
     (is (not (= (count val) (count inreg))) "Not every interval in reg.")
     (is (not (empty? spilled)) "Something is spilled.")
-    (is (= (dissoc (first spilled) :reg) longest-lived) "Longest-lived interval spilled.")))
+    (is (= (dissoc (first spilled) :reg) longest-lived)
+        "Longest-lived interval spilled.")))

@@ -39,7 +39,7 @@ to each. Returns allocated intervals."
 (defn- spill
   "Spill register with longest time left."
   [intrvl active]
-  (let [spill (first @active)]
+  (let [spill (first (reverse (sort-by :end @active)))]
     (if (> (:end spill) (:end intrvl))
       (let [intrvl (assoc intrvl :reg (:reg spill))]
         (reset! active (conj (rest @active) intrvl))
