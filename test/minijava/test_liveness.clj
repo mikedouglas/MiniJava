@@ -26,3 +26,26 @@
           (LABEL t)     #{a b}
           (jmp other)   #{a b}
           (LABEL f)     nil)))))
+
+;; Adapted from Wikipedia example
+(deftest test-liveness-2
+  (tm/reset-num!)
+  (let [l1 (tm/label)
+        a (tm/temp)
+        b (tm/temp)
+        c (tm/temp)
+        prog  (list
+               (LABEL l1)
+               (addl (CONST 3) c)
+               (addl (CONST 5) b)
+               (addl b c)
+               (movl c a)
+               (jmp l1))]
+  (is (= (live prog)
+         (hash-map
+          (LABEL l1)         nil
+          (addl (CONST 3) c) #{c}
+          (addl (CONST 5) b) #{c b}
+          (addl b c)         #{c b}
+          (movl c a)         #{c b a}
+          (jmp l1)           #{c b a})))))
