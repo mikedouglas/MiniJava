@@ -78,7 +78,7 @@
    clojure.lang.IPersistentMap)
 
 ;; precondition: instr is a cmpl/imull/subl/addl/movl
-(defn extract-use-temps [instr set]
+(defn extract-use-temps [instr]
   (case (type instr)
     :minijava.gas/cmpl (let [arg1 (:a instr)
                              arg2 (:b instr)
@@ -97,20 +97,26 @@
           (conj set arg1)
           set))))
 
+;; precondition: instr is a cmpl/imull/subl/addl/movl
+(defn extract-def-temps [instr]
+  (let [dst (:dst instr)]
+    (if (= (type dst) :minijava.temp/Temp)
+        (hash-set dst)
+        (hash-set))))
+
 ;;returns a list of all temps used by this instruction
 (defn uses [instr]
-  (let [use-set (hash-set)]
-    (case (type instr)
-      :minijava.gas/ret   (hash-set (tm/temp :eip))
-      :minijava.gas/jcc   nil
-      :minijava.gas/jmp   nil
-      :minijava.gas/call  nil
-      :minijava.gas/cmpl  (extract-use-temps instr use-set)
-      :minijava.gas/imull (extract-use-temps instr use-set)
-      :minijava.gas/subl  (extract-use-temps instr use-set)
-      :minijava.gas/addl  (extract-use-temps instr use-set)
-      :minijava.gas/movl  (extract-use-temps instr use-set)
-      nil))) ;;catch LABEL, MEMORY, CONST
+  (case (type instr)
+    :minijava.gas/ret   (hash-set (tm/temp :eip))
+    :minijava.gas/jcc   nil
+    :minijava.gas/jmp   nil
+    :minijava.gas/call  nil
+    :minijava.gas/cmpl  (extract-use-temps instr)
+    :minijava.gas/imull (extract-use-temps instr)
+    :minijava.gas/subl  (extract-use-temps instr)
+    :minijava.gas/addl  (extract-use-temps instr)
+    :minijava.gas/movl  (extract-use-temps instr)
+    nil)) ;;catch LABEL, MEMORY, CONST
 
 ;;the set of temps defined by this instruction
 (defn defs [instr]
@@ -120,9 +126,9 @@
     :minijava.gas/jmp   nil
     :minijava.gas/call  nil
     :minijava.gas/cmpl  nil
-    :minijava.gas/imull (hash-set (:dst instr))
-    :minijava.gas/subl  (hash-set (:dst instr))
-    :minijava.gas/addl  (hash-set (:dst instr))
-    :minijava.gas/movl  (hash-set (:dst instr))
+    :minijava.gas/imull (extract-def-temps instr)
+    :minijava.gas/subl  (extract-def-temps instr)
+    :minijava.gas/addl  (extract-def-temps instr)
+    :minijava.gas/movl  (extract-def-temps instr)
     nil)) ;;catch LABEL, MEMORY, CONST
 
