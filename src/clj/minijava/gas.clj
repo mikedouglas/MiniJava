@@ -101,6 +101,33 @@
    Object
    (toString [] "ret"))
 
+;; precondition: instr is a cmpl/imull/subl/addl/movl
+(defn extract-use-temps [instr]
+  (case (type instr)
+    :minijava.gas/cmpl (let [arg1 (:a instr)
+                             arg2 (:b instr)
+                             set  (if (= (type arg2) :minijava.temp/Temp)
+                                      (hash-set arg2)
+                                      (hash-set))]
+                         (if (= (type arg1) :minijava.temp/Temp)
+                             (conj set arg1)
+                             set))
+    (let [arg1 (:src instr)
+          arg2 (:dst instr)
+          set  (if (= (type arg2) :minijava.temp/Temp)
+                   (hash-set arg2)
+                   (hash-set))]
+      (if (= (type arg1) :minijava.temp/Temp)
+          (conj set arg1)
+          set))))
+
+;; precondition: instr is a cmpl/imull/subl/addl/movl
+(defn extract-def-temps [instr]
+  (let [dst (:dst instr)]
+    (if (= (type dst) :minijava.temp/Temp)
+        (hash-set dst)
+        (hash-set))))
+
 ;;returns a list of all temps used by this instruction
 (defn uses [instr]
   (case (type instr)
@@ -108,11 +135,11 @@
     :minijava.gas/jcc   nil
     :minijava.gas/jmp   nil
     :minijava.gas/call  nil
-    :minijava.gas/cmpl  (hash-set (:a instr)   (:b instr))
-    :minijava.gas/imull (hash-set (:src instr) (:dst instr))
-    :minijava.gas/subl  (hash-set (:src instr) (:dst instr))
-    :minijava.gas/addl  (hash-set (:src instr) (:dst instr))
-    :minijava.gas/movl  (hash-set (:src instr) (:dst instr))
+    :minijava.gas/cmpl  (extract-use-temps instr)
+    :minijava.gas/imull (extract-use-temps instr)
+    :minijava.gas/subl  (extract-use-temps instr)
+    :minijava.gas/addl  (extract-use-temps instr)
+    :minijava.gas/movl  (extract-use-temps instr)
     nil)) ;;catch LABEL, MEMORY, CONST
 
 ;;the set of temps defined by this instruction
@@ -123,9 +150,9 @@
     :minijava.gas/jmp   nil
     :minijava.gas/call  nil
     :minijava.gas/cmpl  nil
-    :minijava.gas/imull (hash-set (:dst instr))
-    :minijava.gas/subl  (hash-set (:dst instr))
-    :minijava.gas/addl  (hash-set (:dst instr))
-    :minijava.gas/movl  (hash-set (:dst instr))
+    :minijava.gas/imull (extract-def-temps instr)
+    :minijava.gas/subl  (extract-def-temps instr)
+    :minijava.gas/addl  (extract-def-temps instr)
+    :minijava.gas/movl  (extract-def-temps instr)
     nil)) ;;catch LABEL, MEMORY, CONST
 
