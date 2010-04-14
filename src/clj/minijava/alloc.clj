@@ -18,7 +18,7 @@ to each. Returns allocated intervals."
         active  (atom '())
         spilled (atom '())]
     (doseq [i (sort-by :start intrvls)]
-      (swap! active expire i dead)
+      (swap! active expire i dead allocd)
       (if (= (count @active) (count regs))
         (swap! spilled conj (spill i active))
         (let [reg (first (set/difference regs @allocd))
@@ -29,10 +29,11 @@ to each. Returns allocated intervals."
 
 (defn- expire
   "Expire registers that've been freed from intrvl and intrvl - 1."
-  [active intrvl dead]
+  [active intrvl dead allocd]
   (let [[active died] (split-with #(>= (:end %) (:start intrvl))
                                   (sort-by :end active))]
     (swap! dead concat died)
+    (swap! allocd set/difference (map :reg died))
     active))
 
 (defn- spill
