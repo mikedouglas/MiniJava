@@ -3,6 +3,14 @@
   (:use (minijava ir))
   (:require [minijava.temp :as tm]))
   
+(def *uniqueID* (atom 0))
+
+(defn genID []
+	(do 
+		(reset! *uniqueID* (inc  @*uniqueID*))
+		(@*uniqueID*))
+)
+
 ;;this is NOT an x86 instruction - it is a constant argument to an
 ;;instruction (ie addl $2 %eax)
 (deftype CONST [value  id]
