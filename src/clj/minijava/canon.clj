@@ -34,7 +34,8 @@
           (merge tree [:exp2 e2]))))
 
 (defn remove-eseq-no-commute
-  "(BinaryOp op e1 (ExpSeq s2 e2)) -> [(Move e1 (Temp t)) s2 (BinaryOp op (Temp t e2))]"
+  "(BinaryOp op e1 (ExpSeq s2 e2))
+     -> [(Move e1 (Temp t)) s2 (BinaryOp op (Temp t e2))]"
   [tree]
   (let [e1 (get tree :exp1)
         s1 (get-in tree [:exp2 :seqs])
@@ -52,7 +53,7 @@
 
 (defn matches-eseq-left?
   [s]
-  (or (and (= :minijava.ir/BinaryOp (type s)) ;; the conditions listed in figure 8.1
+  (or (and (= :minijava.ir/BinaryOp (type s)) ;; see figure 8.1
            (= :minijava.ir/ExpSeq (type (:exp1 s))))
       (and (= :minijava.ir/Mem (type s))
            (= :minijava.ir/ExpSeq (type (:adr s))))
@@ -64,7 +65,7 @@
 
 (defn matches-eseq-commute?
   [s]
-  (or (and (= :minijava.ir/BinaryOp (type s)) ;; the conditions listed in figure 8.1
+  (or (and (= :minijava.ir/BinaryOp (type s)) ;; see figure 8.1
            (= :minijava.ir/ExpSeq (type (:exp2 s))))
       (and (= :minijava.ir/Conditional (type s))
            (= :minijava.ir/ExpSeq (type (:exp2 s))))))
@@ -89,10 +90,6 @@
   [s]
   (commutes (second (first s)) (second (second s))))
 
-(defn linearize-conditional
-  [s]
-  )
-
 (defn canon
   "Converts a Seq to linear IR form."
   [seqs]
@@ -105,8 +102,8 @@
        (if (commutes? s)
          (remove-eseq-commute s)
          (remove-eseq-no-commute s))
-     (= (type s) :minijava.ir/Seq) (canon s)
-     (= (type s) :minijava.ir/ExpSeq)
+     (isit? s :minijava.ir/Seq) (canon s)
+     (isit? s :minijava.ir/ExpSeq)
        (list (canon (:seqs s)) (:exp s))
      :else s))))
 
@@ -116,10 +113,10 @@
   [lst match]
   (cond
    (or (empty? lst)
-       (= (type (first match)) :minijava.ir/Jump)
-       (= (type (first match)) :minijava.ir/Conditional))
+       (isit? (first match) :minijava.ir/Jump)
+       (isit? (first match) :minijava.ir/Conditional))
      [(reverse match) lst]
-   (= (type (first lst)) :minijava.ir/Label)
+   (isit? (first lst) :minijava.ir/Label)
      [(reverse (cons (Jump (:lbl (first lst))) match)) lst]
    :else
      (recur (rest lst) (cons (first lst) match))))
@@ -127,16 +124,16 @@
 (defn basic-blocks
   "Takes a list of IR, and breaks into blocks w/ one entry and one exit."
   [[x & xs]]
-  (let [nx (if (= (type x) :minijava.ir/Label)
+  (let [nx (if (isit? x :minijava.ir/Label)
              (list x)
              (list (Label (tm/label)) x))
         [match rest] (split-block xs '())]
     (if (seq rest)
       (cons (concat nx match) (basic-blocks rest))
-      (if (or (= (type (last match)) :minijava.ir/Jump)
-              (= (type (last match)) :minijava.ir/Conditional)
-              (= (type x) :minijava.ir/Jump)
-              (= (type x) :minijava.ir/Conditional))
+      (if (or (isit? (last match) :minijava.ir/Jump)
+              (isit? (last match) :minijava.ir/Conditional)
+              (isit? x :minijava.ir/Jump)
+              (isit? x :minijava.ir/Conditional))
         (list (concat nx match))
         (list (concat (concat nx match) (list (Jump (Name "done")))))))))
 
@@ -150,10 +147,11 @@
       :minijava.ir/Jump        (Label (:lbl lst))
       :minijava.ir/Conditional (Label (:f lst)))))
 
-;; right now I'm walking throught the blocks, trying to find match forward jumps
-;; or false conditionals. This could probably be improved.
-;; note: concat shouldn't be that expensive, it's only performed once we walk through
-;; the first list, amortizing the O(n) cost.
+;; right now I'm walking throught the blocks, trying to find match
+;; forward jumps or false conditionals. This could probably be
+;; improved.  note: concat shouldn't be that expensive, it's only
+;; performed once we walk through the first list, amortizing the O(n)
+;; cost.
 (defn trace
   "Rearranges blocks to limit distance of forward jumps and false conditionals."
   [blks sorted]
@@ -161,6 +159,7 @@
     (let [next (walk (first blks))
           [before after] (split-with #(not (= next (first %))) (rest blks))]
       (if (seq after)
-        (trace (concat (rest after) before) (conj sorted (first blks) (first after)))
+        (trace (concat (rest after) before)
+               (conj sorted (first blks) (first after)))
         (trace before (conj sorted (first blks)))))
     sorted))

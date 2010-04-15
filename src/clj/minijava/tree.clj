@@ -1,7 +1,7 @@
 (ns minijava.tree
   "Functions to convert the AST to IR as directly as possible."
   (:use minijava.x86.frame
-        (minijava ast exp ir))
+        (minijava access ast exp ir obj))
   (:require [minijava.temp :as tm]))
 
 (defprotocol Treeable
@@ -13,8 +13,10 @@
   (BinaryOp op (-> x .e1 (tree frame) unEx)
             (-> x .e2 (tree frame) unEx)))
 
-(defn tree-prog [seq]
-  (let [frame (new-x86 0 [])]
+(defn tree-prog
+  "Walks through a program, applying tree."
+  [seq]
+  (let [frame (new-x86 0 [] nil)]
     (for [s seq] (tree s frame))))
 
 (defmacro deftree [type [obj frame] & body]
@@ -79,10 +81,12 @@
 (deftree minijava.ast.ClassDecl
   [x frame]
   {(.name x)
-   (into {} (for [i ($ (.methods x))]
-              (let [frame (new-x86 0 (map #(. % name) ($ (.vars i))))
-                    name  (str (.name x) "_" (.name i))]
-                [name (Seq (cons (Label name) (tree i frame)))])))})
+   (let [obj (new-obj (for [v ($ (.vars x))] (.name v)))]
+     (into {} (for [i ($ (.methods x))]
+                (let [args  (map #(. % name) (-> i .formals $ reverse))
+                      frame (new-x86 0 (cons "obj" args) obj)
+                      name  (str (.name x) "_" (.name i))]
+                  [name (Seq (cons (Label name) (tree i frame)))]))))})
 
 (deftree minijava.ast.IdentifierExp
   [x frame]
@@ -111,12 +115,12 @@
 
 (deftree minijava.ast.MainClass
   [x frame]
-  {"main" (tree (.statement x) (new-x86 0 ["obj"]))})
+  {"main" (tree (.statement x) (new-x86 0 ["obj"] nil))})
 
 (deftree minijava.ast.MethodDecl
   [x frame]
-  (map #(tree % frame) (concat (-> x .vars $)
-                               (-> x .statements $))))
+  (doseq [v (-> x .vars $)] (allocLocal frame (.name v) false))
+  (map #(tree % frame) (-> x .statements $)))
 
 (deftree minijava.ast.Minus
   [x frame]
@@ -152,8 +156,7 @@
 
 (deftree minijava.ast.Program
   [x frame]
-  (apply merge (map #(tree % nil)
-                    (cons (.mainClass x) ($ (.classes x))) (repeat nil))))
+  (apply merge (map #(tree % nil) (cons (.mainClass x) ($ (.classes x))))))
 
 (deftree minijava.ast.This
   [x frame]
@@ -165,10 +168,9 @@
 
 (deftree minijava.ast.VarDecl
   [x frame]
-  (condp = (.kind x)
-    minijava.ast.VarDecl$Kind/LOCAL  (do (allocLocal frame (.name x) false) (NoOp))
-    minijava.ast.VarDecl$Kind/FIELD  (throw (Exception. "shouldn't be called"))
-    minijava.ast.VarDecl$Kind/FORMAL (throw (Exception. "shouldn't be called"))))
+  (assert (= (.kind x) minijava.ast.VarDecl$Kind/LOCAL))
+  (allocLocal frame (.name x) false)
+  (NoOp))
 
 (deftree minijava.ast.While
   [x frame]

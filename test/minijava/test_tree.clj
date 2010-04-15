@@ -2,10 +2,10 @@
   (:use clojure.test
         clojure.contrib.def
         minijava.x86.frame
-        (minijava ir tree typechecker utility))
+        (minijava ir obj tree typechecker utility))
   (:require [minijava.temp :as tm]))
 
-(defonce- empty-frame (new-x86 0 ["obj"]))
+(defonce- empty-frame (new-x86 0 ["obj"] (new-obj [])))
 
 (deftest tests-binop-conv
   (let [plus   (parse-int "5 + 5")
@@ -73,7 +73,7 @@
       "While statements convert correctly."))
 
 ;; (deftest tests-normal-call
-;;   (let [frame (new-x86 0 ["obj" "a"])
+;;   (let [frame (new-x86 0 ["obj" "a"] (new-obj [])
 ;;         call  (tree (parse-exp "a.test(3)") frame)]
 ;;     (is (= (Call (Name "test")
 ;;                  [(Mem (BinaryOp :+ (Temp :bp) (Const 12)))
@@ -90,36 +90,44 @@
   (tm/reset-num!)
   (let [val (parse-stm "int[] a; a = new int[5];")
         res (list (NoOp)
-              (Move (Call (Name "newArray") [(Const 5)])
-                    (Temp (tm/temp))))]
+                  (Move (Call (Name "newArray") [(Const 5)])
+                        (Temp (tm/temp))))]
     (tm/reset-num!)
     (is (= res (tree-prog val)))))
 
 (deftest tests-array-assign-lookup
-  (let [frame (new-x86 0 [])
-        val (parse-stm "int[] a; a = new int[5]; a[0] = 3; a[4] = 2; a[1] = a[0];")
-        
+  (let [frame (new-x86 0 [] (new-obj []))
+        val (parse-stm "int[] a; a = new int[5]; a[0] = 3; a[4] = 2;
+a[1] = a[0];")
+
         res1
         (do (tm/reset-num!)
             (Move (Const 3)
                   (Mem (BinaryOp :+ (Temp (tm/temp))
                                  (BinaryOp :* (Const (word-size frame))
                                            (Const 0))))))
-        
-        res2 
+
+        res2
         (Move (Const 2) (Mem (BinaryOp :+ (Temp (tm/temp))
                                        (BinaryOp :* (Const (word-size frame))
                                                  (Const 4)))))
-                
+
         tmp (tm/temp)
         res3
         (Move (Mem (BinaryOp :+ (Temp tmp)
                              (BinaryOp :* (Const (word-size frame))
                                        (Const 0))))
-              (Mem (BinaryOp :+ (Temp tmp) (BinaryOp :* (Const (word-size frame))
+              (Mem (BinaryOp :+ (Temp tmp) (BinaryOp :*
+                                                     (Const (word-size frame))
                                                      (Const 1)))))]
     (tm/reset-num!)
     (is (= res1 (last (butlast (butlast (tree-prog val))))))
     (is (= res2 (last (butlast (tree-prog val)))))
     (is (= res3 (last (tree-prog val))))))
 
+(deftest tests-files-convert-without-exception
+  (let [filter (proxy [java.io.FilenameFilter] []
+                 (accept [_ name] (not (nil? (re-find #"java$" name)))))
+        files (-> "resources/sample" java.io.File. (.listFiles filter))]
+    (doseq [f files]
+      (is (doall (tree (parse f) nil)) (str "Converting " f)))))

@@ -2,18 +2,18 @@
   (:import minijava.typechecker.MiniJavaTypeChecker)
   (:use [minijava.ast :only [$]]))
 
-(defn types?
-  "Returns true if program types correctly."
-  [src]
-  (try (MiniJavaTypeChecker/parseAndCheck src)
-       false
-       true))
-
 (defn parse
   "Parses a MiniJava program, returning a Program. Accepts strings and
 readers."
   [str]
   (. (MiniJavaTypeChecker/parseAndCheck str) program))
+
+(defn types?
+  "Returns true if program types correctly."
+  [src]
+  (try (parse src)
+       false
+       true))
 
 (defn parse-meth
   [meth]

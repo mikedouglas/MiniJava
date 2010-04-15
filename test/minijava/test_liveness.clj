@@ -1,36 +1,58 @@
 (ns minijava.test-liveness
   (:use (minijava gas liveness) clojure.test)
   (:require [minijava.temp :as tm]))
-    
-    
-    
 
-
-(deftest test-Flow
+(deftest test-liveness-1
   (tm/reset-num!)
   (let [t (tm/label)
         f (tm/label)
+        a (tm/temp "a")
+        b (tm/temp "b")
+        other (tm/label)
+        prog  (vector
+               (LABEL other)
+               (cmpl a b)
+               (jcc := t)
+               (jmp f)
+               (LABEL t)
+               (jmp other)
+               (LABEL f))]
+  (is (= (live prog)
+         [#{a b} #{a b} #{a b} #{} #{a b} #{a b} #{}]))))
+
+;; Adapted from Wikipedia example
+(deftest test-liveness-2
+  (tm/reset-num!)
+  (let [l1 (tm/label)
+        a (tm/temp "a")
+        b (tm/temp "b")
+        c (tm/temp "c")
+        prog  (vector
+               (LABEL l1)
+               (addl (CONST 3) c)
+               (addl (CONST 5) b)
+               (addl b c)
+               (movl c a)
+               (jmp l1))]
+  (is (= (live prog)
+         [#{c b} #{c b} #{c b} #{c b} #{c b} #{c b}]))))
+
+;; test live map to interval conversion
+(comment
+  (deftest test-conversion-1
+  (tm/reset-num!)
+  (let [l1 (tm/label)
         a (tm/temp)
         b (tm/temp)
-        other (tm/label)        
-  			prog	(list
-  					(LABEL other)
-            (cmpl a b)
-            (jcc := t)
-            (jmp f)
-            (LABEL t)
-            (jmp other)
-            (LABEL f))]
-            
-  (is (= (live prog) 	  
-	  (hash-map
-			(LABEL other) (hash-set a b)
-      (cmpl a b) (hash-set a b)
-      (jcc := t) (hash-set a b)
-      (jmp f) nil
-      (LABEL t) (hash-set a b)
-      (jmp other) (hash-set a b)
-      (LABEL f) nil
-	  	
-	  ) 
-   ))))
+        c (tm/temp)
+        prog  (vector
+               (LABEL l1)
+               (addl (CONST 3) c)
+               (addl (CONST 5) b)
+               (addl b c)
+               (movl c a)
+               (jmp l1))]
+    (= (conversion prog (live prog))
+       [{:id c, :start 1, :end 5}
+        {:id b, :start 2, :end 5}
+        {:id a, :start 4, :end 5}]))))
