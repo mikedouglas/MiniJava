@@ -64,7 +64,7 @@
                (addl b c)
                (movl c a)
                (jmp l1))]
-    (= (livemap->liveintervals prog (live prog))
-       {{:id c, :start 1, :end 5}
-        {:id b, :start 2, :end 5}
-        {:id a, :start 4, :end 5}})))
+    (= (conversion prog (live prog))
+       #{{:id c, :start 1, :end 5}
+         {:id b, :start 2, :end 5}
+         {:id a, :start 4, :end 5}})))

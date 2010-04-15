@@ -50,6 +50,17 @@
 
 ;; this function converts from this liveness map to live intervals
 ;; in preparation for the register allocation algorithm
-;; TODO: stub
-(defn livemap->liveintervals [program map]
-  nil)
+(defn conversion [program map]
+  (let [all-temps (union-all (vals map))
+        first-index (fn [prog map temp]
+                      (loop [prog prog
+                             index 0]
+                        (if (contains? (get map (first prog)) temp)
+                            index
+                            (recur (rest prog) (inc index)))))
+        last-index (fn [prog map temp] (first-index (reverse prog) map temp))]
+    (map (fn [tmp]
+           {:id (:id tmp), 
+            :start (first-index program map tmp), 
+            :end (last-index program map tmp)})
+         all-temps)))
