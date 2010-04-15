@@ -2,6 +2,8 @@
   (:use (minijava gas liveness) clojure.test)
   (:require [minijava.temp :as tm]))
 
+;; Just testing the live variable map generation using live-loop.
+;; To actually generate the final live ranges, call (live ...)
 (deftest test-liveness-1
   (tm/reset-num!)
   (let [t (tm/label)
@@ -17,7 +19,7 @@
                (LABEL t)
                (jmp other)
                (LABEL f))]
-  (is (= (live prog)
+  (is (= (live-loop (reverse prog))
          (hash-map
           (LABEL other) #{a b}
           (cmpl a b)    #{a b}
@@ -41,7 +43,7 @@
                (addl b c)
                (movl c a)
                (jmp l1))]
-  (is (= (live prog)
+  (is (= (live-loop (reverse prog))
          (hash-map
           (LABEL l1)         nil
           (addl (CONST 3) c) #{c}
@@ -50,7 +52,7 @@
           (movl c a)         #{c b a}
           (jmp l1)           #{c b a})))))
 
-;; test live map to interval conversion
+;; Test actual live range generation
 (deftest test-conversion-1
   (tm/reset-num!)
   (let [l1 (tm/label)
@@ -64,7 +66,7 @@
                (addl b c)
                (movl c a)
                (jmp l1))]
-    (= (conversion prog (live prog))
+    (= (live prog)
        #{{:id c, :start 1, :end 5}
          {:id b, :start 2, :end 5}
          {:id a, :start 4, :end 5}})))

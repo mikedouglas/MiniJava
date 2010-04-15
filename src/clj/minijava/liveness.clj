@@ -45,9 +45,6 @@
         ;;determine if any changes were made during the course of the inner loop
         (recur (rest instrs) new-ins new-outs isChanged))))))
 
-(defn live [program]
-  (live-loop (reverse program)))
-
 ;; this function converts from this liveness map to live intervals
 ;; in preparation for the register allocation algorithm
 (defn conversion [program map]
@@ -60,7 +57,14 @@
                             (recur (rest prog) (inc index)))))
         last-index (fn [prog map temp] (first-index (reverse prog) map temp))]
     (map (fn [tmp]
-           {:id (:id tmp), 
+           {:id (:id tmp),
+            ;; live ranges will always be contiguous and unique, so finding
+            ;; the first and last occurences should suffice
             :start (first-index program map tmp), 
             :end (last-index program map tmp)})
          all-temps)))
+
+;; top-level function to get the live ranges
+(defn live [program]
+  (conversion (live-loop (reverse program))))
+
