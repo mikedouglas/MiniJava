@@ -6,18 +6,13 @@
   (reset! *num* 0))
 
 ;; TEMPS
-(defprotocol Colorable
-  (setColor [this]))
-
-(deftype Temp [id color]
-  Colorable
-  (setColor [] nil)
+(deftype Temp [id]
   Object
-  (toString [] (str id))) ;; TODO
+  (toString [] (str id)))
 
 (defn temp
-  ([] (Temp (swap! *num* inc) nil))
-  ([id] (Temp id nil)))
+  ([] (Temp (swap! *num* inc)))
+  ([id] (Temp id)))
 
 ;; LABELS
 (deftype Label [id])

@@ -11,45 +11,29 @@
        u ;; return the complete union of the sets
        (recur (rest sets) (set/union u (first sets))))))
 
-;; assumes that uses and defs have been defined for each GAS instruction
-;; given a list of GAS instructions, return a hashmap defining live-in
-(defn live-loop [program]
-(let [succs (flow program)]
-  (loop [instrs   program
-         live-in  {}
-         live-out {}
-         changed  false]
-    (if (empty? instrs)
-      (if changed
-        ;; if any changes were made, start the loop again, with the
-        ;; full set of instructions again
-        (recur program live-in live-out false)
-        ;; if we need both, instead return (list live-in live-out))
-        ;; otherwise, if no changes occurred during this iteration, return
-        ;; live in and live out
-        live-in)
+(defn live [prog]
+  (let [succs (vec (flow prog))]
+    (loop [lines    (-> prog count range reverse)
+           live-in  (vec (take (inc (count prog)) (repeat #{})))
+           live-out (vec (take (inc (count prog)) (repeat #{})))
+           changed  true]
+      (if (empty? lines)
+        (if changed
+          (recur (-> prog count range reverse) live-in live-out false)
+          (butlast live-in))
+        (let [n           (first lines)
+              in          (live-in n)
+              out         (live-out n)
+              new-in-set  (set/union (gen (prog n))
+                                     (set/difference out (kill (prog n))))
+              new-out-set (union-all (map live-in (succs n)))
+              new-ins     (assoc live-in n new-in-set)
+              new-outs    (assoc live-out n new-out-set)
+              changed?    (or changed
+                              (not (= in new-in-set))
+                              (not (= out new-out-set)))]
+          (recur (rest lines) new-ins new-outs changed?))))))
 
-      ;;otherwise, if instrs is not empty, continue with the loop:
-      (let [n           (first instrs)
-            in          (get live-in n)
-            out         (get live-out n)
-            new-in-set  (set/union (uses n) (set/difference out (defs n)))
-            get-live    (fn get-live [from]
-                          (get live-in from))
-            new-out-set (union-all (map get-live (get succs n)))
-            new-ins     (assoc live-in n new-in-set)
-            new-outs    (assoc live-out n new-out-set)
-            isChanged   (or changed
-                            (not (= in new-in-set))
-                            (not (= out new-out-set)))]
-        ;;determine if any changes were made during the course of the inner loop
-        (recur (rest instrs) new-ins new-outs isChanged))))))
-
-(defn live [program]
-  (live-loop (reverse program)))
-
-;; this function converts from this liveness map to live intervals
-;; in preparation for the register allocation algorithm
 (defn conversion [program map]
   (let [all-temps (union-all (vals map))
         first-index (fn [prog map temp]
@@ -60,7 +44,7 @@
                             (recur (rest prog) (inc index)))))
         last-index (fn [prog map temp] (first-index (reverse prog) map temp))]
     (map (fn [tmp]
-           {:id (:id tmp), 
-            :start (first-index program map tmp), 
+           {:id (:id tmp),
+            :start (first-index program map tmp),
             :end (last-index program map tmp)})
          all-temps)))

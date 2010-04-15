@@ -92,7 +92,7 @@
 (deftype jcc [cc dst]
  clojure.lang.IPersistentMap
  Object
- (toString [] (str "jcc " dst))) ;; TODO: why does jcc manage cc?
+ (toString [] (str "jcc " dst))) ;; TODO: properly consider cc in toString
 
 ;;Pops a value off of the stack and then sets %eip to that value. Used
 ;;to return from function calls.
@@ -101,25 +101,19 @@
    Object
    (toString [] "ret"))
 
+(defn extract-use-both [instr & args]
+  (into #{} (for [a args :when (= (type (a instr)) :minijava.temp/Temp)]
+              (a instr))))
+
 ;; precondition: instr is a cmpl/imull/subl/addl/movl
 (defn extract-use-temps [instr]
   (case (type instr)
-    :minijava.gas/cmpl (let [arg1 (:a instr)
-                             arg2 (:b instr)
-                             set  (if (= (type arg2) :minijava.temp/Temp)
-                                      (hash-set arg2)
-                                      (hash-set))]
-                         (if (= (type arg1) :minijava.temp/Temp)
-                             (conj set arg1)
-                             set))
-    (let [arg1 (:src instr)
-          arg2 (:dst instr)
-          set  (if (= (type arg2) :minijava.temp/Temp)
-                   (hash-set arg2)
-                   (hash-set))]
-      (if (= (type arg1) :minijava.temp/Temp)
-          (conj set arg1)
-          set))))
+    :minijava.gas/cmpl  (extract-use-both instr :a :b)
+    :minijava.gas/movl  (extract-use-both instr :src)
+    :minijava.gas/addl  (extract-use-both instr :src :dst)
+    :minijava.gas/subl  (extract-use-both instr :src :dst)
+    :minijava.gas/imull (extract-use-both instr :src :dst)
+    (throw )))
 
 ;; precondition: instr is a cmpl/imull/subl/addl/movl
 (defn extract-def-temps [instr]
@@ -129,30 +123,29 @@
         (hash-set))))
 
 ;;returns a list of all temps used by this instruction
-(defn uses [instr]
+(defn gen [instr]
   (case (type instr)
-    :minijava.gas/ret   (hash-set (tm/temp :eip))
-    :minijava.gas/jcc   nil
-    :minijava.gas/jmp   nil
-    :minijava.gas/call  nil
+    :minijava.gas/ret   #{(tm/temp :EIP)}
+    :minijava.gas/jcc   #{}
+    :minijava.gas/jmp   #{}
+    :minijava.gas/call  #{}
     :minijava.gas/cmpl  (extract-use-temps instr)
     :minijava.gas/imull (extract-use-temps instr)
     :minijava.gas/subl  (extract-use-temps instr)
     :minijava.gas/addl  (extract-use-temps instr)
     :minijava.gas/movl  (extract-use-temps instr)
-    nil)) ;;catch LABEL, MEMORY, CONST
+    #{})) ;;catch LABEL, MEMORY, CONST
 
 ;;the set of temps defined by this instruction
-(defn defs [instr]
+(defn kill [instr]
   (case (type instr)
-    :minijava.gas/ret   (hash-set (tm/temp :EIP))
-    :minijava.gas/jcc   nil
-    :minijava.gas/jmp   nil
-    :minijava.gas/call  nil
-    :minijava.gas/cmpl  nil
+    :minijava.gas/ret   #{(tm/temp :EIP)}
+    :minijava.gas/jcc   #{}
+    :minijava.gas/jmp   #{}
+    :minijava.gas/call  #{}
+    :minijava.gas/cmpl  #{}
     :minijava.gas/imull (extract-def-temps instr)
     :minijava.gas/subl  (extract-def-temps instr)
     :minijava.gas/addl  (extract-def-temps instr)
     :minijava.gas/movl  (extract-def-temps instr)
-    nil)) ;;catch LABEL, MEMORY, CONST
-
+    #{})) ;;catch LABEL, MEMORY, CONST
