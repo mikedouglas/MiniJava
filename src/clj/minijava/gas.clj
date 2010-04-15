@@ -11,6 +11,15 @@
 		(@*uniqueID*))
 )
 
+;;Equality test for gas types that ignores the unique ID parameter.
+;;Useful for testing.
+(defn gasEq[g1 g2]
+	(or (= g1 g2) 
+	;;compare each key-value pair EXCEPT for id.
+	(= (dissoc g1 :id) (dissoc g2 :id)))
+)
+
+
 ;;this is NOT an x86 instruction - it is a constant argument to an
 ;;instruction (ie addl $2 %eax)
 (deftype CONST [value  id]
