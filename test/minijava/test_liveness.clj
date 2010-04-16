@@ -58,7 +58,7 @@
         {:id a, :start 4, :end 5}]))))
 
 
- (deftest test-live-range
+ (deftest test-live-range-2
   (tm/reset-num!)
   (let [l1 (tm/label)
         a (tm/temp)
@@ -74,3 +74,23 @@
    (is (= (live-ranges (live prog))
        (hash-map  b [(live-range b 0 5)]
  									c [(live-range c 0 5)])))))
+
+(deftest test-live-range-1
+  (tm/reset-num!)
+  (let [t (tm/label)
+        f (tm/label)
+        a (tm/temp "a")
+        b (tm/temp "b")
+        other (tm/label)
+        prog  (vector
+               (LABEL other)
+               (cmpl a b)
+               (jcc := t)
+               (jmp f)
+               (LABEL t)
+               (jmp other)
+               (LABEL f))]
+  (is (= (live-ranges (live prog))
+					(hash-map a [(live-range a 0 2) (live-range a 4 5)]
+ 										b [(live-range b 0 2) (live-range b 4 5)])
+        ))))
