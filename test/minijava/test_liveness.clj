@@ -56,3 +56,22 @@
        [{:id c, :start 1, :end 5}
         {:id b, :start 2, :end 5}
         {:id a, :start 4, :end 5}]))))
+
+
+ (deftest test-live-range
+  (tm/reset-num!)
+  (let [l1 (tm/label)
+        a (tm/temp)
+        b (tm/temp)
+        c (tm/temp)
+        prog  (vector
+               (LABEL l1)
+               (addl (CONST 3) c)
+               (addl (CONST 5) b)
+               (addl b c)
+               (movl c a)
+               (jmp l1))]
+    (= (live-range (live prog))
+       [{:id c, :start 1, :end 5}
+        {:id b, :start 2, :end 5}
+        {:id a, :start 4, :end 5}])))
