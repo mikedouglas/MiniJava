@@ -52,32 +52,30 @@ clojure.contrib.seq)
          all-temps)))
 
 
+(deftype live-range [variable start end]
+ clojure.lang.IPersistentMap)
+
 ;;helper function: given a current map of variables to live ranges, and the live set for the current line index, start or end live ranges as needed
 (defn updateRanges [ranges live-set ind]
 	;;for each variable in the key set of ranges
-	(loop [vars (keys ranges)
+	(loop [vars live-set
 				updatedRanges ranges]
 			(if (empty? vars)  updatedRanges;; return the updated ranges
 			;;update the ranges for this particular variable
-			(let [rangeVec (get updatedRanges (first vars))
+			(let [v (first vars)
+						rangeVec (get updatedRanges v)
 						lastRange (last rangeVec)
 						updatedRangeVec
-						(if (contains? live-set (first vars))
-					;;If the current var is in the current liverange, and the last cons-cell in rangeVec is finished (has an endpos), then append a new cons cell starting at the current index.
-							(if (or (nil? lastRange) (not (nil? (rest lastRange)))) ;;test: If lastRange is nil (there are no ranges yet at all), or its second cons component == ind - 1, then update the second component to ind
-									(conj rangeVec (cons ind nil));;append a new range to the range vector
-									;;else, return the range vector unchanged
-									rangeVec
-							)			
-						;;Else, if the current var is NOT in the current liverange, and the last-cell in rangeVec is NOT finished (has no endpos, then add (- ind 1) ad the end position).
-							(if (and (not (nil? lastRange))  (nil? (rest lastRange))) 
-									;;If lastRange is NOT nil, and it has a nil second cons component, then close this range
-									(let [start (first lastRange)]
-											(conj (pop rangeVec) (cons start (dec ind))));;replace the last (open) range with a closed range
-									;;else, return the range vector unchanged
-									rangeVec
+					
+							(cond  (nil? lastRange);;create a new live-range, starting and ending here
+									 		(conj rangeVec (live-range v ind ind)) 
+									 (= (:end lastRange) (dec ind)) ;;increment the lastRange endpoint
+									 		(conj (pop rangeVec) (live-range  v (:start lastRange) ind))
+										:else
+									(conj rangeVec (live-range  v ind ind));;append a new liverange starting here
 							)
-						)]				
+							
+						]				
 							
  ;;(assoc updatedRanges (first vars) updatedRangeVec)	))
 			(recur (rest vars) (assoc updatedRanges (first vars) updatedRangeVec) )))
@@ -102,7 +100,7 @@ clojure.contrib.seq)
 ;;compute the live ranges for each variable. For each variable, define a vector of pairs (start, end), where
 ;;each pair contains the line numbers of the start and end of the range.
 ;;These vectors of ranges are themselves stored in a map, from variables to ranges.
-(defn live-range [live-sets]
+(defn live-ranges [live-sets]
   ;;run through the live sets of the program.
   
     (loop [sets live-sets

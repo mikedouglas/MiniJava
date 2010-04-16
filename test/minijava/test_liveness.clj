@@ -71,7 +71,7 @@
                (addl b c)
                (movl c a)
                (jmp l1))]
-    (= (live-range (live prog))
+    (= (live-ranges (live prog))
        [{:id c, :start 1, :end 5}
         {:id b, :start 2, :end 5}
         {:id a, :start 4, :end 5}])))
