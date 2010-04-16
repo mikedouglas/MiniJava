@@ -52,7 +52,7 @@ clojure.contrib.seq)
          all-temps)))
 
 
-(deftype live-range [variable start end]
+(deftype live-range [id start end]
  clojure.lang.IPersistentMap)
 
 ;;helper function: given a current map of variables to live ranges, and the live set for the current line index, start or end live ranges as needed
