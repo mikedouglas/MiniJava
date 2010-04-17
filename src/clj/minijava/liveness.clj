@@ -11,7 +11,9 @@
        u ;; return the complete union of the sets
        (recur (rest sets) (set/union u (first sets))))))
 
-(defn live [prog]
+(defn live
+  "Creates a vector of the live-set at each line in the program."
+  [prog]
   (let [succs (vec (flow prog))]
     (loop [lines    (-> prog count range reverse)
            live-in  (vec (take (inc (count prog)) (repeat #{})))
@@ -34,17 +36,18 @@
                               (not (= out new-out-set)))]
           (recur (rest lines) new-ins new-outs changed?))))))
 
-(defn conversion [program map]
-  (let [all-temps (union-all (vals map))
-        first-index (fn [prog map temp]
-                      (loop [prog prog
-                             index 0]
-                        (if (contains? (get map (first prog)) temp)
-                            index
-                            (recur (rest prog) (inc index)))))
-        last-index (fn [prog map temp] (first-index (reverse prog) map temp))]
-    (map (fn [tmp]
-           {:id (:id tmp),
-            :start (first-index program map tmp),
-            :end (last-index program map tmp)})
-         all-temps)))
+(defn- index
+  [coll]
+  (map vector (iterate inc 0) coll))
+
+(defn- pos
+  [pred coll]
+  (for [[i e] (index coll) :when (pred e)] i))
+
+(defn convert
+  "Convert the results of `live` into intervals."
+  [in]
+  (let [temps (union-all (vals map))]
+    (for [t temps]
+      (let [found (pos #{t} in)]
+        {:id t, :start (first found), :end (last found)}))))
