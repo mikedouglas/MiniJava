@@ -52,8 +52,12 @@ clojure.contrib.seq)
          all-temps)))
 
 
-(deftype live-range [id start end]
+(deftype Live-Range [id start end reg]
  clojure.lang.IPersistentMap)
+
+(defn live-range
+  ([id start end] (Live-Range id start end nil));;for use by the test cases
+  ([id start end reg] (Live-Range id start end reg)))
 
 ;;helper function: given a current map of variables to live ranges, and the live set for the current line index, start or end live ranges as needed
 (defn updateRanges [ranges live-set ind]
@@ -63,16 +67,17 @@ clojure.contrib.seq)
 			(if (empty? vars)  updatedRanges;; return the updated ranges
 			;;update the ranges for this particular variable
 			(let [v (first vars)
+						reg (if  (keyword? (:id v)) (:id v) nil)
 						rangeVec (get updatedRanges v)
 						lastRange (last rangeVec)
 						updatedRangeVec
 					
 							(cond  (nil? lastRange);;create a new live-range, starting and ending here
-									 		(conj rangeVec (live-range v ind ind)) 
+									 		(conj rangeVec (live-range v ind ind reg)) 
 									 (= (:end lastRange) (dec ind)) ;;increment the lastRange endpoint
-									 		(conj (pop rangeVec) (live-range  v (:start lastRange) ind))
+									 		(conj (pop rangeVec) (live-range  v (:start lastRange) ind reg))
 										:else
-									(conj rangeVec (live-range  v ind ind));;append a new liverange starting here
+									(conj rangeVec (live-range  v ind ind reg));;append a new liverange starting here
 							)
 							
 						]				
@@ -86,7 +91,7 @@ clojure.contrib.seq)
 	(if (empty? variables) varmap
 	;;else
 	(buildEmptyVarMap (rest variables) (assoc varmap (first variables) (vector)))
-			
+			 
 	)
 
 )
