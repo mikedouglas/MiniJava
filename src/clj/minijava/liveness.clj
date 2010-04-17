@@ -36,22 +36,6 @@ clojure.contrib.seq)
                               (not (= out new-out-set)))]
           (recur (rest lines) new-ins new-outs changed?))))))
 
-(defn conversion [program map]
-  (let [all-temps (union-all (vals map))
-        first-index (fn [prog map temp]
-                      (loop [prog prog
-                             index 0]
-                        (if (contains? (get map (first prog)) temp)
-                            index
-                            (recur (rest prog) (inc index)))))
-        last-index (fn [prog map temp] (first-index (reverse prog) map temp))]
-    (map (fn [tmp]
-           {:id (:id tmp),
-            :start (first-index program map tmp),
-            :end (last-index program map tmp)})
-         all-temps)))
-
-
 (deftype Live-Range [id start end reg]
  clojure.lang.IPersistentMap)
 
