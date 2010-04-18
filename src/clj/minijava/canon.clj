@@ -219,7 +219,7 @@
 	;;		(contains-call? s) ;;this wont work with the current approach; have to remove calls in a separate procedure
 	;;				(do (reset! *local-change* true) (reorganize-call s))
 		(= :minijava.ir/Seq (type s))
-		(do	(println "match seq")	(Seq (flatten;;run canon-local on each element of the sequence
+		(do	(println "match seq" s)	(Seq (flatten;;run canon-local on each element of the sequence
 					  (for [s (:seqs s)] (canon-local s)))))
 		(= :minijava.ir/ExpSeq (type s)) ;;is this right?
 			 (do	(println "match expseq")  (ExpSeq (canon-local (:seqs s)) (canon-local (:exp s))) )
@@ -229,10 +229,14 @@
 				(do	(println "match cond")(Conditional (:op s) (canon-local (:exp1 s))  (canon-local (:exp2 s)) (:t s) (:f s)))
 		(= :minijava.ir/Call (type s))
 				(Call (:lbl s) (canon-local (:args s)))
+		(= :minijava.ir/Mem (type s))
+				(Mem (canon-local (:adr s)))
+		(= :minijava.ir/Jump (type s))
+				(Jump (canon-local (:lbl s)))
 		(= :minijava.ir/Statement (type s))
 				(Statement (canon-local (:exp s)))
 		:else
-			s;;no changes or recursion needed for Consts, Jmps, NoOps,Temp, Name, etc
+			s;;no changes or recursion needed for Consts, NoOps,Temp, Name, etc
 		)]
 		(if @*local-change* (reset! *global-change* true))
 		newS))
@@ -260,7 +264,7 @@
 (defn canon [t]
 	(let [raised (canon-raise t)]
 	;;now remove all the top level sequences, and return a vector of statements, with no seqs (or expseqs, but those were already removed)
-	(remove-seqs t)	
+	(remove-seqs raised)	
 ))
 
 
