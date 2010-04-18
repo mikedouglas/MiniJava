@@ -35,7 +35,7 @@
                (movl c a)
                (jmp l1))]
   (is (= (live prog)
-         [#{c b} #{c b} #{c b} #{c b} #{c b} #{c b}]))))
+         [#{c b} #{c b} #{c b} #{c b} #{c b a} #{c b}]))))
 
  (deftest test-live-range-2
   (tm/reset-num!)
@@ -50,9 +50,10 @@
                (addl b c)
                (movl c a)
                (jmp l1))]
-   (is (= (convert (live prog))
-          [{:id b, :start 0, :end 5, :reg nil}
-           {:id c, :start 0, :end 5, :reg nil}]))))
+   (is (= (into #{} (convert (live prog)))
+          #{{:id a, :start 4, :end 4, :reg nil}
+            {:id b, :start 0, :end 5, :reg nil}
+            {:id c, :start 0, :end 5, :reg nil}}))))
 
 (deftest test-live-range-1
   (tm/reset-num!)

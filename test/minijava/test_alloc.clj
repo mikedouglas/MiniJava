@@ -64,6 +64,6 @@
              (addl (CONST 3) :ECX)
              (addl (CONST 5) :EBX)
              (addl :EBX :ECX)
-             (movl :ECX :EAX) ;; TODO: fails because :EAX is never live.
+             (movl :ECX :EAX)
              (jmp l1))]
     (is (= (fill val) res))))

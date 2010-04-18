@@ -15,13 +15,14 @@
       (if (empty? lines)
         (if changed
           (recur (-> prog count range reverse) live-in live-out false)
-          (butlast live-in))
+          (butlast live-out))
         (let [n           (first lines)
               in          (live-in n)
               out         (live-out n)
               new-in-set  (set/union (gen (prog n))
                                      (set/difference out (kill (prog n))))
-              new-out-set (apply set/union (map live-in (succs n)))
+              new-out-set (set/union (kill (prog n))
+                                (apply set/union (map live-in (succs n))))
               new-ins     (assoc live-in n new-in-set)
               new-outs    (assoc live-out n new-out-set)
               changed?    (or changed
