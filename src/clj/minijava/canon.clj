@@ -4,20 +4,22 @@
         clojure.contrib.seq)
   (:require [minijava.temp :as tm]))
 
+(declare canon)
+
 (defn remove-double-eseq
   "(ExpSeq s1 (ExpSeq s2 e)) -> [s1 s2 e]"
   [tree]
-  (let [s1 (get tree :seqs)
-        s2 (get-in tree [:exp :seqs])
-        e  (get-in tree [:exp :exp])]
+  (let [s1 (canon (:seqs tree ))
+        s2 (canon (get-in tree [:exp :seqs]))
+        e  (canon  (get-in tree [:exp :exp]))]
     (conj (vec (concat s1 s2))
           e)))
 
 (defn remove-eseq-left
   "(BinaryOp op (ExpSeq stmt expr) e2) -> [stmt (BinaryOp op expr e2)]"
-  [tree]
-  (let [stmt (get-in tree [:exp1 :seqs])
-        expr (get-in tree [:exp1 :exp])]
+  [tree] 
+  (let [stmt (canon (get-in tree [:exp1 :seqs]))
+        expr (canon (get-in tree [:exp1 :exp]))]
     (conj (vec stmt)
           (merge tree [:exp1 expr]))))
 
@@ -27,9 +29,9 @@
 (defn remove-eseq-commute
   "(BinaryOp op e1 (ExpSeq s2 e2)) -> [s2 (BinaryOp op e1 e2)]"
   [tree]
-  (let [e1 (get tree :exp1)
-        s2 (get-in tree [:exp2 :seqs])
-        e2 (get-in tree [:exp2 :exp])]
+  (let [e1 (canon (get tree :exp1))
+        s2 (canon (get-in tree [:exp2 :seqs]))
+        e2 (canon (get-in tree [:exp2 :exp]))]
     (conj (vec s2)
           (merge tree [:exp2 e2]))))
 
@@ -37,9 +39,9 @@
   "(BinaryOp op e1 (ExpSeq s2 e2))
      -> [(Move e1 (Temp t)) s2 (BinaryOp op (Temp t e2))]"
   [tree]
-  (let [e1 (get tree :exp1)
-        s1 (get-in tree [:exp2 :seqs])
-        e2 (get-in tree [:exp2 :exp])
+  (let [e1 (canon (get tree :exp1))
+        s1 (canon (get-in tree [:exp2 :seqs]))
+        e2 (canon (get-in tree [:exp2 :exp]))
         t  (tm/temp)]
     (concat [(Move e1 (Temp t))]
             s1
@@ -135,24 +137,34 @@
 
 (defn canon
   "Converts a Seq to linear IR form."
-  [seqs]
-  (flatten
-   (for [s (:seqs seqs)]
-    (cond
-     (matches-eseq-left? s) (remove-eseq-left s)
-     (matches-double-eseq? s) (remove-double-eseq s)
-     (matches-eseq-commute? s)
-       (if (commutes? s)
-         (remove-eseq-commute s)
-         (remove-eseq-no-commute s))
-			;;If s contains Call as an argument, and s is NOT a move, then construct a new ESeq node moving the result of the call into the return value register.
-			;;Then recurse on the newly created node.
-		 (contains-call? s)
-				(reorganize-call s)
-     (isit? s :minijava.ir/Seq) (canon s)
-     (isit? s :minijava.ir/ExpSeq)
-       (list (canon (:seqs s)) (:exp s))
-     :else s))))
+  [s]
+	    (cond 
+			 (matches-eseq-left? s) (remove-eseq-left s)
+			 (matches-double-eseq? s) (remove-double-eseq s)
+			 (matches-eseq-commute? s)
+			       (if (commutes? s)
+			         (remove-eseq-commute s)
+			         (remove-eseq-no-commute s))
+						;;If s contains Call as an argument, and s is NOT a move, then construct a new ESeq node moving the result of the call into the return value register.
+						;;Then recurse on the newly created node.
+					 (contains-call? s)
+							(reorganize-call s)
+		(= :minijava.ir/Seq (type s))
+				(flatten;;run canon on each element of the sequence
+					  (for [s (:seqs s)] (canon s)))
+		(= :minijava.ir/ExpSeq (type s)) ;;is this right?
+			   (list (canon (:seqs s)) (canon (:exp s)))
+		(= :minijava.ir/BinaryOp (type s))
+				(BinaryOp (:op s) (canon (:exp1 s))  (canon (:exp2 s)))
+		(= :minijava.ir/Conditional (type s))
+				(Conditional (:op s) (canon (:exp1 s))  (canon (:exp2 s)) (:t s) (:f s))
+		(= :minijava.ir/Call (type s))
+				(Call (:lbl s) (canon (:args s)))
+		(= :minijava.ir/Statement (type s))
+				(Statement (canon (:exp s)))
+		:else
+				s;;no changes or recursion needed for Consts, Jmps, NoOps,Temp, Name, etc
+))
 
 ;; BASIC BLOCKS
 
