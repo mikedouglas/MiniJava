@@ -2,14 +2,16 @@
   (:use (minijava gas liveness) clojure.test)
   (:require [minijava.temp :as tm]))
 
+;; Just testing the live variable map generation using live-loop.
+;; To actually generate the final live ranges, call (live ...)
 (deftest test-liveness-1
   (tm/reset-num!)
   (let [t (tm/label)
         f (tm/label)
-        a (tm/temp "a")
-        b (tm/temp "b")
+        a (tm/temp)
+        b (tm/temp)
         other (tm/label)
-        prog  (vector
+        prog  (list
                (LABEL other)
                (cmpl a b)
                (jcc := t)
@@ -17,80 +19,54 @@
                (LABEL t)
                (jmp other)
                (LABEL f))]
-  (is (= (live prog)
-         [#{a b} #{a b} #{a b} #{} #{a b} #{a b} #{}]))))
+  (is (= (live-loop (reverse prog))
+         (hash-map
+          (LABEL other) #{a b}
+          (cmpl a b)    #{a b}
+          (jcc := t)    #{a b}
+          (jmp f)       nil
+          (LABEL t)     #{a b}
+          (jmp other)   #{a b}
+          (LABEL f)     nil)))))
 
 ;; Adapted from Wikipedia example
 (deftest test-liveness-2
   (tm/reset-num!)
   (let [l1 (tm/label)
-        a (tm/temp "a")
-        b (tm/temp "b")
-        c (tm/temp "c")
-        prog  (vector
+        a (tm/temp)
+        b (tm/temp)
+        c (tm/temp)
+        prog  (list
                (LABEL l1)
                (addl (CONST 3) c)
                (addl (CONST 5) b)
                (addl b c)
                (movl c a)
                (jmp l1))]
-  (is (= (live prog)
-         [#{c b} #{c b} #{c b} #{c b} #{c b} #{c b}]))))
+  (is (= (live-loop (reverse prog))
+         (hash-map
+          (LABEL l1)         nil
+          (addl (CONST 3) c) #{c}
+          (addl (CONST 5) b) #{c b}
+          (addl b c)         #{c b}
+          (movl c a)         #{c b a}
+          (jmp l1)           #{c b a})))))
 
-;; test live map to interval conversion
-(comment
-  (deftest test-conversion-1
+;; Test actual live range generation
+(deftest test-conversion-1
   (tm/reset-num!)
   (let [l1 (tm/label)
         a (tm/temp)
         b (tm/temp)
         c (tm/temp)
-        prog  (vector
+        prog  (list
                (LABEL l1)
                (addl (CONST 3) c)
                (addl (CONST 5) b)
                (addl b c)
                (movl c a)
                (jmp l1))]
-    (= (conversion prog (live prog))
-       [{:id c, :start 1, :end 5}
-        {:id b, :start 2, :end 5}
-        {:id a, :start 4, :end 5}]))))
-
-
- (deftest test-live-range-2
-  (tm/reset-num!)
-  (let [l1 (tm/label)
-        a (tm/temp)
-        b (tm/temp)
-        c (tm/temp)
-        prog  (vector
-               (LABEL l1)
-               (addl (CONST 3) c)
-               (addl (CONST 5) b)
-               (addl b c)
-               (movl c a)
-               (jmp l1))]
-   (is (= (live-ranges (live prog))
-       (hash-map  b [(live-range b 0 5)]
- 									c [(live-range c 0 5)])))))
-
-(deftest test-live-range-1
-  (tm/reset-num!)
-  (let [t (tm/label)
-        f (tm/label)
-        a (tm/temp "a")
-        b (tm/temp "b")
-        other (tm/label)
-        prog  (vector
-               (LABEL other)
-               (cmpl a b)
-               (jcc := t)
-               (jmp f)
-               (LABEL t)
-               (jmp other)
-               (LABEL f))]
-  (is (= (live-ranges (live prog))
-					(hash-map a [(live-range a 0 2) (live-range a 4 5)]
- 										b [(live-range b 0 2) (live-range b 4 5)])
-        ))))
+    (= (live prog)
+       #{{:id c, :start 1, :end 5}
+         {:id b, :start 2, :end 5}
+         {:id a, :start 4, :end 5}})))
