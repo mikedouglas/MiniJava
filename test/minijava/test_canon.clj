@@ -143,13 +143,38 @@
 				v1 (tm/temp)
         other (tm/label)
 				function (tm/label)
-        prog  (Seq [(Conditional :< (BinaryOp :+ (ExpSeq (Statement (Const 3)) (Const 2)) (Temp v1) ) (Const 4)  (Name t) (Name f))])]
+        prog  (Seq [(Conditional :< (BinaryOp :+ (ExpSeq [(Statement (Const 3))] (Const 2)) (Temp v1) ) (Const 4)  (Name t) (Name f))])]
  (is (= (canon prog)
      
            [(Statement (Const 3)) (Conditional :< (BinaryOp :+ (Const 2) (Temp v1) ) (Const 4)  (Name t) (Name f))]))))
 
-(comment
+
 (deftest test-recursion
+  (let [t (tm/label)
+        f (tm/label)
+				v1 (tm/temp)
+        other (tm/label)
+				function (tm/label)
+        prog  (Seq [(Label other)
+                    (Conditional :< (BinaryOp :+ (ExpSeq [(Statement (Const 3))] (Const 2)) (Temp v1) ) (Const 4)  (Name t) (Name f))
+                    (Label t)
+                    (Seq [(BinaryOp :+  (ExpSeq [(Seq [(Const 1) (Const 2)])] (Const 3)) (Const 4) ) (Const 5)] )
+                    (Jump (Name other))
+                    (Label f)])]
+    (is (= (canon prog)
+           [
+            (Label other)
+						(Statement (Const 3))
+            (Conditional :< (BinaryOp :+ (Const 2) (Temp v1))  (Const 4) (Name t) (Name f))
+            (Label t)
+							(Const 1)
+							(Const 2)
+						(BinaryOp :+  (Const 3) (Const 4))
+						(Const 5)
+            (Jump (Name other))
+            (Label f)]))))
+(comment
+(deftest test-recursion-call
   (let [t (tm/label)
         f (tm/label)
 				v1 (tm/temp)
@@ -162,11 +187,11 @@
                     (Jump (Name other))
                     (Label f)])]
     (is (= (canon prog)
-           (list
+           [
             (Label other)
-            (Conditional :< (Const 3) (Const 4) (Name t) (Name f))
+						(Statement (Const 3))
+            (Conditional :< (BinaryOp :+ (Const 2) (Temp v1)) (Name t) (Name f))
             (Label t)
             (Jump (Name other))
-            (Label f))))))
+            (Label f)]))))
 )
-

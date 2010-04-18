@@ -12,14 +12,14 @@
   (let [s1 (canon-local (:seqs tree ))
         s2 (canon-local (get-in tree [:exp :seqs]))
         e  (canon-local  (get-in tree [:exp :exp]))]
-   		(ExpSeq (Seq s1 s2) e)))
+   		(ExpSeq [(Seq s1 s2)] e)))
 
 (defn raise-eseq-left-binop
   "(BinaryOp op (ExpSeq stmt expr) e2) -> (ExpSeq stmt (BinaryOp op expr e2))"
   [tree] 
   (let [stmt (canon-local (get-in tree [:exp1 :seqs]))
         expr (canon-local (get-in tree [:exp1 :exp]))]
-				(ExpSeq stmt (merge tree [:exp1 expr]))
+				(ExpSeq [stmt] (merge tree [:exp1 expr]))
 ))
 
 (defn raise-eseq-left-cond
@@ -36,11 +36,11 @@
 (cond (= :minijava.ir/Mem (type tree))
 		  (let [stmt (canon-local (get-in tree [:adr :seqs]))
 		        expr (canon-local (get-in tree [:adr :exp]))]
-						(ExpSeq (merge tree [:adr expr])))
+						(ExpSeq [stmt] (merge tree [:adr expr])))
 			(= :minijava.ir/Jump (type tree))
 		  (let [stmt (canon-local (get-in tree [:lbl :seqs]))
 		        expr (canon-local (get-in tree [:lbl :exp]))]
-						(ExpSeq stmt (merge tree [:lbl expr])))
+						(ExpSeq [stmt] (merge tree [:lbl expr])))
 ))
 
 
@@ -53,7 +53,7 @@
   (let [e1 (canon-local (get tree :exp1))
         s2 (canon-local (get-in tree [:exp2 :seqs]))
         e2 (canon-local (get-in tree [:exp2 :exp]))]
-   			(ExpSeq s2 (merge tree [:exp2 e2]))))
+   			(ExpSeq [s2] (merge tree [:exp2 e2]))))
 
 (defn raise-eseq-commute-cond
   "(Conditional op e1 (ExpSeq s2 e2) t f) -> (ExpSeq s2 (Conditional op e1 e2 t f))"
@@ -75,7 +75,7 @@
         s1 (canon-local (get-in tree [:exp2 :seqs]))
         e2 (canon-local (get-in tree [:exp2 :exp]))
         t  (tm/temp)]
-			(ExpSeq (Move e1 (Temp t)) (ExpSeq s1 (merge tree [:exp1 (Temp t)] [:exp2 e2])))
+			(ExpSeq [(Move e1 (Temp t))] (ExpSeq s1 (merge tree [:exp1 (Temp t)] [:exp2 e2])))
 )) 
 
 (defn raise-eseq-no-commute-cond
@@ -221,10 +221,11 @@
 	;;		(contains-call? s) ;;this wont work with the current approach; have to remove calls in a separate procedure
 	;;				(do (reset! *local-change* true) (reorganize-call s))
 		(= :minijava.ir/Seq (type s))
-		(do	(println "match seq" s)	(Seq (flatten;;run canon-local on each element of the sequence
-					  (for [s (:seqs s)] (canon-local s)))))
+		(do	(println "match seq" s)	(Seq (vec(flatten;;run canon-local on each element of the sequence
+					  (for [s (:seqs s)] (canon-local s))))))
 		(= :minijava.ir/ExpSeq (type s)) ;;is this right?
-			 (do	(println "match expseq")  (ExpSeq (canon-local (:seqs s)) (canon-local (:exp s))) )
+			 (do	(println "match expseq")  (ExpSeq (vec (flatten;;run canon-local on each element of the sequence
+					  (for [s (:seqs s)] (canon-local s)))) (canon-local (:exp s))) )
 		(= :minijava.ir/BinaryOp (type s))
 				(do	(println "match binop") (BinaryOp (:op s) (canon-local (:exp1 s))  (canon-local (:exp2 s))))
 		(= :minijava.ir/Conditional (type s))
@@ -257,8 +258,10 @@
 (defn remove-seqs[t]
 		(cond
 				(= :minijava.ir/Seq (type t))
-						(flatten (for [t (:seqs t)] (remove-seqs t)))
-				:else t;;All seqs are guaranteed to be top level (not contained in anything but a seq), so we dont need to explore other nodes.
+						(vec (flatten (for [t (:seqs t)] (remove-seqs t))))
+				(= :minijava.ir/ExpSeq (type t))
+						(conj (vec (flatten (for [s (:seqs t)] (remove-seqs s))))  (remove-seqs (:exp t)) )
+				:else t;;All seqs and expseq are guaranteed to be top level (not contained in anything but a seq or expseq), so we dont need to explore other nodes.
 	)
 )
 
@@ -266,7 +269,7 @@
 (defn canon [t]
 	(let [wrapped (wrap-calls t)
 				raised (canon-raise wrapped)]
-	;;now remove all the top level sequences, and return a vector of statements, with no seqs (or expseqs, but those were already removed)
+	;;now remove all the top level sequences, and return a vector of statements, with no seqs or expseqs
 	(remove-seqs raised)	
 ))
 
