@@ -2,7 +2,7 @@
   (:use (minijava canon interp ir)
         clojure.test)
   (:require [minijava.temp :as tm]))
-
+(comment
 (deftest test-remove-double-eseq
   (let [exp (ExpSeq [(Statement (Const 1))] (ExpSeq [(Statement (Const 2))]
                                                     (Const 3)))
@@ -42,7 +42,9 @@
         "Removes ExpSeq per rule four.")
     (is (= (eval-prog (seq result))
            5))))
+)
 
+(comment
  (deftest test-commute
   (let [s (Statement (Const 0))
         m (Move s (Const 2))
@@ -106,6 +108,17 @@
     (tm/reset-num!)
     (is (= (basic-blocks exp) res))))
 
+
+
+(deftest test-trace
+  (let [t (tm/label)
+        f (tm/label)
+        other (tm/label)
+        prog (Seq [(Label other)
+                   (Conditional :< (Const 3) (Const 4) (Name t) (Name f))
+                   ])]))
+)
+
 (deftest test-simple
   (let [t (tm/label)
         f (tm/label)
@@ -117,17 +130,43 @@
                     (Jump (Name other))
                     (Label f)])]
     (is (= (canon prog)
+           [ (Label other)
+            (Conditional :< (Const 3) (Const 4) (Name t) (Name f))
+            (Label t)
+            (Jump (Name other))
+            (Label f)]))))
+
+
+(deftest test-simple-recursion
+  (let [t (tm/label)
+        f (tm/label)
+				v1 (tm/temp)
+        other (tm/label)
+				function (tm/label)
+        prog  (Seq [(Conditional :< (BinaryOp :+ (ExpSeq (Statement (Const 3)) (Const 2)) (Temp v1) ) (Const 4)  (Name t) (Name f))])]
+ (is (= (canon prog)
+     
+           [(Statement (Const 3)) (Conditional :< (BinaryOp :+ (Const 2) (Temp v1) ) (Const 4)  (Name t) (Name f))]))))
+
+(comment
+(deftest test-recursion
+  (let [t (tm/label)
+        f (tm/label)
+				v1 (tm/temp)
+        other (tm/label)
+				function (tm/label)
+        prog  (Seq [(Label other)
+                    (Conditional :< (BinaryOp :+ (ExpSeq (Statement (Const 3)) (Const 2)) (Temp v1) ) (Const 4)  (Name t) (Name f))
+                    (Label t)
+                    (Seq [(Call (Name function) [(BinaryOp :+  (ExpSeq (Seq [(Const 1) (Const 2)]) (Const 3)) (Const 4) ) (Const 5) ])])
+                    (Jump (Name other))
+                    (Label f)])]
+    (is (= (canon prog)
            (list
             (Label other)
             (Conditional :< (Const 3) (Const 4) (Name t) (Name f))
             (Label t)
             (Jump (Name other))
             (Label f))))))
+)
 
-(deftest test-trace
-  (let [t (tm/label)
-        f (tm/label)
-        other (tm/label)
-        prog (Seq [(Label other)
-                   (Conditional :< (Const 3) (Const 4) (Name t) (Name f))
-                   ])]))

@@ -151,7 +151,9 @@
 						(= :minijava.ir/Call (type (:adr s)) ))
 	)
 )
-
+(defn wrap-calls [s]
+	s
+)
 (defn reorganize-call [s]
 	(cond (= :minijava.ir/BinaryOp (type s))
 					;;s is a binary op, and one or both arguments are calls
@@ -262,7 +264,8 @@
 
 
 (defn canon [t]
-	(let [raised (canon-raise t)]
+	(let [wrapped (wrap-calls t)
+				raised (canon-raise wrapped)]
 	;;now remove all the top level sequences, and return a vector of statements, with no seqs (or expseqs, but those were already removed)
 	(remove-seqs raised)	
 ))
