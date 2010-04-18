@@ -2,47 +2,6 @@
   (:use (minijava canon interp ir)
         clojure.test)
   (:require [minijava.temp :as tm]))
-(comment
-(deftest test-remove-double-eseq
-  (let [exp (ExpSeq [(Statement (Const 1))] (ExpSeq [(Statement (Const 2))]
-                                                    (Const 3)))
-        result [(Statement (Const 1)) (Statement (Const 2)) (Const 3)]]
-    (is (= (remove-double-eseq exp)
-           result)
-        "Removes ExpSeq per rule one.")
-    (is (= (eval-prog (seq result))
-           3))))
-
-(deftest test-remove-eseq-left
-  (let [exp (BinaryOp :+ (ExpSeq [(Statement (Const 1))] (Const 3)) (Const 4))
-        result [(Statement (Const 1)) (BinaryOp :+ (Const 3) (Const 4))]]
-    (is (= (remove-eseq-left exp)
-           result)
-        "Removes ExpSeq per rule two.")))
-
-(deftest test-remove-eseq-commute
-  (let [exp (BinaryOp :+ (Const 2) (ExpSeq [(Statement (Const 0))] (Const 3)))
-        result [(Statement (Const 0)) (BinaryOp :+ (Const 2) (Const 3))]]
-    (is (= (remove-eseq-commute exp)
-           result)
-        "Removes ExpSeq per rule three.")
-    (is (= (eval-prog (seq result))
-           5))))
-
-(deftest test-remove-eseq-no-commute
-  (tm/reset-num!)
-  (let [exp (BinaryOp :+ (Const 3) (ExpSeq [(Statement (Const 0))] (Const 2)))
-        t (tm/temp)
-        result [(Move (Const 3) (Temp t))
-                (Statement (Const 0))
-                (BinaryOp :+ (Temp t) (Const 2))]]
-    (tm/reset-num!)
-    (is (= (remove-eseq-no-commute exp)
-           (seq result))
-        "Removes ExpSeq per rule four.")
-    (is (= (eval-prog (seq result))
-           5))))
-)
 
  (deftest test-commute
   (let [s (Statement (Const 0))
@@ -110,6 +69,7 @@
 
 
 (deftest test-trace
+(tm/reset-num!)
   (let [t (tm/label)
         f (tm/label)
         other (tm/label)
@@ -119,6 +79,7 @@
 
 
 (deftest test-simple
+(tm/reset-num!)
   (let [t (tm/label)
         f (tm/label)
         other (tm/label)
@@ -137,6 +98,7 @@
 
 
 (deftest test-simple-recursion
+(tm/reset-num!)
   (let [t (tm/label)
         f (tm/label)
 				v1 (tm/temp)
@@ -149,6 +111,7 @@
 
 
 (deftest test-recursion
+(tm/reset-num!)
   (let [t (tm/label)
         f (tm/label)
 				v1 (tm/temp)
@@ -174,6 +137,7 @@
             (Label f)]))))
 
 (deftest test-call
+(tm/reset-num!)
   (let [t (tm/label)
         f (tm/label)
 				v1 (tm/temp)
@@ -197,6 +161,7 @@
 
 
 (deftest test-recursion-call
+(tm/reset-num!)
   (let [t (tm/label)
         f (tm/label)
 				v1 (tm/temp)
@@ -220,8 +185,17 @@
             (Jump (Name other))
             (Label f)]))))
 
+(deftest test-call-wrap
+(tm/reset-num!)
+  (let [function (tm/label)
+			s (BinaryOp :+ (Call (Name function) [(Const 1)])  (Const 4))]
+    (is (= (wrap-calls s)
+		(BinaryOp :+ (ExpSeq [(Move  (Call (Name function) [(Const 1)]) (tm/temp 2) )] (Temp (tm/temp 2))) (Const 4)))))
+
+)
 
 (deftest test-call-rewrite
+(tm/reset-num!)
   (let [t (tm/label)
         f (tm/label)
 				v1 (tm/temp)
@@ -235,7 +209,8 @@
     (is (= (canon prog)
            [
             (Label other)
-            (Conditional :< (BinaryOp :+ (Call (Name function) [(Const 1)]) (Const 4)) (Const 5)  (Name t) (Name f))
+						(Move (Call (Name function) [(Const 1)]) (tm/temp 6))
+            (Conditional :< (BinaryOp :+ (Temp  (tm/temp 6)) (Const 4)) (Const 5)  (Name t) (Name f))
             (Label t)
             (Jump (Name other))
             (Label f)]))))

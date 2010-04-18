@@ -185,40 +185,38 @@
 	)
 )
 
+(declare wrap-calls)
+
+;;Helper method for wrap calls. If s is a call, wraps it, otherwise runs wrap-calls on it.
+;;This is *unlike* wrap-calls, which will assume that if s is a call it is a statement and does not need wrapping.
+(defn wrap-if-needed[s]
+ (if  (= :minijava.ir/Call (type s))
+			;;wrap the call
+			(let [t (tm/temp)] (ExpSeq [(Move (wrap-calls s) t)] (Temp t)));;wrap the call, and also recurse on it
+			;;else
+			(wrap-calls s);;recurse on s
+))
+
 (defn wrap-calls [s]
 	(cond (= :minijava.ir/BinaryOp (type s))
-					;;s is a binary op, and one or both arguments are calls
-					(let [arg1 (if (not (= :minijava.ir/Call (type (:exp1 s)))) (wrap-calls(:exp1 s))
-											;;exp1 is a call, so wrap it in an eseq  
-											(let [t (tm/temp)] (ExpSeq [(Move (wrap-calls(:exp1 s)) t)] t)))
-								arg2 (if (not (= :minijava.ir/Call (type (:exp2 s)))) (wrap-calls(:exp2 s))
-											;;;exp2 is a call, so wrap it in an eseq  
-											(let [t (tm/temp)] (ExpSeq [(Move (wrap-calls(:exp2 s)) t)] t)))]
-								 (BinaryOp (:op s) arg1 arg2));;ok; now create a new binop with these arguments, and run canon-local on it		
+					(let [arg1 (wrap-if-needed (:exp1 s))
+								arg2 (wrap-if-needed (:exp2 s))]
+								 (BinaryOp (:op s) arg1 arg2))	
 				(= :minijava.ir/ExpSeq (type s))
-					;;s is an expseq, and its expression is a call	
-					 (ExpSeq (:seqs s) 	
-								 (let [t (tm/temp)] (ExpSeq [(Move (wrap-calls(:exp s)) t)] t)))
+					(ExpSeq (vec(flatten (for [t (:seqs s)] (wrap-calls t)))) (wrap-if-needed (:exp s)))
 			(= :minijava.ir/Conditional (type s))
-							;;s is an conditional, and one or both arguments are calls
-							(let [arg1 (if (not (= :minijava.ir/Call (type (:exp1 s)))) (wrap-calls(:exp1 s))
-											;;exp1 is a call, so wrap it in an eseq  
-											(let [t (tm/temp)] (ExpSeq [(Move (wrap-calls(:exp1 s)) t)] t)))
-								arg2 (if (not (= :minijava.ir/Call (type (:exp2 s)))) (wrap-calls(:exp2 s))
-											;;;exp2 is a call, so wrap it in an eseq  
-											(let [t (tm/temp)] (ExpSeq [(Move (wrap-calls (:exp2 s)) t)] t)))]
-								 (Conditional (:op s) arg1 arg2 (:t s) (:f s)));;ok; now create a new binop with these arguments, and run canon-local on it		
+						(merge s [:exp1 (wrap-if-needed (:exp1 s))] [:exp2 (wrap-if-needed (:exp2 s))])
 			(= :minijava.ir/Mem (type s))
-					;;s is an Mem, and its adress is a call	
-					 (Mem (let [t (tm/temp)] (ExpSeq [(Move 	(wrap-calls (:adr s)) t)] t)))
+ 						(merge s [:adr (wrap-if-needed (:adr s))])
 			(= :minijava.ir/Junp (type s))
-					;;s is an Jump, and its label is a call	
-					 (Jump (let [t (tm/temp)] (ExpSeq [(Move (wrap-calls (:lbl s)) t)] t)))
+					(merge s [:lbl (wrap-if-needed (:lbl s))])
 			(= :minijava.ir/Call (type s))
-						(Call (wrap-calls (:lbl s)) (vec(flatten (for [s (:seqs s)] (wrap-calls s)))))
+			;;The call itself is ok, but we have to check and possibly wrap each argument.
+					(Call (wrap-if-needed (:lbl s)) (vec(flatten (for [t (:args s)] (wrap-if-needed t)))))
+				(= :minijava.ir/Seq (type s))
+						(Seq (vec (flatten (for [t (:seqs s)](wrap-calls t)))))
 			(= :minijava.ir/Statement (type s))
 						(Statement (wrap-calls (:exp s)))
-
 				:else s
 ))
 ;; commutes? s is whether the children of s commute (as opposed to
