@@ -1,6 +1,7 @@
 (ns minijava.test-alloc
-  (:use minijava.alloc
-        clojure.test))
+  (:use minijava.alloc minijava.gas minijava.liveness
+        clojure.test)
+(:require [minijava.temp :as tm]))
 
 (deftest tests-no-spilled-no-dead
   (let [val [{:start 0, :end 3}
@@ -46,3 +47,26 @@
     (is (not (empty? spilled)) "Something is spilled.")
     (is (= (dissoc (first spilled) :reg) longest-lived)
         "Longest-lived interval spilled.")))
+
+
+
+(deftest test-live-range-1
+  (tm/reset-num!)
+  (let [t (tm/label)
+        f (tm/label)
+        a (tm/temp "a")
+        b (tm/temp "b")
+        other (tm/label)
+        prog  (vector
+               (LABEL other)
+               (cmpl a b)
+               (jcc := t)
+               (jmp f)
+               (LABEL t)
+               (jmp other)
+               (LABEL f))
+				range (live-ranges (live prog))]
+  (println (scan range)
+					
+        )))
+

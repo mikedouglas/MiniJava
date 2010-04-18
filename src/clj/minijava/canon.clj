@@ -124,7 +124,15 @@
   (and (= :minijava.ir/Conditional (type s));; see figure 8.1
            (= :minijava.ir/ExpSeq (type (:exp2 s))))
  )
- 
+
+(defn matches-call-arg? [s];;check if any of the arguments to a call are an expseq
+	(and (= :minijava.ir/Call (type s))
+			(or (flatten (for [t (:args s)] (= :minijava.ir/ExpSeq (type t)))) )	);;there is almost certainly a better way to do this.
+)
+
+(defn raise-call-arg [s];;check if any of the arguments to a call are an expseq
+		s;;TODO
+)
 
 (defn isit? [x t]
   (= (type x) t))
@@ -151,35 +159,40 @@
 						(= :minijava.ir/Call (type (:adr s)) ))
 	)
 )
+
 (defn wrap-calls [s]
-	s
-)
-(defn reorganize-call [s]
 	(cond (= :minijava.ir/BinaryOp (type s))
 					;;s is a binary op, and one or both arguments are calls
-					(let [arg1 (if (not (= :minijava.ir/Call (type (:exp1 s)))) (:exp1 s)
+					(let [arg1 (if (not (= :minijava.ir/Call (type (:exp1 s)))) (wrap-calls(:exp1 s))
 											;;exp1 is a call, so wrap it in an eseq  
-											(let [t (tm/temp)] (ExpSeq (Move (:exp1 s) t) t)))
-								arg2 (if (not (= :minijava.ir/Call (type (:exp2 s)))) (:exp2 s)
+											(let [t (tm/temp)] (ExpSeq [(Move (wrap-calls(:exp1 s)) t)] t)))
+								arg2 (if (not (= :minijava.ir/Call (type (:exp2 s)))) (wrap-calls(:exp2 s))
 											;;;exp2 is a call, so wrap it in an eseq  
-											(let [t (tm/temp)] (ExpSeq (Move (:exp2 s) t) t)))]
-								(canon-local (BinaryOp (:op s) arg1 arg2)));;ok; now create a new binop with these arguments, and run canon-local on it		
+											(let [t (tm/temp)] (ExpSeq [(Move (wrap-calls(:exp2 s)) t)] t)))]
+								 (BinaryOp (:op s) arg1 arg2));;ok; now create a new binop with these arguments, and run canon-local on it		
 				(= :minijava.ir/ExpSeq (type s))
 					;;s is an expseq, and its expression is a call	
-					(canon-local (ExpSeq (:seqs s) 	
-								 (let [t (tm/temp)] (ExpSeq (Move (:exp s) t) t))))
+					 (ExpSeq (:seqs s) 	
+								 (let [t (tm/temp)] (ExpSeq [(Move (wrap-calls(:exp s)) t)] t)))
 			(= :minijava.ir/Conditional (type s))
 							;;s is an conditional, and one or both arguments are calls
-							(let [arg1 (if (not (= :minijava.ir/Call (type (:exp1 s)))) (:exp1 s)
+							(let [arg1 (if (not (= :minijava.ir/Call (type (:exp1 s)))) (wrap-calls(:exp1 s))
 											;;exp1 is a call, so wrap it in an eseq  
-											(let [t (tm/temp)] (ExpSeq (Move (:exp1 s) t) t)))
-								arg2 (if (not (= :minijava.ir/Call (type (:exp2 s)))) (:exp2 s)
+											(let [t (tm/temp)] (ExpSeq [(Move (wrap-calls(:exp1 s)) t)] t)))
+								arg2 (if (not (= :minijava.ir/Call (type (:exp2 s)))) (wrap-calls(:exp2 s))
 											;;;exp2 is a call, so wrap it in an eseq  
-											(let [t (tm/temp)] (ExpSeq (Move (:exp2 s) t) t)))]
-								(canon-local (Conditional (:op s) arg1 arg2 (:t s) (:f s))));;ok; now create a new binop with these arguments, and run canon-local on it		
+											(let [t (tm/temp)] (ExpSeq [(Move (wrap-calls (:exp2 s)) t)] t)))]
+								 (Conditional (:op s) arg1 arg2 (:t s) (:f s)));;ok; now create a new binop with these arguments, and run canon-local on it		
 			(= :minijava.ir/Mem (type s))
 					;;s is an Mem, and its adress is a call	
-					(canon-local (Mem (let [t (tm/temp)] (ExpSeq (Move (:exp s) t) t))))
+					 (Mem (let [t (tm/temp)] (ExpSeq [(Move 	(wrap-calls (:adr s)) t)] t)))
+			(= :minijava.ir/Junp (type s))
+					;;s is an Jump, and its label is a call	
+					 (Jump (let [t (tm/temp)] (ExpSeq [(Move (wrap-calls (:lbl s)) t)] t)))
+			(= :minijava.ir/Call (type s))
+						(Call (wrap-calls (:lbl s)) (vec(flatten (for [s (:seqs s)] (wrap-calls s)))))
+			(= :minijava.ir/Statement (type s))
+						(Statement (wrap-calls (:exp s)))
 
 				:else s
 ))
@@ -201,37 +214,39 @@
 	(let [*local-change* (atom false)
 				newS 
     (cond 
-			 (matches-eseq-left-binop? s) (do (println "match left binop")	(reset! *local-change* true)	(raise-eseq-left-binop s))
-		 	 (matches-eseq-left-cond? s) (do (println "match left cond")	(reset! *local-change* true)	 (raise-eseq-left-cond s))
-			 (matches-double-eseq? s) (do (println "match double eseq")	(reset! *local-change* true)	 (raise-double-eseq s)	)
+			 (matches-eseq-left-binop? s) (do 	(reset! *local-change* true)	(raise-eseq-left-binop s))
+		 	 (matches-eseq-left-cond? s) (do 	(reset! *local-change* true)	 (raise-eseq-left-cond s))
+			 (matches-double-eseq? s) (do(reset! *local-change* true)	 (raise-double-eseq s)	)
 			 (matches-eseq-commute-binop? s)
-					(do(println "match commute binop") (reset! *local-change* true)						
+					(do (reset! *local-change* true)						
 			       (if (commutes? s)
 			         (raise-eseq-commute-binop s)
 			         (raise-eseq-no-commute-binop s))						
 					)
 			 (matches-eseq-commute-cond? s)
-			      (do(println "match commute cond") (reset! *local-change* true)	
+			      (do (reset! *local-change* true)	
 								(if (commutes? s)
 						         (raise-eseq-commute-cond s)
 						         (raise-eseq-no-commute-cond s))				
 							)
+				(matches-call-arg? s) ;;if an argument to the call is an expseq, raise it out
+						(raise-call-arg s)
 			;;If s contains Call as an argument, and s is NOT a move, then construct a new ESeq node moving the result of the call into the return value register.
 			;;Then recurse on the newly created node.
 	;;		(contains-call? s) ;;this wont work with the current approach; have to remove calls in a separate procedure
 	;;				(do (reset! *local-change* true) (reorganize-call s))
 		(= :minijava.ir/Seq (type s))
-		(do	(println "match seq" s)	(Seq (vec(flatten;;run canon-local on each element of the sequence
-					  (for [s (:seqs s)] (canon-local s))))))
+		(Seq (vec(flatten;;run canon-local on each element of the sequence
+					  (for [s (:seqs s)] (canon-local s)))))
 		(= :minijava.ir/ExpSeq (type s)) ;;is this right?
-			 (do	(println "match expseq")  (ExpSeq (vec (flatten;;run canon-local on each element of the sequence
-					  (for [s (:seqs s)] (canon-local s)))) (canon-local (:exp s))) )
+			   (ExpSeq (vec (flatten;;run canon-local on each element of the sequence
+					  (for [s (:seqs s)] (canon-local s)))) (canon-local (:exp s))) 
 		(= :minijava.ir/BinaryOp (type s))
-				(do	(println "match binop") (BinaryOp (:op s) (canon-local (:exp1 s))  (canon-local (:exp2 s))))
+			 (BinaryOp (:op s) (canon-local (:exp1 s))  (canon-local (:exp2 s)))
 		(= :minijava.ir/Conditional (type s))
-				(do	(println "match cond")(Conditional (:op s) (canon-local (:exp1 s))  (canon-local (:exp2 s)) (:t s) (:f s)))
+			(Conditional (:op s) (canon-local (:exp1 s))  (canon-local (:exp2 s)) (:t s) (:f s))
 		(= :minijava.ir/Call (type s))
-				(Call (:lbl s) (canon-local (:args s)))
+			(Call (canon-local (:lbl s))  (vec (flatten   (for [s (:args s)] (canon-local s)))))
 		(= :minijava.ir/Mem (type s))
 				(Mem (canon-local (:adr s)))
 		(= :minijava.ir/Jump (type s))
