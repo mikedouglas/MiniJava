@@ -82,6 +82,49 @@
   [a b]
   (or (isNop a) (isit? b :minijava.ir/Name) (isit? b :minijava.ir/Const)))
 
+(defn contains-call? [s]
+	(or (and  (= :minijava.ir/BinaryOp (type s)) ;;if either argument (or both) of a binop are calls
+						(or (= :minijava.ir/Call (type (:exp1 s)))  (= :minijava.ir/Call (type (:exp2 s))) ))
+ 			(and  (= :minijava.ir/ExpSeq (type s))
+						(= :minijava.ir/Call (type (:exp s)) ))
+ 			(and  (= :minijava.ir/Conditional (type s))
+						(= :minijava.ir/Call (type (:exp1 s)) ))
+ 			(and  (= :minijava.ir/Conditional (type s))
+						(= :minijava.ir/Call (type (:exp2 s)) ))
+ 			(and  (= :minijava.ir/Mem (type s))
+						(= :minijava.ir/Call (type (:adr s)) ))
+	)
+)
+
+(defn reorganize-call [s]
+	(cond (= :minijava.ir/BinaryOp (type s))
+					;;s is a binary op, and one or both arguments are calls
+					(let [arg1 (if (not (= :minijava.ir/Call (type (:exp1 s)))) (:exp1 s)
+											;;exp1 is a call, so wrap it in an eseq  
+											(let [t (tm/temp)] (ExpSeq (Move (:exp1 s) t) t)))
+								arg2 (if (not (= :minijava.ir/Call (type (:exp2 s)))) (:exp2 s)
+											;;;exp2 is a call, so wrap it in an eseq  
+											(let [t (tm/temp)] (ExpSeq (Move (:exp2 s) t) t)))]
+								(canon (BinaryOp (:op s) arg1 arg2)));;ok; now create a new binop with these arguments, and run canon on it		
+				(= :minijava.ir/ExpSeq (type s))
+					;;s is an expseq, and its expression is a call	
+					(canon (ExpSeq (:seqs s) 	
+								 (let [t (tm/temp)] (ExpSeq (Move (:exp s) t) t))))
+			(= :minijava.ir/Conditional (type s))
+							;;s is an conditional, and one or both arguments are calls
+							(let [arg1 (if (not (= :minijava.ir/Call (type (:exp1 s)))) (:exp1 s)
+											;;exp1 is a call, so wrap it in an eseq  
+											(let [t (tm/temp)] (ExpSeq (Move (:exp1 s) t) t)))
+								arg2 (if (not (= :minijava.ir/Call (type (:exp2 s)))) (:exp2 s)
+											;;;exp2 is a call, so wrap it in an eseq  
+											(let [t (tm/temp)] (ExpSeq (Move (:exp2 s) t) t)))]
+								(canon (Conditional (:op s) arg1 arg2 (:t s) (:f s))));;ok; now create a new binop with these arguments, and run canon on it		
+			(= :minijava.ir/Mem (type s))
+					;;s is an Mem, and its adress is a call	
+					(canon (Mem (let [t (tm/temp)] (ExpSeq (Move (:exp s) t) t))))
+
+				:else s
+))
 ;; commutes? s is whether the children of s commute (as opposed to
 ;; whether s commutes with something else.  s is assumed to have two
 ;; child functions here - other wise it wouldn't match the Eseq form so
@@ -102,6 +145,10 @@
        (if (commutes? s)
          (remove-eseq-commute s)
          (remove-eseq-no-commute s))
+			;;If s contains Call as an argument, and s is NOT a move, then construct a new ESeq node moving the result of the call into the return value register.
+			;;Then recurse on the newly created node.
+		 (contains-call? s)
+				(reorganize-call s)
      (isit? s :minijava.ir/Seq) (canon s)
      (isit? s :minijava.ir/ExpSeq)
        (list (canon (:seqs s)) (:exp s))

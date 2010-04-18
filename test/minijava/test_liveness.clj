@@ -37,9 +37,7 @@
   (is (= (live prog)
          [#{c b} #{c b} #{c b} #{c b} #{c b} #{c b}]))))
 
-;; test live map to interval conversion
-(comment
-  (deftest test-conversion-1
+ (deftest test-live-range-2
   (tm/reset-num!)
   (let [l1 (tm/label)
         a (tm/temp)
@@ -52,7 +50,25 @@
                (addl b c)
                (movl c a)
                (jmp l1))]
-    (= (conversion prog (live prog))
-       [{:id c, :start 1, :end 5}
-        {:id b, :start 2, :end 5}
-        {:id a, :start 4, :end 5}]))))
+   (is (= (convert (live prog))
+          [{:id b, :start 0, :end 5, :reg nil}
+           {:id c, :start 0, :end 5, :reg nil}]))))
+
+(deftest test-live-range-1
+  (tm/reset-num!)
+  (let [t (tm/label)
+        f (tm/label)
+        a (tm/temp "a")
+        b (tm/temp "b")
+        other (tm/label)
+        prog  (vector
+               (LABEL other)
+               (cmpl a b)
+               (jcc := t)
+               (jmp f)
+               (LABEL t)
+               (jmp other)
+               (LABEL f))]
+  (is (= (convert (live prog))
+         [{:id a, :start 0, :end 5, :reg nil}
+          {:id b, :start 0, :end 5, :reg nil}]))))

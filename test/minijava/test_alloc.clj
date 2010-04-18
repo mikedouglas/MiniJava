@@ -1,5 +1,5 @@
 (ns minijava.test-alloc
-  (:use minijava.alloc
+  (:use (minijava alloc liveness gas temp)
         clojure.test))
 
 (deftest tests-no-spilled-no-dead
@@ -46,3 +46,24 @@
     (is (not (empty? spilled)) "Something is spilled.")
     (is (= (dissoc (first spilled) :reg) longest-lived)
         "Longest-lived interval spilled.")))
+
+(deftest pipeline-no-spilled
+  (let [l1 (label)
+        a (temp :EAX)
+        b (temp :EBX)
+        c (temp :ECX)
+        val (vector
+             (LABEL l1)
+             (addl (CONST 3) c)
+             (addl (CONST 5) b)
+             (addl b c)
+             (movl c a)
+             (jmp l1))
+        res (vector
+             (LABEL l1)
+             (addl (CONST 3) :ECX)
+             (addl (CONST 5) :EBX)
+             (addl :EBX :ECX)
+             (movl :ECX :EAX) ;; TODO: fails because :EAX is never live.
+             (jmp l1))]
+    (is (= (fill val) res))))

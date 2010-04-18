@@ -46,7 +46,7 @@ memory. Returns allocated intervals."
 
 (defn- pull-temps
   [intrvls]
-  (into {} (for [i intrvls] [(:temp i) i])))
+  (into {} (for [i intrvls] [(:id i) i])))
 
 (defn- replace-temp
   "For each key provided, looks up in info and replaces with correct reg."
@@ -58,7 +58,7 @@ memory. Returns allocated intervals."
 (defn fill
   "Replace temps in x86 asm with registers. Incomplete."
   [asm]
-  (let [info (scan (convert asm))
+  (let [info (-> asm live convert scan :inreg)
         temps (pull-temps info)]
     (for [a asm]
       (case (type a)
@@ -66,7 +66,8 @@ memory. Returns allocated intervals."
         :minijava.gas/cmpl (replace-temp a temps :a :b)
         :minijava.gas/imull (replace-temp a temps :src :dst)
         :minijava.gas/subl (replace-temp a temps :src :dst)
-        :minijava.gas/movl (replace-temp a temps :src :dst)))))
+        :minijava.gas/movl (replace-temp a temps :src :dst)
+        a))))
 
 (defn- expire
   "Expire registers that've been freed from intrvl and intrvl - 1."

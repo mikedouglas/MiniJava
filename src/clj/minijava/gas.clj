@@ -23,7 +23,7 @@
 (deftype LABEL [lbl]
   clojure.lang.IPersistentMap
   Object
-  (toString [] (str lbl)))
+  (toString [] (str lbl ":")))
 
 ;;movl %eax, %ebx copies the contents of %eax to %ebx
 (deftype movl [src dst]
