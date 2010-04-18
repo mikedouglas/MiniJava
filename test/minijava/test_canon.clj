@@ -219,3 +219,23 @@
 						(Call (Name function) [(BinaryOp :+ (Const 3) (Const 4) ) (Const 5) ])
             (Jump (Name other))
             (Label f)]))))
+
+
+(deftest test-call-rewrite
+  (let [t (tm/label)
+        f (tm/label)
+				v1 (tm/temp)
+        other (tm/label)
+				function (tm/label)
+        prog  (Seq [(Label other)
+                    (Conditional :<  (BinaryOp :+ (Call (Name function) [(Const 1)]) (Const 4)) (Const 5)  (Name t) (Name f))
+                    (Label t)
+                     (Jump (Name other))
+                    (Label f)])]
+    (is (= (canon prog)
+           [
+            (Label other)
+            (Conditional :< (BinaryOp :+ (Call (Name function) [(Const 1)]) (Const 4)) (Const 5)  (Name t) (Name f))
+            (Label t)
+            (Jump (Name other))
+            (Label f)]))))
