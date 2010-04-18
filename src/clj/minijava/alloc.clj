@@ -1,7 +1,7 @@
 (ns minijava.alloc
   "Register allocation, using a linear scan algorithm.
    See Poletto and Sarkar[1999]"
-  (:use [minijava flow gas])
+  (:use [minijava flow liveness gas])
   (:require [clojure.set :as set]))
 
 (declare expire spill)
@@ -13,7 +13,7 @@
   (swap! inuse conj reg)
   (swap! active conj (assoc i :reg reg)))
 
-;; liveness interval {:start lineno, :end lineno, [:reg (oneof regs)]?}
+;; {:start lineno, :end lineno, :temp Temp, [:reg (oneof regs)]?}
 (defn scan
   "Scan through register intervals, allocating a register or spilling to
 memory. Returns allocated intervals."
@@ -34,15 +34,6 @@ memory. Returns allocated intervals."
            (alloc i reg active inuse))))
     {:inreg (concat @dead @active), :spilled @spilled}))
 
-(defn- expire
-  "Expire registers that've been freed from intrvl and intrvl - 1."
-  [active intrvl dead inuse]
-  (let [[died active] (split-with #(< (:end %) (:start intrvl))
-                                  (sort-by :end active))]
-    (swap! dead concat died)
-    (swap! inuse set/difference (map :reg died))
-    active))
-
 (defn- spill
   "Spill register with longest time left."
   [intrvl active]
@@ -52,3 +43,37 @@ memory. Returns allocated intervals."
         (reset! active (conj (rest @active) intrvl))
         intrvl)
       intrvl)))
+
+(defn- pull-temps
+  [intrvls]
+  (into {} (for [i intrvls] [(:id i) i])))
+
+(defn- replace-temp
+  "For each key provided, looks up in info and replaces with correct reg."
+  [x info & keys]
+  (apply merge x
+         (for [k keys :when (= (type (k x)) :minijava.temp/Temp)]
+           [k (get-in info [(k x) :reg])])))
+
+(defn fill
+  "Replace temps in x86 asm with registers. Incomplete."
+  [asm]
+  (let [info (-> asm live convert scan :inreg)
+        temps (pull-temps info)]
+    (for [a asm]
+      (case (type a)
+        :minijava.gas/addl (replace-temp a temps :src :dst)
+        :minijava.gas/cmpl (replace-temp a temps :a :b)
+        :minijava.gas/imull (replace-temp a temps :src :dst)
+        :minijava.gas/subl (replace-temp a temps :src :dst)
+        :minijava.gas/movl (replace-temp a temps :src :dst)
+        a))))
+
+(defn- expire
+  "Expire registers that've been freed from intrvl and intrvl - 1."
+  [active intrvl dead inuse]
+  (let [[died active] (split-with #(< (:end %) (:start intrvl))
+                                  (sort-by :end active))]
+    (swap! dead concat died)
+    (swap! inuse set/difference (map :reg died))
+    active))

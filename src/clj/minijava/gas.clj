@@ -23,7 +23,7 @@
 (deftype LABEL [lbl]
   clojure.lang.IPersistentMap
   Object
-  (toString [] (str lbl)))
+  (toString [] (str lbl ":")))
 
 ;;movl %eax, %ebx copies the contents of %eax to %ebx
 (deftype movl [src dst]
@@ -119,8 +119,8 @@
 (defn extract-def-temps [instr]
   (let [dst (:dst instr)]
     (if (= (type dst) :minijava.temp/Temp)
-        (hash-set dst)
-        (hash-set))))
+        #{dst}
+        #{})))
 
 ;;returns a list of all temps used by this instruction
 (defn gen [instr]
