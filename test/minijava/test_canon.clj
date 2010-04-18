@@ -195,7 +195,7 @@
             (Jump (Name other))
             (Label f)]))))
 
-(comment
+
 (deftest test-recursion-call
   (let [t (tm/label)
         f (tm/label)
@@ -219,4 +219,3 @@
 						(Call (Name function) [(BinaryOp :+ (Const 3) (Const 4) ) (Const 5) ])
             (Jump (Name other))
             (Label f)]))))
-)

@@ -125,13 +125,38 @@
            (= :minijava.ir/ExpSeq (type (:exp2 s))))
  )
 
+;;helper function to see if a vector contains any expseqs
+(defn contains-exp-seq [args]
+	(cond (empty? args) false
+				(= :minijava.ir/ExpSeq (type (first args))) true
+				:else (contains-exp-seq (rest args)))
+)
+
 (defn matches-call-arg? [s];;check if any of the arguments to a call are an expseq
-	(and (= :minijava.ir/Call (type s))
-			(or (flatten (for [t (:args s)] (= :minijava.ir/ExpSeq (type t)))) )	);;there is almost certainly a better way to do this.
+	(and (= :minijava.ir/Call (type s)) (> (count (:args s)) 0)
+			(contains-exp-seq (:args s)))
+	;;	(apply or (flatten (for [t (:args s)] (= :minijava.ir/ExpSeq (type t)))) )	);;there is almost certainly a better way to do this.
+)
+
+
+
+(defn first-arg-pos [args index]
+	(cond (empty? args) -1
+				(= :minijava.ir/ExpSeq (type (first args))) index
+				:else (first-arg-pos (rest args) (inc index))) 
 )
 
 (defn raise-call-arg [s];;check if any of the arguments to a call are an expseq
-		s;;TODO
+	(let [args (:args s)
+				pos (first-arg-pos args 0)
+				to-raise  (nth args pos nil)
+				prepend (take (dec pos) args)
+				append (take-last  (dec (- (count args) pos)) args )
+			 raised-args (if (nil? to-raise) args
+									(vec (flatten (conj append (:exp to-raise)  prepend ))))]
+			;;(println "args: " args "raised:" raised-args "pos:" pos "toraise" to-raise "prepend" prepend "append" append )
+		  (Seq [(:seqs to-raise)  (merge s [:args raised-args])]) )
+
 )
 
 (defn isit? [x t]
@@ -229,8 +254,9 @@
 						         (raise-eseq-commute-cond s)
 						         (raise-eseq-no-commute-cond s))				
 							)
-				(matches-call-arg? s) ;;if an argument to the call is an expseq, raise it out
+				(matches-call-arg? s) ;;if s is a call and an argument to the call is an expseq, raise it out
 						(raise-call-arg s)
+		;;				
 			;;If s contains Call as an argument, and s is NOT a move, then construct a new ESeq node moving the result of the call into the return value register.
 			;;Then recurse on the newly created node.
 	;;		(contains-call? s) ;;this wont work with the current approach; have to remove calls in a separate procedure
