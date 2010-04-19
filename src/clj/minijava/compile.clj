@@ -24,10 +24,20 @@
 	(apply-canon-helper (keys treemap) treemap (hash-map))
 )
 
-(defn compile-program [program]
-(let [treemap (apply-tree (parse program))
-		  canonmap (apply-canon treemap)
-]
-		canonmap
-))
+;; an HOF that applies the given transformation to the method's data
+;; (map-method canon map) should do the same as apply-canon above
+(defn map-method [f treemap]
+  (apply hash-map 
+    (mapcat
+      (fn [pair] 
+        (let [methodName (first pair)
+              val        (second pair)
+              frame      (:frame val)
+              data       (:ir val)]
+          [key, {:frame frame, :ir (f data)}]))
+      treemap)))
 
+(defn compile-program [program]
+  (let [treemap  (apply-tree (parse program))
+        canonmap (map-method canon treemap)]
+    canonmap))
