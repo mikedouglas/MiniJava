@@ -159,7 +159,7 @@
 
 )
 
-(defn isit? [x t]
+(defn- isit? [x t]
   (= (type x) t))
 
 ;; support function for Commutes, taken from canon-local.java
