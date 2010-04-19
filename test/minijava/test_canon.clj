@@ -225,9 +225,9 @@
 				n (tm/label)
 				prog(Call p [(Call c [(Call n ['Fac]) (Const 10)])])			]
    (is (= (canon prog)
-         [(Move (Call n ['Fac]) (tm/temp 7))
-					(Move (Call c [(Temp (tm/temp 7)) (Const 10)]) (tm/temp 6))
-					(Call p [(Temp (tm/temp 6))])
+         [(Move (Call n ['Fac]) (tm/temp 5))
+					(Move (Call c [(Temp (tm/temp 5)) (Const 10)]) (tm/temp 4))
+					(Call p [(Temp (tm/temp 4))])
           ]  ))))
 
 
