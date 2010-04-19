@@ -214,3 +214,22 @@
             (Label t)
             (Jump (Name other))
             (Label f)]))))
+
+
+
+
+(deftest test-call-2
+(tm/reset-num!)
+  (let [p (tm/label)
+				c (tm/label)
+				n (tm/label)
+				prog(Call p [(Call c [(Call n ['Fac]) (Const 10)])])			]
+   (is (= (canon prog)
+         [(Move (Call n ['Fac]) (tm/temp 7))
+					(Move (Call c [(Temp (tm/temp 7)) (Const 10)]) (tm/temp 6))
+					(Call p [(Temp (tm/temp 6))])
+          ]  ))))
+
+
+
+

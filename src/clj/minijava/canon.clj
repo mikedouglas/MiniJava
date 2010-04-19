@@ -6,28 +6,52 @@
 
 (declare canon-local)
 
+
+;;helper to deal with the merging arguments for seqs, calls, expseqs, into a single well behaved vector
+(defn build-args [x]
+ (vec (flatten [x]))
+)
+
+
 (defn raise-double-eseq
   "(ExpSeq s1 (ExpSeq s2 e)) -> (ExpSeq (Seq s1 s2) e)"
   [tree]
   (let [s1 (canon-local (:seqs tree ))
         s2 (canon-local (get-in tree [:exp :seqs]))
         e  (canon-local  (get-in tree [:exp :exp]))]
-   		(ExpSeq [(Seq s1 s2)] e)))
+   		(ExpSeq ( build-args (Seq s1 s2)) e)))
 
 (defn raise-eseq-left-binop
   "(BinaryOp op (ExpSeq stmt expr) e2) -> (ExpSeq stmt (BinaryOp op expr e2))"
   [tree] 
   (let [stmt (canon-local (get-in tree [:exp1 :seqs]))
         expr (canon-local (get-in tree [:exp1 :exp]))]
-				(ExpSeq [stmt] (merge tree [:exp1 expr]))
+				(ExpSeq ( build-args stmt) (merge tree [:exp1 expr])) ;;what if seqs is a vector of ir, does this still work?
 ))
+
+(defn raise-eseq-left-move
+  "(BinaryOp op (ExpSeq stmt expr) e2) -> (ExpSeq stmt (BinaryOp op expr e2))"
+  [tree] 
+  (let [stmt (canon-local (get-in tree [:src :seqs]))
+        expr (canon-local (get-in tree [:src :exp]))]
+				(ExpSeq  ( build-args stmt) (merge tree [:src expr]))
+))
+
+(defn raise-eseq-right-move
+  "(BinaryOp op (ExpSeq stmt expr) e2) -> (ExpSeq stmt (BinaryOp op expr e2))"
+  [tree] 
+  (let [stmt (canon-local (get-in tree [:dst :seqs]))
+        expr (canon-local (get-in tree [:dst :exp]))]
+				(ExpSeq ( build-args stmt) (merge tree [:dst expr]))
+))
+
 
 (defn raise-eseq-left-cond
   "(BinaryOp op (ExpSeq stmt expr) e2) -> (ExpSeq stmt (BinaryOp op expr e2))"
   [tree] 
   (let [stmt (canon-local (get-in tree [:exp1 :seqs]))
         expr (canon-local (get-in tree [:exp1 :exp]))]
-				(Seq [stmt (merge tree [:exp1 expr])])
+				(Seq  ( build-args [stmt (merge tree [:exp1 expr])]))
 ))
 
 (defn raise-eseq-center
@@ -36,11 +60,11 @@
 (cond (= :minijava.ir/Mem (type tree))
 		  (let [stmt (canon-local (get-in tree [:adr :seqs]))
 		        expr (canon-local (get-in tree [:adr :exp]))]
-						(ExpSeq [stmt] (merge tree [:adr expr])))
+						(ExpSeq  ( build-args stmt) (merge tree [:adr expr])))
 			(= :minijava.ir/Jump (type tree))
 		  (let [stmt (canon-local (get-in tree [:lbl :seqs]))
 		        expr (canon-local (get-in tree [:lbl :exp]))]
-						(ExpSeq [stmt] (merge tree [:lbl expr])))
+						(ExpSeq  ( build-args stmt) (merge tree [:lbl expr])))
 ))
 
 
@@ -53,7 +77,7 @@
   (let [e1 (canon-local (get tree :exp1))
         s2 (canon-local (get-in tree [:exp2 :seqs]))
         e2 (canon-local (get-in tree [:exp2 :exp]))]
-   			(ExpSeq [s2] (merge tree [:exp2 e2]))))
+   			(ExpSeq ( build-args s2) (merge tree [:exp2 e2]))))
 
 (defn raise-eseq-commute-cond
   "(Conditional op e1 (ExpSeq s2 e2) t f) -> (ExpSeq s2 (Conditional op e1 e2 t f))"
@@ -61,7 +85,7 @@
   (let [e1 (canon-local (get tree :exp1))
         s2 (canon-local (get-in tree [:exp2 :seqs]))
         e2 (canon-local (get-in tree [:exp2 :exp]))]
-   			(Seq [s2 (merge tree [:exp2 e2])])))
+   			(Seq  ( build-args [s2 (merge tree [:exp2 e2])]))))
 
 
 
@@ -75,7 +99,7 @@
         s1 (canon-local (get-in tree [:exp2 :seqs]))
         e2 (canon-local (get-in tree [:exp2 :exp]))
         t  (tm/temp)]
-			(ExpSeq [(Move e1 (Temp t))] (ExpSeq s1 (merge tree [:exp1 (Temp t)] [:exp2 e2])))
+			(ExpSeq ( build-args  [(Move e1 (Temp t))]) (ExpSeq ( build-args s1) (merge tree [:exp1 (Temp t)] [:exp2 e2])))
 )) 
 
 (defn raise-eseq-no-commute-cond
@@ -86,7 +110,7 @@
         s1 (canon-local (get-in tree [:exp2 :seqs]))
         e2 (canon-local (get-in tree [:exp2 :exp]))
         t  (tm/temp)]
-			(Seq [(Move e1 (Temp t)) (Seq s1 (merge tree [:exp1 (Temp t)] [:exp2 e2]))])
+			(Seq ( build-args [(Move e1 (Temp t)) (Seq ( build-args s1) (merge tree [:exp1 (Temp t)] [:exp2 e2]))]))
 )) 
 
 
@@ -99,6 +123,16 @@
   [s]
    (and (= :minijava.ir/Conditional (type s))
            (= :minijava.ir/ExpSeq (type (:exp1 s)))))
+
+(defn matches-eseq-left-move?
+  [s]
+  (and (= :minijava.ir/Move (type s)) 
+           (= :minijava.ir/ExpSeq (type (:src s)))))
+
+(defn matches-eseq-right-move?
+  [s]
+  (and (= :minijava.ir/Move (type s)) 
+           (= :minijava.ir/ExpSeq (type (:dst s)))))
 
 (defn matches-eseq-left-binop?
   [s]
@@ -147,6 +181,7 @@
 )
 
 (defn raise-call-arg [s];;check if any of the arguments to a call are an expseq
+;;(Call lbl [(ExpSeq stm e)]) -> (ExpSeq [stm] (Call lbl [e]))
 	(let [args (:args s)
 				pos (first-arg-pos args 0)
 				to-raise  (nth args pos nil)
@@ -155,7 +190,7 @@
 			 raised-args (if (nil? to-raise) args
 									(vec (flatten (conj append (:exp to-raise)  prepend ))))]
 			;;(println "args: " args "raised:" raised-args "pos:" pos "toraise" to-raise "prepend" prepend "append" append )
-		  (Seq [(:seqs to-raise)  (merge s [:args raised-args])]) )
+		  (ExpSeq ( build-args [(:seqs to-raise)])  (merge s [:args ( build-args raised-args)]))) 
 
 )
 
@@ -217,6 +252,8 @@
 						(Seq (vec (flatten (for [t (:seqs s)](wrap-calls t)))))
 			(= :minijava.ir/Statement (type s))
 						(Statement (wrap-calls (:exp s)))
+			(= :minijava.ir/Move (type s))
+						(Move (wrap-calls (:src s)) (wrap-if-needed (:dst s))) ;;unwrapped calls are allowed at move sources.
 				:else s
 ))
 ;; commutes? s is whether the children of s commute (as opposed to
@@ -231,45 +268,50 @@
 ;;If so, we should set this to false and run canon-local again.
 (def *global-change* (atom true))
 
+
 (defn canon-local
   "Converts a Statement or Expression to linear IR form."
   [s]
 	(let [*local-change* (atom false)
 				newS 
     (cond 
-			 (matches-eseq-left-binop? s) (do 	(reset! *local-change* true)	(raise-eseq-left-binop s))
-		 	 (matches-eseq-left-cond? s) (do 	(reset! *local-change* true)	 (raise-eseq-left-cond s))
-			 (matches-double-eseq? s) (do(reset! *local-change* true)	 (raise-double-eseq s)	)
+			 (matches-eseq-left-binop? s) (do (reset! *local-change* true)	(raise-eseq-left-binop s))
+		 	 (matches-eseq-left-cond? s) (do  	(reset! *local-change* true)	 (raise-eseq-left-cond s))
+			 (matches-eseq-left-move? s) (do   	(reset! *local-change* true)	 (raise-eseq-left-move s))
+			 (matches-eseq-right-move? s) (do 	 (reset! *local-change* true)	 (raise-eseq-right-move s)) ;;note: moves dont ever commute
+			 (matches-double-eseq? s) (do   (reset! *local-change* true)	 (raise-double-eseq s)	)
 			 (matches-eseq-commute-binop? s)
-					(do (reset! *local-change* true)						
+					(do (reset! *local-change* true)			
 			       (if (commutes? s)
 			         (raise-eseq-commute-binop s)
 			         (raise-eseq-no-commute-binop s))						
 					)
 			 (matches-eseq-commute-cond? s)
-			      (do (reset! *local-change* true)	
+			      (do (reset! *local-change* true)	 
 								(if (commutes? s)
 						         (raise-eseq-commute-cond s)
 						         (raise-eseq-no-commute-cond s))				
 							)
-				(matches-call-arg? s) ;;if s is a call and an argument to the call is an expseq, raise it out
-						(raise-call-arg s)
+
+	
+		(matches-call-arg? s) ;;if s is a call and an argument to the call is an expseq, raise it out
+			(do  (reset! *local-change* true) 	(raise-call-arg s))
 		;;				
 			;;If s contains Call as an argument, and s is NOT a move, then construct a new ESeq node moving the result of the call into the return value register.
 			;;Then recurse on the newly created node.
 	;;		(contains-call? s) ;;this wont work with the current approach; have to remove calls in a separate procedure
 	;;				(do (reset! *local-change* true) (reorganize-call s))
 		(= :minijava.ir/Seq (type s))
-		(Seq (vec(flatten;;run canon-local on each element of the sequence
-					  (for [s (:seqs s)] (canon-local s)))))
+			(do  	(Seq (vec(flatten;;run canon-local on each element of the sequence
+					  (for [s (:seqs s)] (canon-local s))))))
 		(= :minijava.ir/ExpSeq (type s)) ;;is this right?
-			   (ExpSeq (vec (flatten;;run canon-local on each element of the sequence
-					  (for [s (:seqs s)] (canon-local s)))) (canon-local (:exp s))) 
+			(do  	(ExpSeq (vec (flatten;;run canon-local on each element of the sequence
+					  (for [s (:seqs s)] (canon-local s)))) (canon-local (:exp s))) )
 		(= :minijava.ir/BinaryOp (type s))
 			 (BinaryOp (:op s) (canon-local (:exp1 s))  (canon-local (:exp2 s)))
 		(= :minijava.ir/Conditional (type s))
 			(Conditional (:op s) (canon-local (:exp1 s))  (canon-local (:exp2 s)) (:t s) (:f s))
-		(= :minijava.ir/Call (type s))
+		(= :minijava.ir/Call (type s));;note, if the args of the call are themselves expseqs, they will be caught above by matches-call-arg
 			(Call (canon-local (:lbl s))  (vec (flatten   (for [s (:args s)] (canon-local s)))))
 		(= :minijava.ir/Mem (type s))
 				(Mem (canon-local (:adr s)))
@@ -277,6 +319,10 @@
 				(Jump (canon-local (:lbl s)))
 		(= :minijava.ir/Statement (type s))
 				(Statement (canon-local (:exp s)))
+		(= :minijava.ir/Move (type s))
+			(Move (canon-local (:src s)) (canon-local (:dst s)))
+;;		(coll? s);;s is a collection. As a convenience method, run canon on each element, collect the results and return them
+;;			(vec (flatten(for [s (:seqs s)] (canon-local s)))) ;;probably not needed, since the repeated running of canon-local after each change will find elements in these collections anyhow
 		:else
 			s;;no changes or recursion needed for Consts, NoOps,Temp, Name, etc
 		)]
