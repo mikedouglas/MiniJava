@@ -19,7 +19,7 @@
   (let [s1 (canon-local (:seqs tree ))
         s2 (canon-local (get-in tree [:exp :seqs]))
         e  (canon-local  (get-in tree [:exp :exp]))]
-   		(ExpSeq ( build-args (Seq s1 s2)) e)))
+   		(ExpSeq (build-args (Seq [s1 s2])) e)))
 
 (defn raise-eseq-left-binop
   "(BinaryOp op (ExpSeq stmt expr) e2) -> (ExpSeq stmt (BinaryOp op expr e2))"
@@ -302,17 +302,18 @@
 	;;		(contains-call? s) ;;this wont work with the current approach; have to remove calls in a separate procedure
 	;;				(do (reset! *local-change* true) (reorganize-call s))
 		(= :minijava.ir/Seq (type s))
-			(do  	(Seq (vec(flatten;;run canon-local on each element of the sequence
-					  (for [s (:seqs s)] (canon-local s))))))
+			 	(Seq (build-args;;run canon-local on each element of the sequence
+					  (for [s (:seqs s)]
+								 (canon-local s))))
 		(= :minijava.ir/ExpSeq (type s)) ;;is this right?
-			(do  	(ExpSeq (vec (flatten;;run canon-local on each element of the sequence
-					  (for [s (:seqs s)] (canon-local s)))) (canon-local (:exp s))) )
+			 	(ExpSeq (build-args;;run canon-local on each element of the sequence
+					  (for [s (:seqs s)] (canon-local s))) (canon-local (:exp s)))
 		(= :minijava.ir/BinaryOp (type s))
 			 (BinaryOp (:op s) (canon-local (:exp1 s))  (canon-local (:exp2 s)))
 		(= :minijava.ir/Conditional (type s))
 			(Conditional (:op s) (canon-local (:exp1 s))  (canon-local (:exp2 s)) (:t s) (:f s))
 		(= :minijava.ir/Call (type s));;note, if the args of the call are themselves expseqs, they will be caught above by matches-call-arg
-			(Call (canon-local (:lbl s))  (vec (flatten   (for [s (:args s)] (canon-local s)))))
+			(Call (canon-local (:lbl s))  (build-args  (for [s (:args s)] (canon-local s))))
 		(= :minijava.ir/Mem (type s))
 				(Mem (canon-local (:adr s)))
 		(= :minijava.ir/Jump (type s))
