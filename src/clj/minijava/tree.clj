@@ -10,7 +10,7 @@
 (def *methods* (atom (hash-map)))
 
 (defn addMethod [name method frame]
-	nil;;(reset! *methods* (merge @*methods* [name {:method method :frame frame}]))
+		(reset! *methods* (assoc @*methods* name {:method method :frame frame}))
 )
 
 (defn binop
@@ -134,11 +134,7 @@
 (deftree minijava.ast.MainClass
   [x frame]
  (let [f (new-x86 0 ["obj"] nil)]
-(addMethod "main" (tree (.statement x) f) f ))
-
-;; {"main" (tree (.statement x) (new-x86 0 ["obj"] nil))}
-
-)
+(addMethod "main" (tree (.statement x) f) f )))
 
 (deftree minijava.ast.MethodDecl
   [x frame]
