@@ -10,7 +10,7 @@
 (def *methods* (atom (hash-map)))
 
 (defn addMethod [name method frame]
-		(reset! *methods* (assoc @*methods* name {:method method :frame frame}))
+		(reset! *methods* (assoc @*methods* name {:ir method :frame frame}))
 )
 
 (defn binop

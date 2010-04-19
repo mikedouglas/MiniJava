@@ -231,5 +231,14 @@
           ]  ))))
 
 
-
-
+(deftest test-call-seq
+(tm/reset-num!)
+  (let [p (tm/label)
+				c (tm/label)
+				n (tm/label)
+				prog(Call p [(Call c [(ExpSeq [(Seq [(Const 1)])] (Const 2))])])			]
+   (is (= (canon prog)
+         [(Const 1)
+					(Move (Call c [(Const 2)]) (tm/temp 4))
+					(Call p [(Temp (tm/temp 4))])
+          ]  ))))
