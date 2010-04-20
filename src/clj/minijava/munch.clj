@@ -133,7 +133,7 @@
   nil)
 
 ;; Call
-(defmethod munchMap [:minijava.ir/Call :minijava.ir/Name clojure.lang.IPersistentList]
+(defmethod munchMap [:minijava.ir/Call :minijava.ir/Name clojure.lang.IPersistentVector]
   [x label args]
   ;; munch the arguments into temps.
   (let [formals (map munch args)

@@ -139,7 +139,7 @@
 (deftest test-call
   (tm/reset-num!)
   (let [function (tm/label)
-        args (list (Temp (tm/temp)) (Temp (tm/temp)))]
+        args (vector (Temp (tm/temp)) (Temp (tm/temp)))]
     (is (= (select (Call (Name function) args))
            (list (call function)
                  (movl (tm/temp :eax)(tm/temp 4)))))))
