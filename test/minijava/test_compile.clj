@@ -9,7 +9,7 @@
                  (accept [_ name] (not (nil? (re-find #"java$" name)))))
         files (-> "resources/sample" java.io.File. (.listFiles filter))]
     (doseq [f files]
-    (dorun (compile-program f)))))
+      (is (doall (compile-program f))))))
 
 
 (deftest test-factorial
@@ -34,7 +34,7 @@ class Fac {
 
 }" ]
 
- (dorun (compile-program prog))
+ (doall (compile-program prog))
 
 ))
 
@@ -136,13 +136,8 @@ class LS {
 			j = j + 1 ;
 			k = k - 1 ;
 		}
-		return 0 ;	
+		return 0;
 	}
 
 }"]
-
- (dorun (compile-program prog))
-
-))
-
-
+          (is (doall (compile-program prog)))))

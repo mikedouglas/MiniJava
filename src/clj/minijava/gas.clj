@@ -69,7 +69,7 @@
 (deftype pushl [val]
   clojure.lang.IPersistentMap
   Object
-  (toString [] (str "push " val)))
+  (toString [] (str "pushl " val)))
 
 ;;Compares two integers. It does this by subtracting the first operand
 ;;from the second.  It discards the results, but sets the flags
