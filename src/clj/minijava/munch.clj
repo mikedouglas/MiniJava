@@ -134,18 +134,18 @@
   ;; munch the arguments into temps.
   (let [formals (map munch args)
         ;; where do the temps from these formals end up?  According to
-  	;; the book, we aren't going to use these temps explicitly here
-  	;; (in any emited x86). But register allocation will later
-  	;; determine which ones to put into registers and which to put
-  	;; into the stack, and at that point the appropriate movl code
-  	;; will be inserted here.  however we still have two things
-  	;; that we will have to do (for stage 5 or 6, so not required
-  	;; yet): we need to designate these temps as 'sources' of the
-  	;; call isntruction (the books terminology) so that liveness
-  	;; analysis recognizes these temps as live during the function
-  	;; call, and secondly, we will need to faciliate the connection
-  	;; between these temps and the equivelent temps in the function
-  	;; itself.
+        ;; the book, we aren't going to use these temps explicitly here
+        ;; (in any emited x86). But register allocation will later
+        ;; determine which ones to put into registers and which to put
+        ;; into the stack, and at that point the appropriate movl code
+        ;; will be inserted here.  however we still have two things
+        ;; that we will have to do (for stage 5 or 6, so not required
+        ;; yet): we need to designate these temps as 'sources' of the
+        ;; call isntruction (the books terminology) so that liveness
+        ;; analysis recognizes these temps as live during the function
+        ;; call, and secondly, we will need to faciliate the connection
+        ;; between these temps and the equivelent temps in the function
+        ;; itself.
         ret  (tm/temp)]
     (emit (call (munch label)))
     (emit (movl (tm/temp :eax) ret))
@@ -291,4 +291,7 @@
   [stm dst]
   (emit (jmp (munch dst))))
 
+;; pass strings through
+(defmethod munchMap [java.lang.String]
+  [x] x)
 

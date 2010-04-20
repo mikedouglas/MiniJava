@@ -20,19 +20,18 @@ memory. Returns allocated intervals."
   [intrvls]
   (let [dead    (atom '())
         inuse   (atom #{})
-        active  (atom '())
-        spilled (atom '())]
+        active  (atom '())]
     (doseq [i (sort-by :start intrvls)]
       (swap! active expire i dead inuse)
       (cond
        (:reg i)
          (alloc i (:reg i) active inuse)
        (= @inuse regs)
-         (swap! spilled conj (spill i active))
+         (swap! dead conj (spill i active))
        :else
          (let [reg (first (set/difference regs @inuse))]
            (alloc i reg active inuse))))
-    {:inreg (concat @dead @active), :spilled @spilled}))
+    (concat @dead @active)))
 
 (defn- spill
   "Spill register with longest time left."
@@ -41,32 +40,39 @@ memory. Returns allocated intervals."
     (if (> (:end longest) (:end intrvl))
       (let [intrvl (assoc intrvl :reg (:reg longest))]
         (reset! active (conj (rest @active) intrvl))
-        intrvl)
-      intrvl)))
+        (assoc intrvl :reg :spilled))
+      (assoc intrvl :reg :spilled))))
 
 (defn- pull-temps
   [intrvls]
   (into {} (for [i intrvls] [(:id i) i])))
 
-(defn- replace-temp
+(defn- replace-temps
   "For each key provided, looks up in info and replaces with correct reg."
-  [x info & keys]
+  [info x & keys]
   (apply merge x
          (for [k keys :when (= (type (k x)) :minijava.temp/Temp)]
            [k (get-in info [(k x) :reg])])))
 
+(def replace-strings identity) ;; TODO
+
+(defn output-string
+  "Outputs a string for assembly. ID'd by hashcode."
+  [s] (str (hash s) ":\n.asciz " (pr-str s)))
+
 (defn fill
   "Replace temps in x86 asm with registers. Incomplete."
   [asm]
-  (let [info (-> asm live convert scan :inreg)
-        temps (pull-temps info)]
+  (let [temps (-> asm live convert scan pull-temps)
+        replace-temps (partial replace-temps temps)]
     (for [a asm]
       (case (type a)
-        :minijava.gas/addl (replace-temp a temps :src :dst)
-        :minijava.gas/cmpl (replace-temp a temps :a :b)
-        :minijava.gas/imull (replace-temp a temps :src :dst)
-        :minijava.gas/subl (replace-temp a temps :src :dst)
-        :minijava.gas/movl (replace-temp a temps :src :dst)
+        :minijava.gas/call (replace-strings a)
+        :minijava.gas/addl (replace-temps a [:src :dst])
+        :minijava.gas/cmpl (replace-temps a [:a :b])
+        :minijava.gas/imull (replace-temps a [:src :dst])
+        :minijava.gas/subl (replace-temps a [:src :dst])
+        :minijava.gas/movl (replace-temps a [:src :dst])
         a))))
 
 (defn- expire
