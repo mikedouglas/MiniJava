@@ -139,11 +139,11 @@
 
 (deftree minijava.ast.NewArray
   [x frame]
-  (Call (Name (tm/label "newArray")) [(-> x .size (tree frame) unEx)]))
+  (Call (Name (tm/label "_mj_new_array")) [(-> x .size (tree frame) unEx)]))
 
 (deftree minijava.ast.NewObject
   [x frame]
-  (Call (Name (tm/label "newObject")) [(Name (tm/label (.typeName x)))]))
+  (Call (Name (tm/label "_mj_new_object")) [(Name (tm/label (.typeName x)))]))
 
 (deftree minijava.ast.Not
   [x frame]
@@ -163,7 +163,7 @@
 
 (deftree minijava.ast.Print
   [x frame]
-  (Call (Name (tm/label "print")) [(-> x .exp (tree frame) unEx)]))
+  (Call (Name (tm/label "_mj_println")) [(-> x .exp (tree frame) unEx)]))
 
 (deftree minijava.ast.Program
   [x frame]
