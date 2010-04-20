@@ -38,7 +38,8 @@
       treemap)))
 
 (defn compile-program [program]
-  (let [treemap  (apply-tree (parse program))
-        canonmap (map-method canon treemap)
-        munchmap (map-method select treemap)]
+  (let [treemap   (apply-tree (parse program))
+        canonmap  (map-method canon treemap)
+        blocksmap (map-method basic-blocks canonmap)
+        munchmap  (map-method select blocksmap)]
     munchmap))
