@@ -37,13 +37,14 @@
       treemap)))
 
 (defn compile-program [program]
-  (->> (parse program)
-       apply-tree
+  (let [[prog table] (parse program)]
+    (->> prog
+       (apply-tree table)
        (map-method canon)
        (map-method basic-blocks)
        (map-method #(trace % nil))
        (map-method #(flatten (map select %)))
-       (map-method (comp fill vec))))
+       (map-method (comp fill vec)))))
 
 ;; convert all GAS instructions to strings
 (defn extract-program-text [program]
@@ -61,6 +62,5 @@
     (doseq [pair text]
       (let [name (first pair)
             code (second pair)]
-        (do (println (str name ":"))
-            (doseq [block code]
+        (do (doseq [block code]
               (println block)))))))

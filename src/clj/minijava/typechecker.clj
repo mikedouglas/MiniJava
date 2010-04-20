@@ -2,11 +2,14 @@
   (:import minijava.typechecker.MiniJavaTypeChecker)
   (:use [minijava.ast :only [$]]))
 
+(declare build-table)
+
 (defn parse
   "Parses a MiniJava program, returning a Program. Accepts strings and
 readers."
   [str]
-  (. (MiniJavaTypeChecker/parseAndCheck str) program))
+  (let [info (MiniJavaTypeChecker/parseAndCheck str)]
+    [(.program info) (build-table (.classTable info))]))
 
 (defn types?
   "Returns true if program types correctly."
@@ -22,6 +25,7 @@ readers."
             "class Test2 {"
             meth " }")
        parse
+       first
        .classes
        (.elementAt 0)
        .methods
@@ -49,3 +53,17 @@ readers."
       parse-stm
       second
       .value))
+
+(defn- iterator-to-map
+  [iter]
+  (loop [map {}]
+    (if (.hasNext iter)
+      (let [next (.next iter)]
+        (recur (assoc map (.getKey next)
+                      (count (seq (.getFields (.getValue next)))))))
+      map)))
+
+(defn- build-table
+  "Returns the number of fields of a class."
+  [table]
+  (iterator-to-map (.iterator table)))

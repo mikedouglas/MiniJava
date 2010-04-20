@@ -7,7 +7,8 @@
 (defprotocol Treeable
   (tree [this frame]))
 
-(def *methods* (atom (hash-map)))
+(def *methods* (atom {}))
+(def *field-table* (atom {}))
 
 (defn addMethod [name method frame]
   (reset! *methods* (assoc @*methods* name {:ir method :frame frame})))
@@ -18,7 +19,8 @@
   (BinaryOp op (-> x .e1 (tree frame) unEx)
             (-> x .e2 (tree frame) unEx)))
 
-(defn apply-tree [prog]
+(defn apply-tree [table prog]
+  (reset! *field-table* table)
   (tree prog nil)
   @*methods*)
 
@@ -143,7 +145,8 @@
 
 (deftree minijava.ast.NewObject
   [x frame]
-  (Call (Name (tm/label "_mj_new_object")) [(Name (tm/label (.typeName x)))]))
+  (Call (Name (tm/label "_mj_new_object"))
+        [(Const (get @*field-table* (.typeName x)))]))
 
 (deftree minijava.ast.Not
   [x frame]
