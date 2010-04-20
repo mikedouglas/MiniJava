@@ -45,7 +45,7 @@
 (defn select [irtree]
   (do
     (reset! *instr* '()) ;; reset instr to empty list
-    (if (list? irtree)
+    (if (or (list? irtree) (vector? irtree))
       (doall (map munch irtree)) ;; munch each ir statemnet in this list of ir statements.
       (munch irtree))  ;; just munch this single ir statement
     (reverse  @*instr*)))
@@ -299,7 +299,7 @@
 
 (defmethod munchMap [:minijava.ir/Jump :minijava.temp/Label]
   [stm dst]
-  (emit (jmp (munch dst))))
+  (emit (jmp dst)))
 
 ;; pass strings through
 (defmethod munchMap [java.lang.String]

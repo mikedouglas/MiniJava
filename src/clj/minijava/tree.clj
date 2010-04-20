@@ -98,7 +98,7 @@
           (let [args (map #(. % name) (-> i .formals $ reverse))
 						frame (new-x86 0 (cons "obj" args) obj)
 						name (str (.name x) "_" (.name i))
-					ir (Seq (cons (Label name) (tree i frame)))]
+					ir (Seq (cons (Label (tm/label name)) (tree i frame)))]
 (addMethod name ir frame)
 ))))})
 
