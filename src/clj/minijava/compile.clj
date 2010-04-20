@@ -1,7 +1,9 @@
 (ns minijava.compile
   "Implementation of the canon-localicalization algorithms for IR."
-  (:use   minijava.x86.frame
-        (minijava ir obj tree typechecker utility gas munch liveness canon))
+  (:use minijava.x86.frame
+        clojure.contrib.seq-utils
+        (minijava alloc ir obj tree typechecker utility gas munch
+                  liveness canon))
   (:require [minijava.temp :as tm]))
 
 
@@ -40,4 +42,4 @@
        (map-method canon)
        (map-method basic-blocks)
        (map-method #(trace % nil))
-       (map-method #(map select %))))
+       (map-method #(flatten (map select %)))))

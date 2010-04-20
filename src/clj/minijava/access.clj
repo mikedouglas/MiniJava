@@ -1,6 +1,7 @@
 (ns minijava.access
   "Datatypes for accessing registers and memory addresses."
-  (:use minijava.ir))
+  (:use minijava.ir)
+  (:require [minijava.temp :as tm]))
 
 (defprotocol Access
   (exp [x]))
@@ -10,7 +11,7 @@
 
 (deftype InFrame [offset]
   Access
-  (exp [] (Mem (BinaryOp :+ (Temp :bp) (Const offset)))))
+  (exp [] (Mem (BinaryOp :+ (Temp (tm/temp :bp)) (Const offset)))))
 
 (deftype InReg [temp]
   Access
