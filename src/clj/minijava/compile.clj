@@ -62,5 +62,7 @@
     (doseq [pair text]
       (let [name (first pair)
             code (second pair)]
-        (do (doseq [block code]
-              (println block)))))))
+        (if (= name "main")
+          (println "_mj_main:"))
+        (doseq [block code]
+          (println block))))))
