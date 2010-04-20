@@ -86,7 +86,7 @@
 
 (deftree minijava.ast.Call
   [x frame]
-  (Call (Name (.name x))
+  (Call (Name (tm/label (.name x)))
         (map (comp unEx #(tree % frame))
              (cons (.receiver x) ($ (.rands x))))))
 
@@ -147,11 +147,11 @@
 
 (deftree minijava.ast.NewArray
   [x frame]
-  (Call (Name "newArray") [(-> x .size (tree frame) unEx)]))
+  (Call (Name (tm/label "newArray")) [(-> x .size (tree frame) unEx)]))
 
 (deftree minijava.ast.NewObject
   [x frame]
-  (Call (Name "newObject") [(.typeName x)]))
+  (Call (Name (tm/label "newObject")) [(.typeName x)]))
 
 (deftree minijava.ast.Not
   [x frame]
@@ -171,7 +171,7 @@
 
 (deftree minijava.ast.Print
   [x frame]
-  (Call (Name "print") [(-> x .exp (tree frame) unEx)]))
+  (Call (Name (tm/label "print")) [(-> x .exp (tree frame) unEx)]))
 
 (deftree minijava.ast.Program
   [x frame]
