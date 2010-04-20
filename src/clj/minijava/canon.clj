@@ -227,7 +227,7 @@
 (defn wrap-if-needed[s]
  (if  (= :minijava.ir/Call (type s))
 			;;wrap the call
-			(let [t (tm/temp)] (ExpSeq [(Move (wrap-calls s) t)] (Temp t)));;wrap the call, and also recurse on it
+			(let [t (tm/temp)] (ExpSeq [(Move (wrap-calls s) (Temp t))] (Temp t)));;wrap the call, and also recurse on it
 			;;else
 			(wrap-calls s);;recurse on s
 ))
