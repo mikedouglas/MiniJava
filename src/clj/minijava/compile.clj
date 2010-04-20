@@ -41,5 +41,6 @@
   (let [treemap   (apply-tree (parse program))
         canonmap  (map-method canon treemap)
         blocksmap (map-method basic-blocks canonmap)
-        munchmap  (map-method select blocksmap)]
+        munchmap  (map-method (fn [blocks] (map select blocks)) 
+                              blocksmap)]
     munchmap))
