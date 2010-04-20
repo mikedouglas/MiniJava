@@ -61,6 +61,6 @@
     (doseq [pair text]
       (let [name (first pair)
             code (second pair)]
-        (do (println name)
+        (do (println (str name ":"))
             (doseq [block code]
               (println block)))))))

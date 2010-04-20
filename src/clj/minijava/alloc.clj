@@ -74,6 +74,7 @@ memory. Returns allocated intervals."
          :minijava.gas/imull (replace-temps a [:src :dst])
          :minijava.gas/subl (replace-temps a [:src :dst])
          :minijava.gas/movl (replace-temps a [:src :dst])
+         :minijava.gas/pushl (replace-temps a [:val])
          a)))))
 
 (defn- expire
