@@ -63,6 +63,6 @@
       (let [name (first pair)
             code (second pair)]
         (if (= name "main")
-          (println "_mj_main:"))
+          (println "mj_main:"))
         (doseq [block code]
           (println block))))))
