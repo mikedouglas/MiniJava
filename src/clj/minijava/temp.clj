@@ -14,10 +14,24 @@
   ([] (Temp (swap! *num* inc)))
   ([id] (Temp id)))
 
+(comment
 ;; LABELS
 (deftype Label [id]
   Object
   (toString [] (str id)))
+)
+(defn digit? [x]
+	(Character/isDigit (.charAt (str x) 0))
+)
+
+;; LABELS
+(deftype Label [id]
+  Object
+  (toString [] 
+(if (digit? id)
+(str "lbl" id)
+id
+)))
 
 (defn label
   ([] (Label (swap! *num* inc)))

@@ -30,7 +30,7 @@
 (deftype LABEL [lbl]
   clojure.lang.IPersistentMap
   Object
-  (toString [] (str "lbl_" lbl ":")))
+  (toString [] (str lbl ":")))
 
 ;;movl %eax, %ebx copies the contents of %eax to %ebx
 (deftype movl [src dst]
@@ -64,7 +64,7 @@
 (deftype call [dst]
   clojure.lang.IPersistentMap
   Object
-  (toString [] (str (if (number? dst) "call lbl_" "call ") dst)))
+  (toString [] (str "call " dst)))
 
 ;;An unconditional jump. This simply sets %eip to the destination
 ;;address.
