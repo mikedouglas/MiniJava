@@ -1,6 +1,7 @@
 =(ns minijava.munch
   (:use (minijava exp ir gas))
-  (:require [minijava.temp :as tm]))
+  (:require [minijava.temp :as tm])
+  (:import clojure.lang.Keyword))
 
 
 ;; helper method to do instanceof
@@ -46,7 +47,8 @@
   (do
     (reset! *instr* '()) ;; reset instr to empty list
     (if (or (list? irtree) (vector? irtree))
-      (doall (map munch irtree)) ;; munch each ir statemnet in this list of ir statements.
+      ;; munch each ir statemnet in this list of ir statements.
+      (doall (map munch irtree))
       (munch irtree))  ;; just munch this single ir statement
     (reverse  @*instr*)))
 
@@ -56,7 +58,8 @@
 ;; defined for a Move and any combination of its arguments, all the way
 ;; up to Move (Expression Expression)
 
-(defmethod munchMap [:minijava.ir/Move :minijava.exp/expression :minijava.ir/Mem]
+(defmethod munchMap
+  [:minijava.ir/Move :minijava.exp/expression :minijava.ir/Mem]
   [x src dst]
   (cond
    ;; Move(e2 Mem(Binop(Plus(Const(i),e1))) -> movl e2  $i[e1]
@@ -75,7 +78,7 @@
            e2 (munch src) ]
        (emit  (movl  e2 (MEMORY e1 offset))))
        ;; AFTER munching these two statements, emit the code.
-       ;; Move(Mem(e1),e2) -> movl e2 [e1] 
+       ;; Move(Mem(e1),e2) -> movl e2 [e1]
 
    :else
      (let [adr (munch (:adr dst))
@@ -83,7 +86,8 @@
        (emit (movl e2 (MEMORY adr 0))))))
 
 ;; Default Move pattern: just use Movl
-(defmethod munchMap [:minijava.ir/Move :minijava.exp/expression :minijava.exp/expression]
+(defmethod munchMap
+  [:minijava.ir/Move :minijava.exp/expression :minijava.exp/expression]
   [x src dst]
   ;; Move(e1,e2) -> Movl e1 e2
   (let [s (munch src)
@@ -170,7 +174,7 @@
 
 ;; Constant operands can be compiled out into a CONST
 (defmethod munchMap
-  [:minijava.ir/BinaryOp clojure.lang.Keyword :minijava.ir/Const :minijava.ir/Const]
+  [:minijava.ir/BinaryOp Keyword :minijava.ir/Const :minijava.ir/Const]
   [exp op rand1 rand2]
   (case op
     :+  (emit (CONST (+ (:val rand1) (:val rand2))))
@@ -179,7 +183,7 @@
 
 ;; Subtraction
 (defmethod munchMap
-  [:minijava.ir/BinaryOp clojure.lang.Keyword :minijava.ir/Const :minijava.exp/expression]
+  [:minijava.ir/BinaryOp Keyword :minijava.ir/Const :minijava.exp/expression]
   ;; first exp - second exp
   [exp op rand1 rand2]
   (let [cmd (getCmd op)

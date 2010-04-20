@@ -5,7 +5,7 @@
 
 (defstruct env :temps :mem :labels :methods)
 
-(def empty-env 
+(def empty-env
   (atom (struct env {} {} {} {})))
 
 (defn write-temp [env key val]
@@ -25,18 +25,18 @@
 
 (defn read-method [env name]
   (get-in @env [:methods name]))
- 
+
 ;; eval-ir evaluates the linearized IR tree. Only types that
 ;; appear in the final tree have cases in the multimethod.
 ;; e.g. ESeq and Seq are gone after linearization
- 
+
 ;; dispatch on type of first arg
 (defmulti eval-ir (fn [x y] (type x)))
- 
+
 ;; this gets called if the program jumps to the very end
 (defmethod eval-ir clojure.lang.PersistentList$EmptyList [lst env]
   nil)
- 
+
 ;; use lookahead to see if we jump or evaluate normally
 (defmethod eval-ir clojure.lang.ISeq [lst env]
   (cond (or (= (type (first lst)) :minijava.ir/Jump)
@@ -47,7 +47,7 @@
         :else
           (do (eval-ir (first lst) env)
               (eval-ir (rest lst) env))))
- 
+
 (defmethod eval-ir :minijava.ir/BinaryOp [exp env]
   (let [e1 (eval-ir (:exp1 exp) env)
         e2 (eval-ir (:exp2 exp) env)]
@@ -55,10 +55,10 @@
           :+ (+ e1 e2)
           :- (- e1 e2)
           :* (* e1 e2))))
- 
+
 (defmethod eval-ir :minijava.ir/Const [exp env]
   (:val exp))
- 
+
 (defmethod eval-ir :minijava.ir/Conditional [exp env]
   (let [e1 (eval-ir (:exp1 exp) env)
         e2 (eval-ir (:exp2 exp) env)
@@ -74,7 +74,7 @@
           := (if (= e1 e2)
                 (eval-ir lt env)
                 (eval-ir lf env)))))
- 
+
 ; Canonicalization removes eseqs and also seqs
 ;
 ;(defmethod eval-ir ::minijava.ir/ExpSeq [exp]
@@ -83,7 +83,7 @@
 ; (...)))
 ;
 ;(defmethod eval-ir ::minijava.ir/Seq [exp])
- 
+
 (defmethod eval-ir :minijava.ir/Move [exp env]
   (let [val (eval-ir (:src exp) env)
         dst (:dst exp)]
@@ -91,10 +91,10 @@
           (write-temp env (:reg dst) val)
           (= (type dst) :minijava.ir/Mem)
           (write-mem env (:adr dst) val))))
- 
+
 (defmethod eval-ir :minijava.ir/Jump [exp env]
   (eval-ir (read-label env (:lbl exp)) env))
- 
+
 ;; Labels and names don't do anything after the label
 ;; table is built. These should never be called since
 ;; eval-ir unpacks these directly.
@@ -102,7 +102,7 @@
   nil)
 (defmethod eval-ir :minijava.ir/Name [exp env]
   nil)
- 
+
 ;; Mem does need to eval in case an operation is hiding
 ;; in the address expression
 (defmethod eval-ir :minijava.ir/Mem [exp env]
@@ -125,12 +125,12 @@
       "newObject" (println "Unimplemented stub")
       "newArray" []
       (eval-ir (read-method env fn-name) env))))
- 
+
 (defmethod eval-ir :minijava.ir/Statement [exp env]
   (do
     (eval-ir (:exp exp) env)
     nil)) ;; ensure no value returned
- 
+
 ;; Build map of label code - should be efficient by persistence
 ;; of list data structure
 (defn build-label-map [stms map]
@@ -141,7 +141,7 @@
         true (recur (rest stms) map)))
 
 ;; top-level eval for a sequence of statements
-(defn eval-prog 
+(defn eval-prog
   ([stms] (eval-prog stms (hash-map)))
   ([stms methods]
     (let [labels (build-label-map stms (hash-map))]
