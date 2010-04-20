@@ -158,7 +158,8 @@
     (doseq [f (reverse formals)]
       (emit (pushl f)))
     (emit (call (munch label)))
-    (emit (movl (tm/temp :eax) ret))
+    (emit (movl (tm/temp :EAX) ret))
+    (emit (addl (CONST (* (count formals) 4)) (tm/temp :ESP)))
     ;; want to return the return value as a temp from this function.
     ;; liveness analysis will probably remove this movl instruction
     ;; later, but for now, thats what we'll do.  this depends upon the
