@@ -10,8 +10,7 @@
 (def *methods* (atom (hash-map)))
 
 (defn addMethod [name method frame]
-  (reset! *methods* (assoc @*methods* name {:ir method :frame frame}))
-)
+  (reset! *methods* (assoc @*methods* name {:ir method :frame frame})))
 
 (defn binop
   "Quick BinaryOp for objects with e1 and e2 fields."
@@ -21,15 +20,13 @@
 
 (defn apply-tree [prog]
   (tree prog nil)
-  @*methods*	
-)
+  @*methods*)
 
 (defn tree-prog
   "Walks through a program, applying tree."
   [seq]
   (let [frame (new-x86 0 [] nil)]
-    (for [s seq] (tree s frame)))
-)
+    (for [s seq] (tree s frame))))
 
 (defmacro deftree [type [obj frame] & body]
   `(extend-class ~type
@@ -99,8 +96,7 @@
                 frame (new-x86 0 (cons "obj" args) obj)
                 name (str (.name x) "_" (.name i))
                 ir (Seq (cons (Label name) (tree i frame)))]
-(addMethod name ir frame)
-))))})
+            (addMethod name ir frame)))))})
 
 
 
