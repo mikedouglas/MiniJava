@@ -114,17 +114,17 @@
 (cond
 ;;Conditional keywords in use in minijava:  :!= :< :>  :&& := :==
 	(= cc :!=)
-		 (str "Jne" dst)
+		 (str "Jne " dst)
 	(or (= cc :=) (= cc :==))
-		 (str "Je" dst)
+		 (str "Je " dst)
 	(= cc :<)
- 		 (str "Jl" dst)
+ 		 (str "Jl " dst)
 	(or (= cc :<=)(= cc :=<))
- 		 (str "Jle" dst)
+ 		 (str "Jle " dst)
 	(= cc :>)
- 		 (str "Jg" dst)
+ 		 (str "Jg " dst)
 	(or (= cc :>=) (= cc :=>))
- 		 (str "Jz" dst) ;;zero flag is set if testl is true.
+ 		 (str "Jz " dst) ;;zero flag is set if testl is true.
 ))) ;; TODO: properly consider cc in toString
 
 ;;Pops a value off of the stack and then sets %eip to that value. Used
