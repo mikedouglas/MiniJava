@@ -23,7 +23,7 @@
 (deftype MEMORY [adr offset?]
   clojure.lang.IPersistentMap
   Object
-  (toString [] (str offset? "(" adr ")")))
+  (toString [] (str offset? "(" (p adr) ")")))
 
 ;;this is NOT an x86 instruction - it is just a marker that this
 ;;position is the destination of a label
@@ -126,11 +126,11 @@
 	(or (= cc :=) (= cc :==))
 		 (str "Je " dst)
 	(= cc :<)
- 		 (str "Jl " dst)
-	(or (= cc :<=)(= cc :=<))
- 		 (str "Jle " dst)
-	(= cc :>)
  		 (str "Jg " dst)
+	(or (= cc :<=)(= cc :=<))
+ 		 (str "Jge " dst)
+	(= cc :>)
+ 		 (str "Jl " dst)
 	(or (= cc :>=) (= cc :=>))
  		 (str "Jz " dst) ;;zero flag is set if testl is true.
 ))) ;; TODO: properly consider cc in toString

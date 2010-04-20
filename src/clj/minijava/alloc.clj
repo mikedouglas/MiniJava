@@ -51,8 +51,13 @@ memory. Returns allocated intervals."
   "For each key provided, looks up in info and replaces with correct reg."
   [info x keys]
   (apply merge x
-         (for [k keys :when (= (type (k x)) :minijava.temp/Temp)]
-           [k (get-in info [(k x) :reg])])))
+         (for [k keys]
+           (cond
+            (= (type (k x)) :minijava.temp/Temp)
+              [k (get-in info [(k x) :reg])]
+            (and (= (type (k x)) :minijava.gas/MEMORY)
+                 (= (type (:adr (k x))) :minijava.temp/Temp))
+              [k (MEMORY (get-in info [(:adr (k x)) :reg]) (:offset (k x)))]))))
 
 (def replace-strings identity) ;; TODO
 

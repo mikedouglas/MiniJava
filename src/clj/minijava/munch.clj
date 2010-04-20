@@ -103,7 +103,7 @@
   ;; Mem(addr) -> Movl [adr] Temp
   (let [d  (tm/temp)
         s (munch adr)]
-    (emit (movl s d))
+    (emit (movl (MEMORY s 0) d))
     d)) ;; Since Mem is an expression, it returns a temp.
 
 (defmethod munchMap [:minijava.ir/Temp :minijava.temp/Temp]
