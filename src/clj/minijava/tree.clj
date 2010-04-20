@@ -151,7 +151,7 @@
 
 (deftree minijava.ast.NewObject
   [x frame]
-  (Call (Name (tm/label "newObject")) [(.typeName x)]))
+  (Call (Name (tm/label "newObject")) [(Name (tm/label (.typeName x)))]))
 
 (deftree minijava.ast.Not
   [x frame]
