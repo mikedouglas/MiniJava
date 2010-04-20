@@ -76,7 +76,7 @@
 ;;   (let [frame (new-x86 0 ["obj" "a"] (new-obj [])
 ;;         call  (tree (parse-exp "a.test(3)") frame)]
 ;;     (is (= (Call (Name "test")
-;;                  [(Mem (BinaryOp :+ (Temp :bp) (Const 12)))
+;;                  [(Mem (BinaryOp :+ (Temp :ebp) (Const 12)))
 ;;                   (Const 3)])
 ;;            call)
 ;;         "Method calls convert correctly.")))

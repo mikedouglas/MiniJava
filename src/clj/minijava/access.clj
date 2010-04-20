@@ -11,7 +11,7 @@
 
 (deftype InFrame [offset]
   Access
-  (exp [] (Mem (BinaryOp :+ (Temp (tm/temp :bp)) (Const offset)))))
+  (exp [] (Mem (BinaryOp :+ (Temp (tm/temp :EBP)) (Const offset)))))
 
 (deftype InReg [temp]
   Access

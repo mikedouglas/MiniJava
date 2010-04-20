@@ -246,7 +246,8 @@
    :minijava.exp/expression :minijava.ir/Name :minijava.ir/Name]
   [exp op rand1 rand2 then else]
   (let [t2 (munch rand2)]
-    (emit (cmpl (CONST (:val rand1)) t2))
+		(if (= op :&&)    (emit (testl (CONST (:val rand1)) t2))
+		    (emit (cmpl (CONST (:val rand1)) t2)))
     (emit (jcc op (munch then)))
     (emit (jmp (munch else)))))
 
@@ -267,8 +268,10 @@
                 :<= :=>
                 :>= :<=
                 := :=
-                :!= :!=)]
-    (emit (cmpl (CONST (:val rand2)) t1))
+                :!= :!=
+								:&&	:&&)]
+		(if (= op :&&)    (emit (testl (CONST (:val rand2)) t1))
+				 (emit (cmpl (CONST (:val rand2)) t1)) )
     (emit (jcc negop (munch then)))
     (emit (jmp (munch else)))))
 
@@ -286,7 +289,8 @@
               :>= (if (>= v1 v2) then else)
               :<= (if (<= v1 v2) then else)
               := (if (= v1 v2) then else)
-              :!= (if (not (= v1 v2)) then else))]
+              :!= (if (not (= v1 v2)) then else)
+							:&& (if (and v1 v2) then else))]
     (emit (jmp (munch dst)))))
 
 ;; Statement
@@ -299,11 +303,19 @@
 
 (defmethod munchMap [:minijava.ir/Jump :minijava.ir/Name]
   [stm dst]
-  (emit (jmp (munch dst))))
+	(if (= (:id (:lbl dst)) :done )
+				;;special case: this is actual a return statement.
+	(emit (ret)) ;;GAS ret code.
+;else
+  (emit (jmp (munch dst)))))
 
 (defmethod munchMap [:minijava.ir/Jump :minijava.temp/Label]
   [stm dst]
-  (emit (jmp dst)))
+	(if (= (:id dst) :done) 
+				;;special case: this is actual a return statement.
+	(emit (ret)) ;;GAS ret code.
+		;;else
+  (emit (jmp dst))))
 
 ;; pass strings through
 (defmethod munchMap [java.lang.String]

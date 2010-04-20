@@ -381,7 +381,7 @@
               (isit? x :minijava.ir/Conditional))
         (list (concat nx match))
         (list (concat (concat nx match)
-                      (list (Jump (Name (tm/label "done"))))))))))
+                      (list (Jump (Name (tm/label :done)))))))))) ;;:done is a special keyword that will be handled specially by munch.
 
 ;; TRACING
 
