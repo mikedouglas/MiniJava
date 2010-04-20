@@ -296,6 +296,10 @@
   [stm dst]
   (emit (jmp (munch dst))))
 
+(defmethod munchMap [:minijava.ir/Jump :minijava.temp/Label]
+  [stm dst]
+  (emit (jmp (munch dst))))
+
 ;; pass strings through
 (defmethod munchMap [java.lang.String]
   [x] x)
