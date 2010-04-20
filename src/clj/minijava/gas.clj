@@ -64,7 +64,7 @@
 (deftype call [dst]
   clojure.lang.IPersistentMap
   Object
-  (toString [] (str (if (number? dst) "call lbl_" "call ") dst)))
+  (toString [] (str "call " dst)))
 
 ;;An unconditional jump. This simply sets %eip to the destination
 ;;address.
