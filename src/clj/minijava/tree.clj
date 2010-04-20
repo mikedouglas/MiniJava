@@ -98,10 +98,6 @@
                 ir (Seq (cons (Label name) (tree i frame)))]
             (addMethod name ir frame)))))})
 
-
-
-
-
 (deftree minijava.ast.IdentifierExp
   [x frame]
   (exp (lookup frame (.name x))))
