@@ -303,11 +303,19 @@
 
 (defmethod munchMap [:minijava.ir/Jump :minijava.ir/Name]
   [stm dst]
-  (emit (jmp (munch dst))))
+	(if (= (:id (:lbl dst)) :done )
+				;;special case: this is actual a return statement.
+	(emit (ret)) ;;GAS ret code.
+;else
+  (emit (jmp (munch dst)))))
 
 (defmethod munchMap [:minijava.ir/Jump :minijava.temp/Label]
   [stm dst]
-  (emit (jmp dst)))
+	(if (= (:id dst) :done) 
+				;;special case: this is actual a return statement.
+	(emit (ret)) ;;GAS ret code.
+		;;else
+  (emit (jmp dst))))
 
 ;; pass strings through
 (defmethod munchMap [java.lang.String]
