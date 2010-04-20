@@ -49,7 +49,7 @@ memory. Returns allocated intervals."
 
 (defn- replace-temps
   "For each key provided, looks up in info and replaces with correct reg."
-  [info x & keys]
+  [info x keys]
   (apply merge x
          (for [k keys :when (= (type (k x)) :minijava.temp/Temp)]
            [k (get-in info [(k x) :reg])])))
@@ -65,15 +65,16 @@ memory. Returns allocated intervals."
   [asm]
   (let [temps (-> asm live convert scan pull-temps)
         replace-temps (partial replace-temps temps)]
-    (for [a asm]
-      (case (type a)
-        :minijava.gas/call (replace-strings a)
-        :minijava.gas/addl (replace-temps a [:src :dst])
-        :minijava.gas/cmpl (replace-temps a [:a :b])
-        :minijava.gas/imull (replace-temps a [:src :dst])
-        :minijava.gas/subl (replace-temps a [:src :dst])
-        :minijava.gas/movl (replace-temps a [:src :dst])
-        a))))
+    (remove #(and (= (type %) :minijava.gas/movl) (= (:dst %) (:src %)))
+     (for [a asm]
+       (case (type a)
+         :minijava.gas/call (replace-strings a)
+         :minijava.gas/addl (replace-temps a [:src :dst])
+         :minijava.gas/cmpl (replace-temps a [:a :b])
+         :minijava.gas/imull (replace-temps a [:src :dst])
+         :minijava.gas/subl (replace-temps a [:src :dst])
+         :minijava.gas/movl (replace-temps a [:src :dst])
+         a)))))
 
 (defn- expire
   "Expire registers that've been freed from intrvl and intrvl - 1."
