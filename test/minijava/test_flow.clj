@@ -9,6 +9,7 @@
         a (tm/temp)
         b (tm/temp)
         other (tm/label)
+        done (tm/label "done")
         prog (vector
               (LABEL other)
               (cmpl a b)
@@ -20,7 +21,7 @@
     (is (= (lookup-lbl prog)
            (do
              (tm/reset-num!)
-             {f 6, t 4, other 0})))))
+             {f 6, t 4, other 0, done 7})))))
 
 (deftest test-flow
   (tm/reset-num!)

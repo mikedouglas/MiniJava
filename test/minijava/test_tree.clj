@@ -46,7 +46,7 @@
                f (tm/label)
                d (tm/label)]
            (Seq [(Conditional :!= (Const 1)
-                              0 (Name t) (Name f))
+                              (Const 0) (Name t) (Name f))
                  (Label t)
                  (Seq [])
                  (Jump d)
@@ -83,14 +83,14 @@
 
 (deftest tests-special-call
   (let [val (parse-stm "System.out.println(3);")
-        res (Call (Name "print") [(Const 3)])]
+        res (Call (Name (tm/label "print")) [(Const 3)])]
     (is (= res (last (tree-prog val))))))
 
 (deftest tests-new-array
   (tm/reset-num!)
   (let [val (parse-stm "int[] a; a = new int[5];")
         res (list (NoOp)
-                  (Move (Call (Name "newArray") [(Const 5)])
+                  (Move (Call (Name (tm/label "newArray")) [(Const 5)])
                         (Temp (tm/temp))))]
     (tm/reset-num!)
     (is (= res (tree-prog val)))))
