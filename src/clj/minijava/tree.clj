@@ -96,7 +96,7 @@
      (into {} (for [i ($ (.methods x))]
           (let [args (map #(. % name) (-> i .formals $ reverse))
                 frame (new-x86 0 (cons "obj" args) obj)
-                name (.name i) 
+                name (str (.name i))
                 ir (Seq (cons (Label (tm/label name)) (tree i frame)))]
             (addMethod name ir frame)))))})
 
@@ -141,11 +141,11 @@
 
 (deftree minijava.ast.NewArray
   [x frame]
-  (Call (Name (tm/label "_mj_new_array")) [(-> x .size (tree frame) unEx)]))
+  (Call (Name (tm/label "mj_new_array")) [(-> x .size (tree frame) unEx)]))
 
 (deftree minijava.ast.NewObject
   [x frame]
-  (Call (Name (tm/label "_mj_new_object"))
+  (Call (Name (tm/label "mj_new_object"))
         [(Const (get @*field-table* (.typeName x)))]))
 
 (deftree minijava.ast.Not
@@ -166,7 +166,7 @@
 
 (deftree minijava.ast.Print
   [x frame]
-  (Call (Name (tm/label "_mj_println")) [(-> x .exp (tree frame) unEx)]))
+  (Call (Name (tm/label "mj_println")) [(-> x .exp (tree frame) unEx)]))
 
 (deftree minijava.ast.Program
   [x frame]
