@@ -151,6 +151,8 @@
         ;; between these temps and the equivelent temps in the function
         ;; itself.
         ret  (tm/temp)]
+    (doseq [f (reverse formals)]
+      (emit (pushl f)))
     (emit (call (munch label)))
     (emit (movl (tm/temp :eax) ret))
     ;; want to return the return value as a temp from this function.

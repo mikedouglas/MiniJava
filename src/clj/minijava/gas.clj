@@ -66,6 +66,11 @@
   Object
   (toString [] (str "jmp " dst)))
 
+(deftype pushl [val]
+  clojure.lang.IPersistentMap
+  Object
+  (toString [] (str "push " val)))
+
 ;;Compares two integers. It does this by subtracting the first operand
 ;;from the second.  It discards the results, but sets the flags
 ;;accordingly. Usually used before a conditional jump.
