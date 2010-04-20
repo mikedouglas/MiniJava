@@ -1,6 +1,7 @@
 (ns minijava.test-compile
   (:use clojure.test
         clojure.contrib.def
+        clojure.contrib.pprint
         (minijava compile)))
 
 (comment
@@ -9,11 +10,7 @@
                  (accept [_ name] (not (nil? (re-find #"java$" name)))))
         files (-> "resources/sample" java.io.File. (.listFiles filter))]
     (doseq [f files]
-   (println (compile-program f)))))
-
-)
-
-
+      (pprint (compile-program f))))))
 
 (deftest test-factorial
 	(let [prog 
@@ -37,6 +34,6 @@ class Fac {
 
 }" ]
 
- (println (compile-program prog))
+ (pprint (compile-program prog))
 
 ))

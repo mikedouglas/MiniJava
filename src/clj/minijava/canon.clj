@@ -389,7 +389,7 @@
               (isit? x :minijava.ir/Jump)
               (isit? x :minijava.ir/Conditional))
         (list (concat nx match))
-        (list (concat (concat nx match) (list (Jump (Name (Label "done"))))))))))
+        (list (concat (concat nx match) (list (Jump (Name (tm/label "done"))))))))))
 
 ;; TRACING
 
