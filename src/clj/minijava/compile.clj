@@ -41,10 +41,12 @@
     (->> prog
        (apply-tree table)
        (map-method canon)
+			 (map-method (fn [x] (flatten (vector x))))
        (map-method basic-blocks)
        (map-method #(trace % nil))
        (map-method #(flatten (map select %)))
-       (map-method (comp fill vec)))))
+       (map-method (comp fill vec))
+)))
 
 ;; convert all GAS instructions to strings
 (defn extract-program-text [program]
@@ -63,6 +65,8 @@
       (let [name (first pair)
             code (second pair)]
         (if (= name "main")
-          (println "mj_main:"))
+          (println ".globl mj_main
+	.type	mj_main, @function
+mj_main:"))
         (doseq [block code]
           (println block))))))
