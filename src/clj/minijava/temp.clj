@@ -15,7 +15,9 @@
   ([id] (Temp id)))
 
 ;; LABELS
-(deftype Label [id])
+(deftype Label [id]
+  Object
+  (toString [] (str id)))
 
 (defn label
   ([] (Label (swap! *num* inc)))
