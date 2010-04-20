@@ -1,5 +1,5 @@
 =(ns minijava.munch
-  (:use (minijava exp ir gas))
+  (:use (minijava exp ir gas alloc))
   (:require [minijava.temp :as tm])
   (:import clojure.lang.Keyword))
 
@@ -155,10 +155,16 @@
         ;; between these temps and the equivelent temps in the function
         ;; itself.
         ret  (tm/temp)]
+    ;; don't save EAX since it's a return register
+    (doseq [r (disj regs :EAX)]
+      (emit (pushl r)))
     (doseq [f (reverse formals)]
       (emit (pushl f)))
     (emit (call (munch label)))
     (emit (movl (tm/temp :EAX) ret))
+    ;; pop these registers
+    (doseq [r (disj regs :EAX)]
+      (emit (popl r)))
     (emit (addl (CONST (* (count formals) 4)) (tm/temp :ESP)))
     ;; want to return the return value as a temp from this function.
     ;; liveness analysis will probably remove this movl instruction
