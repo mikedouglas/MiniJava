@@ -65,7 +65,7 @@
      (let [offset (:val (:exp1 (:adr dst)))
            e1 (munch (:exp2 (:adr dst)))
            e2 (munch src) ]
-       (emit (movl (MEMORY e1 offset) e2)))
+       (emit (movl  e2 (MEMORY e1 offset))))
        ;; AFTER munching these two statements, emit the code.
        ;; Move(Mem(Binop(Plus(e1, Const(i))),e2) -> movl $i[e1] e2
    (and (isit? (:adr dst) :minijava.ir/BinaryOp) (= (:op (:adr dst)) :+)
@@ -73,14 +73,14 @@
      (let [offset (:val (:exp2 (:adr dst)))
            e1 (munch (:exp1 (:adr dst)))
            e2 (munch src) ]
-       (emit (movl (MEMORY e1 offset) e2)))
+       (emit  e2 (movl (MEMORY e1 offset))))
        ;; AFTER munching these two statements, emit the code.
        ;; Move(Mem(e1),e2) -> movl [e1] e2
 
    :else
-     (let [adr (munch (:adr src))
-           e2 (munch dst) ]
-       (emit (movl (MEMORY adr) e2)))))
+     (let [adr (munch (:adr dst))
+           e2 (munch src) ]
+       (emit (movl e2 (MEMORY adr 0))))))
 
 ;; Default Move pattern: just use Movl
 (defmethod munchMap [:minijava.ir/Move :minijava.exp/expression :minijava.exp/expression]
