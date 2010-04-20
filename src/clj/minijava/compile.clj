@@ -44,3 +44,23 @@
        (map-method #(trace % nil))
        (map-method #(flatten (map select %)))
        (map-method (comp fill vec))))
+
+;; convert all GAS instructions to strings
+(defn extract-program-text [program]
+  (into {}
+    (map (fn [pair]
+           (let [methodName (first pair)
+                 val        (second pair)
+                 data       (:ir val)]
+             [methodName, (doall (map str data))]))
+         program)))
+
+;; print each methods instructions out with newlines
+(defn print-program-text [program]
+  (let [text (extract-program-text program)]
+    (doseq [pair text]
+      (let [name (first pair)
+            code (second pair)]
+        (do (println name)
+            (doseq [block code]
+              (println block)))))))
