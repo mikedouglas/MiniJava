@@ -4,7 +4,7 @@
 
 
 ;; helper method to do instanceof
-(defn isit? [x t]
+(defn- isit? [x t]
   (= (type x) t))
 
 (def *instr* (atom '()))

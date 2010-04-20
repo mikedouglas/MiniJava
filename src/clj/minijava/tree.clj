@@ -7,17 +7,29 @@
 (defprotocol Treeable
   (tree [this frame]))
 
+(def *methods* (atom (hash-map)))
+
+(defn addMethod [name method frame]
+		(reset! *methods* (assoc @*methods* name {:ir method :frame frame}))
+)
+
 (defn binop
   "Quick BinaryOp for objects with e1 and e2 fields."
   [op x frame]
   (BinaryOp op (-> x .e1 (tree frame) unEx)
             (-> x .e2 (tree frame) unEx)))
 
+(defn apply-tree [prog]
+	(tree prog nil)
+		@*methods*	
+)
+
 (defn tree-prog
   "Walks through a program, applying tree."
   [seq]
   (let [frame (new-x86 0 [] nil)]
-    (for [s seq] (tree s frame))))
+    (for [s seq] (tree s frame)))
+)
 
 (defmacro deftree [type [obj frame] & body]
   `(extend-class ~type
@@ -80,13 +92,19 @@
 
 (deftree minijava.ast.ClassDecl
   [x frame]
-  {(.name x)
+ {(.name x)
    (let [obj (new-obj (for [v ($ (.vars x))] (.name v)))]
      (into {} (for [i ($ (.methods x))]
-                (let [args  (map #(. % name) (-> i .formals $ reverse))
-                      frame (new-x86 0 (cons "obj" args) obj)
-                      name  (str (.name x) "_" (.name i))]
-                  [name (Seq (cons (Label name) (tree i frame)))]))))})
+          (let [args (map #(. % name) (-> i .formals $ reverse))
+						frame (new-x86 0 (cons "obj" args) obj)
+						name (str (.name x) "_" (.name i))
+					ir (Seq (cons (Label name) (tree i frame)))]
+(addMethod name ir frame)
+))))})
+
+
+
+
 
 (deftree minijava.ast.IdentifierExp
   [x frame]
@@ -115,7 +133,8 @@
 
 (deftree minijava.ast.MainClass
   [x frame]
-  {"main" (tree (.statement x) (new-x86 0 ["obj"] nil))})
+ (let [f (new-x86 0 ["obj"] nil)]
+(addMethod "main" (tree (.statement x) f) f )))
 
 (deftree minijava.ast.MethodDecl
   [x frame]
