@@ -23,7 +23,7 @@
 (deftype MEMORY [adr offset?]
   clojure.lang.IPersistentMap
   Object
-  (toString [] (str offset? "(" adr ")")))
+  (toString [] (str offset? "(" (p adr) ")")))
 
 ;;this is NOT an x86 instruction - it is just a marker that this
 ;;position is the destination of a label
