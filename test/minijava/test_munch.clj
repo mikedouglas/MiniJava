@@ -2,7 +2,6 @@
   (:use (minijava gas ir munch) clojure.test)
   (:require [minijava.temp :as tm]))
       
-
 (deftest test-Plus
   (tm/reset-num!)
   (let [tree (BinaryOp :+ (Const 2) (Const 1))]				
@@ -168,3 +167,15 @@
             (LABEL t)
             (jmp other)
             (LABEL f))))))
+
+
+
+(deftest test-nil
+(tm/reset-num!)
+(println (select 
+(Move (BinaryOp :+ (Temp (tm/temp 12)) (Temp (tm/temp 13))) 	(Mem (BinaryOp :+ (Mem (BinaryOp :+ (Mem (BinaryOp :+ (Temp (tm/temp :bp)) (Const 8))) (Const 0)))   (BinaryOp :* (Const 4) (Temp (tm/temp 10))))))
+))
+
+)
+
+
