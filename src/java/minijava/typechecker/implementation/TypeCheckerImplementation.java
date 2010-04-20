@@ -29,7 +29,7 @@ public class TypeCheckerImplementation {
 		checker.visit(program);
 		
 		reporter.close();//this will throw the first exception that was reported, if it exists.
-                return new TypeChecked(program);
+                return new TypeChecked(program, classTable);
 	}
 
 	public Object buildClassTable(){

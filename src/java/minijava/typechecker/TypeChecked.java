@@ -1,6 +1,8 @@
 package minijava.typechecker;
 
 import minijava.ast.Program;
+import minijava.util.ImpTable;
+import minijava.typechecker.implementation.ClassEntry;
 
 /**
  * An instance of this class represents a correctly TypeChecked minijava program.
@@ -19,9 +21,11 @@ import minijava.ast.Program;
  */
 public class TypeChecked {
     public final Program program;
+    public final ImpTable<ClassEntry> classTable;
     
-    public TypeChecked(Program program) 
+    public TypeChecked(Program program, ImpTable<ClassEntry> classTable) 
     {
         this.program = program;
+        this.classTable = classTable;
     }
 }
