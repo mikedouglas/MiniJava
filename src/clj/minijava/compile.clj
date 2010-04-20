@@ -41,7 +41,10 @@
   (let [treemap   (apply-tree (parse program))
         canonmap  (map-method canon treemap)
         blocksmap (map-method basic-blocks canonmap)
-				tracemap (map-method trace canonmap)
-        munchmap  (map-method (fn [blocks] (map select blocks)) 
-                              blocksmap)]
-    munchmap))
+				tracemap (map-method #(trace % []) blocksmap)
+     ;;   munchmap  (map-method (fn [blocks] (map select blocks)) 
+    ;;                          tracemap)
+			]
+    tracemap))
+
+
