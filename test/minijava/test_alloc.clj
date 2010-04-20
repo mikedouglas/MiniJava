@@ -9,7 +9,9 @@
              {:start 1, :end 7}
              {:start 2, :end 6}
              {:start 2, :end 5}]
-        {:keys [inreg spilled]} (scan val)]
+        inreg (scan val)
+        spilled (filter #(= (:reg %) :spilled) inreg)
+        inreg (remove #(= (:reg %) :spilled) inreg)]
     (is (= (count val) (count inreg)) "Every interval is allocated to reg.")
     (is (distinct? (map :reg inreg)) "Interval is given a unique register.")
     (is (empty? spilled) "Nothing is spilled.")))
@@ -26,7 +28,9 @@
              {:start 0, :end 2}
              {:start 1, :end 3}
              {:start 2, :end 3}]
-        {:keys [inreg spilled]} (scan val)
+        inreg (scan val)
+        spilled (filter #(= (:reg %) :spilled) inreg)
+        inreg (remove #(= (:reg %) :spilled) inreg)
         doubled (find-dup-in :reg inreg)]
     (is (= (count val) (count inreg)) "Every interval is allocated to reg.")
     (is (not (nil? doubled)) "Registers are not unique.")
@@ -40,7 +44,9 @@
              {:start 1, :end 6}
              {:start 1, :end 4}
              {:start 2, :end 6}]
-        {:keys [inreg spilled]} (scan val)
+        inreg (scan val)
+        spilled (filter #(= (:reg %) :spilled) inreg)
+        inreg (remove #(= (:reg %) :spilled) inreg)
         longest-lived (first (reverse (sort-by :reg val)))]
     (is (not (= (count val) (count inreg))) "Not every interval in reg.")
     (is (not (empty? spilled)) "Something is spilled.")
@@ -67,3 +73,19 @@
              (movl :ECX :EAX)
              (jmp l1))]
     (is (= (fill val) res))))
+
+(deftest pipeline-unique
+  (let [l1 (label)
+        a (temp)
+        b (temp)
+        c (temp)
+        val (vector
+             (LABEL l1)
+             (addl (CONST 3) c)
+             (addl (CONST 5) b)
+             (addl b c)
+             (movl c a)
+             (jmp l1))]
+    (is (distinct? (:dst (val 1)) (:dst (val 2)) (:dst (val 4))))))
+
+
