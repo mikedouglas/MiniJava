@@ -83,14 +83,14 @@
 
 (deftest tests-special-call
   (let [val (parse-stm "System.out.println(3);")
-        res (Call (Name (tm/label "_mj_println")) [(Const 3)])]
+        res (Call (Name (tm/label "mj_println")) [(Const 3)])]
     (is (= res (last (tree-prog val))))))
 
 (deftest tests-new-array
   (tm/reset-num!)
   (let [val (parse-stm "int[] a; a = new int[5];")
         res (list (NoOp)
-                  (Move (Call (Name (tm/label "_mj_new_array")) [(Const 5)])
+                  (Move (Call (Name (tm/label "mj_new_array")) [(Const 5)])
                         (Temp (tm/temp))))]
     (tm/reset-num!)
     (is (= res (tree-prog val)))))

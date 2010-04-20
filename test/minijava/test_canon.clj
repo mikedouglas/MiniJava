@@ -33,7 +33,7 @@
                         (Jump (Name "test")))
                   (list (Label (tm/label))
                         (Statement (Const 4))
-                        (Jump (Name (tm/label "done")))))]
+                        (Jump (Name (tm/label :done)))))]
     (tm/reset-num!)
     (is (= (basic-blocks exp) res))))
 
@@ -62,7 +62,7 @@
                         (Jump done))
                   (list (Label done)
                         (Call (Name (tm/label "print")) [(Const 5)])
-                        (Jump (Name (tm/label "done")))))]
+                        (Jump (Name (tm/label :done)))))]
     (tm/reset-num!)
     (is (= (basic-blocks exp) res))))
 

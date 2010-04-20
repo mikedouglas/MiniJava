@@ -57,7 +57,8 @@ memory. Returns allocated intervals."
               [k (get-in info [(k x) :reg])]
             (and (= (type (k x)) :minijava.gas/MEMORY)
                  (= (type (:adr (k x))) :minijava.temp/Temp))
-              [k (MEMORY (get-in info [(:adr (k x)) :reg]) (:offset (k x)))]))))
+              [k (MEMORY (get-in info [(:adr (k x)) :reg]) (:offset (k x)))]
+            :else [k (k x)]))))
 
 (def replace-strings identity) ;; TODO
 
