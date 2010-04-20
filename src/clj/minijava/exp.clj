@@ -1,6 +1,6 @@
 (ns minijava.exp
   "Mixins that define basic IR usage."
-  (:use [minijava.ir :only [Exp Conditional Statement]]))
+  (:use [minijava.ir :only [Exp Conditional Statement Const]]))
 
 ;;; IR Hierarchy
 ;; :minijava.exp/expression -> BinaryOp, Const, Mem, Temp, ExpSeq
@@ -14,7 +14,7 @@
     Exp
      (unEx [this]     this)
      (unNx [this]     (Statement this))
-     (unCx [this t f] (Conditional :!= this 0 t f))))
+     (unCx [this t f] (Conditional :!= this (Const 0) t f))))
 
 (defn addNx!
   "Adds methods for a statement."

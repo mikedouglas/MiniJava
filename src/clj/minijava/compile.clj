@@ -4,8 +4,6 @@
         (minijava ir obj tree typechecker utility gas munch liveness canon))
   (:require [minijava.temp :as tm]))
 
-
-
 (defn apply-canon-helper [keyset originalmap newmap]
   (if (empty? keyset) newmap
       ;;else
@@ -40,4 +38,5 @@
        (map-method canon)
        (map-method basic-blocks)
        (map-method #(trace % nil))
-       (map-method #(map select %))))
+       (map-method #(map select %))
+))

@@ -36,7 +36,7 @@
 ;; produced by vars into a vector, required by multimethod
 (defn munch
   [x]
- (apply munchMap (conj  (vals x) x)))
+ (do (println "munch:" x) (apply munchMap (conj  (vals x) x))))
 ;; if a call is made to munch with just the ir root argument, call back
 ;; munchStm with the ir root followed by its children (for easier
 ;; pattern matching).
