@@ -36,7 +36,7 @@
 ;; produced by vars into a vector, required by multimethod
 (defn munch
   [x]
- (apply munchMap (conj  (vals x) x)))
+  (apply munchMap (conj (vals x) x)))
 ;; if a call is made to munch with just the ir root argument, call back
 ;; munchStm with the ir root followed by its children (for easier
 ;; pattern matching).
@@ -58,7 +58,6 @@
 
 (defmethod munchMap [:minijava.ir/Move :minijava.exp/expression :minijava.ir/Mem]
   [x src dst]
-(println "munch move exp mem")
   (cond
    ;; Move(Mem(Binop(Plus(Const(i),e1)),e2) -> movl $i[e1] e2
    (and (isit? (:adr dst) :minijava.ir/BinaryOp) (= (:op (:adr dst)) :+)
@@ -66,7 +65,7 @@
      (let [offset (:val (:exp1 (:adr dst)))
            e1 (munch (:exp2 (:adr dst)))
            e2 (munch src) ]
-       (emit (movl  e2 (MEMORY e1 offset))))
+       (emit (movl (MEMORY e1 offset) e2)))
        ;; AFTER munching these two statements, emit the code.
        ;; Move(Mem(Binop(Plus(e1, Const(i))),e2) -> movl $i[e1] e2
    (and (isit? (:adr dst) :minijava.ir/BinaryOp) (= (:op (:adr dst)) :+)
@@ -74,14 +73,14 @@
      (let [offset (:val (:exp2 (:adr dst)))
            e1 (munch (:exp1 (:adr dst)))
            e2 (munch src) ]
-       (emit (movl  e2 (MEMORY e1 offset))))
+       (emit (movl (MEMORY e1 offset) e2)))
        ;; AFTER munching these two statements, emit the code.
        ;; Move(Mem(e1),e2) -> movl [e1] e2
 
    :else
- (let [adr (munch (:adr dst))
-           e2 (munch src) ]
-       (emit (movl e2  (MEMORY adr 0))))))
+     (let [adr (munch (:adr src))
+           e2 (munch dst) ]
+       (emit (movl (MEMORY adr) e2)))))
 
 ;; Default Move pattern: just use Movl
 (defmethod munchMap [:minijava.ir/Move :minijava.exp/expression :minijava.exp/expression]
@@ -134,7 +133,7 @@
   nil)
 
 ;; Call
-(defmethod munchMap [:minijava.ir/Call :minijava.ir/Name clojure.lang.IPersistentVector]
+(defmethod munchMap [:minijava.ir/Call :minijava.ir/Name java.util.List]
   [x label args]
   ;; munch the arguments into temps.
   (let [formals (map munch args)
@@ -162,7 +161,6 @@
     ;; convention that return values always go in eax, so we can
     ;; pre-color the temp above.
     ret))
-
 
 (defn getCmd [op]
   (case op

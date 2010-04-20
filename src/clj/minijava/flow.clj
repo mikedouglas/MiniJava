@@ -4,7 +4,7 @@
   (:require [minijava.temp :as tm]))
 
 (defn lookup-lbl [prog]
-  (into {}
+  (into {(tm/label "done") (-> prog count)}
         (for [lbl (-> prog count range)
               :when (= (type (prog lbl)) :minijava.gas/LABEL)]
           [(:lbl (prog lbl)) lbl])))

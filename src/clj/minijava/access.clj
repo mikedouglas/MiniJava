@@ -1,7 +1,7 @@
 (ns minijava.access
   "Datatypes for accessing registers and memory addresses."
   (:use minijava.ir)
-	(:require [minijava.temp  :as tm]))
+  (:require [minijava.temp :as tm]))
 
 (defprotocol Access
   (exp [x]))
