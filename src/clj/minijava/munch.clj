@@ -59,7 +59,7 @@
 (defmethod munchMap [:minijava.ir/Move :minijava.exp/expression :minijava.ir/Mem]
   [x src dst]
   (cond
-   ;; Move(Mem(Binop(Plus(Const(i),e1)),e2) -> movl $i[e1] e2
+   ;; Move(e2 Mem(Binop(Plus(Const(i),e1))) -> movl e2  $i[e1]
    (and (isit? (:adr dst) :minijava.ir/BinaryOp) (= (:op (:adr dst)) :+)
         (isit? (:exp1 (:adr dst)) :minijava.ir/Const))
      (let [offset (:val (:exp1 (:adr dst)))
@@ -67,15 +67,15 @@
            e2 (munch src) ]
        (emit (movl  e2 (MEMORY e1 offset))))
        ;; AFTER munching these two statements, emit the code.
-       ;; Move(Mem(Binop(Plus(e1, Const(i))),e2) -> movl $i[e1] e2
+       ;; Move(e2 Mem(Binop(Plus(e1, Const(i)))) -> movl e2  $i[e1]
    (and (isit? (:adr dst) :minijava.ir/BinaryOp) (= (:op (:adr dst)) :+)
         (isit? (:exp2 (:adr dst)) :minijava.ir/Const))
      (let [offset (:val (:exp2 (:adr dst)))
            e1 (munch (:exp1 (:adr dst)))
            e2 (munch src) ]
-       (emit  e2 (movl (MEMORY e1 offset))))
+       (emit  (movl  e2 (MEMORY e1 offset))))
        ;; AFTER munching these two statements, emit the code.
-       ;; Move(Mem(e1),e2) -> movl [e1] e2
+       ;; Move(Mem(e1),e2) -> movl e2 [e1] 
 
    :else
      (let [adr (munch (:adr dst))
