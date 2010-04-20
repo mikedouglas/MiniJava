@@ -101,38 +101,37 @@
 (tm/reset-num!)
   (let [t (tm/label)
         f (tm/label)
-				v1 (tm/temp)
+        v1 (tm/temp)
         other (tm/label)
-				function (tm/label)
+        function (tm/label)
         prog  (Seq [(Conditional :< (BinaryOp :+ (ExpSeq [(Statement (Const 3))] (Const 2)) (Temp v1) ) (Const 4)  (Name t) (Name f))])]
  (is (= (canon prog)
-     
-           [(Statement (Const 3)) (Conditional :< (BinaryOp :+ (Const 2) (Temp v1) ) (Const 4)  (Name t) (Name f))]))))
+        [(Statement (Const 3)) (Conditional :< (BinaryOp :+ (Const 2) (Temp v1)) (Const 4)  (Name t) (Name f))]))))
 
 
 (deftest test-recursion
 (tm/reset-num!)
   (let [t (tm/label)
         f (tm/label)
-				v1 (tm/temp)
+        v1 (tm/temp)
         other (tm/label)
-				function (tm/label)
+        function (tm/label)
         prog  (Seq [(Label other)
-                    (Conditional :< (BinaryOp :+ (ExpSeq [(Statement (Const 3))] (Const 2)) (Temp v1) ) (Const 4)  (Name t) (Name f))
+                    (Conditional :< (BinaryOp :+ (ExpSeq [(Statement (Const 3))] (Const 2)) (Temp v1)) (Const 4) (Name t) (Name f))
                     (Label t)
-                    (Seq [(BinaryOp :+  (ExpSeq [(Seq [(Const 1) (Const 2)])] (Const 3)) (Const 4) ) (Const 5)] )
+                    (Seq [(BinaryOp :+ (ExpSeq [(Seq [(Const 1) (Const 2)])] (Const 3)) (Const 4)) (Const 5)] )
                     (Jump (Name other))
                     (Label f)])]
     (is (= (canon prog)
            [
             (Label other)
-						(Statement (Const 3))
-            (Conditional :< (BinaryOp :+ (Const 2) (Temp v1))  (Const 4) (Name t) (Name f))
+            (Statement (Const 3))
+            (Conditional :< (BinaryOp :+ (Const 2) (Temp v1)) (Const 4) (Name t) (Name f))
             (Label t)
-							(Const 1)
-							(Const 2)
-						(BinaryOp :+  (Const 3) (Const 4))
-						(Const 5)
+            (Const 1)
+            (Const 2)
+            (BinaryOp :+  (Const 3) (Const 4))
+            (Const 5)
             (Jump (Name other))
             (Label f)]))))
 
@@ -140,11 +139,11 @@
 (tm/reset-num!)
   (let [t (tm/label)
         f (tm/label)
-				v1 (tm/temp)
+        v1 (tm/temp)
         other (tm/label)
-				function (tm/label)
+        function (tm/label)
         prog  (Seq [(Label other)
-                    (Conditional :< (BinaryOp :+ (ExpSeq [(Statement (Const 3))] (Const 2)) (Temp v1) ) (Const 4)  (Name t) (Name f))
+                    (Conditional :< (BinaryOp :+ (ExpSeq [(Statement (Const 3))] (Const 2)) (Temp v1)) (Const 4) (Name t) (Name f))
                     (Label t)
                     (Seq [(Call (Name function) [(Const 5)]) ])
                     (Jump (Name other))
@@ -152,10 +151,10 @@
     (is (= (canon prog)
            [
             (Label other)
-						(Statement (Const 3))
+            (Statement (Const 3))
             (Conditional :< (BinaryOp :+ (Const 2) (Temp v1)) (Const 4) (Name t) (Name f))
             (Label t)
-						(Call (Name function) [(Const 5)])
+            (Call (Name function) [(Const 5)])
             (Jump (Name other))
             (Label f)]))))
 
@@ -164,33 +163,33 @@
 (tm/reset-num!)
   (let [t (tm/label)
         f (tm/label)
-				v1 (tm/temp)
+        v1 (tm/temp)
         other (tm/label)
-				function (tm/label)
+        function (tm/label)
         prog  (Seq [(Label other)
-                    (Conditional :< (BinaryOp :+ (ExpSeq [(Statement (Const 3))] (Const 2)) (Temp v1) ) (Const 4)  (Name t) (Name f))
+                    (Conditional :< (BinaryOp :+ (ExpSeq [(Statement (Const 3))] (Const 2)) (Temp v1)) (Const 4) (Name t) (Name f))
                     (Label t)
-                    (Seq [(Call (Name function) [(BinaryOp :+  (ExpSeq [(Seq [(Const 1) (Const 2)])] (Const 3)) (Const 4) ) (Const 5) ])])
+                    (Seq [(Call (Name function) [(BinaryOp :+ (ExpSeq [(Seq [(Const 1) (Const 2)])] (Const 3)) (Const 4)) (Const 5)])])
                     (Jump (Name other))
                     (Label f)])]
     (is (= (canon prog)
            [
             (Label other)
-						(Statement (Const 3))
+            (Statement (Const 3))
             (Conditional :< (BinaryOp :+ (Const 2) (Temp v1)) (Const 4) (Name t) (Name f))
             (Label t)
-						(Const 1)
-						(Const 2)
-						(Call (Name function) [(BinaryOp :+ (Const 3) (Const 4) ) (Const 5) ])
+            (Const 1)
+            (Const 2)
+            (Call (Name function) [(BinaryOp :+ (Const 3) (Const 4)) (Const 5)])
             (Jump (Name other))
             (Label f)]))))
 
 (deftest test-call-wrap
 (tm/reset-num!)
   (let [function (tm/label)
-			s (BinaryOp :+ (Call (Name function) [(Const 1)])  (Const 4))]
+        s (BinaryOp :+ (Call (Name function) [(Const 1)])  (Const 4))]
     (is (= (wrap-calls s)
-		(BinaryOp :+ (ExpSeq [(Move  (Call (Name function) [(Const 1)]) (tm/temp 2) )] (Temp (tm/temp 2))) (Const 4)))))
+           (BinaryOp :+ (ExpSeq [(Move (Call (Name function) [(Const 1)]) (tm/temp 2) )] (Temp (tm/temp 2))) (Const 4)))))
 
 )
 
@@ -198,47 +197,43 @@
 (tm/reset-num!)
   (let [t (tm/label)
         f (tm/label)
-				v1 (tm/temp)
+        v1 (tm/temp)
         other (tm/label)
-				function (tm/label)
+        function (tm/label)
         prog  (Seq [(Label other)
-                    (Conditional :<  (BinaryOp :+ (Call (Name function) [(Const 1)]) (Const 4)) (Const 5)  (Name t) (Name f))
+                    (Conditional :< (BinaryOp :+ (Call (Name function) [(Const 1)]) (Const 4)) (Const 5) (Name t) (Name f))
                     (Label t)
                      (Jump (Name other))
                     (Label f)])]
     (is (= (canon prog)
            [
             (Label other)
-						(Move (Call (Name function) [(Const 1)]) (tm/temp 6))
-            (Conditional :< (BinaryOp :+ (Temp  (tm/temp 6)) (Const 4)) (Const 5)  (Name t) (Name f))
+            (Move (Call (Name function) [(Const 1)]) (tm/temp 6))
+            (Conditional :< (BinaryOp :+ (Temp (tm/temp 6)) (Const 4)) (Const 5)  (Name t) (Name f))
             (Label t)
             (Jump (Name other))
             (Label f)]))))
 
-
-
-
 (deftest test-call-2
 (tm/reset-num!)
   (let [p (tm/label)
-				c (tm/label)
-				n (tm/label)
-				prog(Call p [(Call c [(Call n ['Fac]) (Const 10)])])			]
+        c (tm/label)
+        n (tm/label)
+        prog (Call p [(Call c [(Call n ['Fac]) (Const 10)])])]
    (is (= (canon prog)
          [(Move (Call n ['Fac]) (tm/temp 5))
-					(Move (Call c [(Temp (tm/temp 5)) (Const 10)]) (tm/temp 4))
-					(Call p [(Temp (tm/temp 4))])
-          ]  ))))
-
+          (Move (Call c [(Temp (tm/temp 5)) (Const 10)]) (tm/temp 4))
+          (Call p [(Temp (tm/temp 4))])
+          ]))))
 
 (deftest test-call-seq
 (tm/reset-num!)
   (let [p (tm/label)
-				c (tm/label)
-				n (tm/label)
-				prog(Call p [(Call c [(ExpSeq [(Seq [(Const 1)])] (Const 2))])])			]
+        c (tm/label)
+        n (tm/label)
+        prog (Call p [(Call c [(ExpSeq [(Seq [(Const 1)])] (Const 2))])])]
    (is (= (canon prog)
          [(Const 1)
-					(Move (Call c [(Const 2)]) (tm/temp 4))
-					(Call p [(Temp (tm/temp 4))])
-          ]  ))))
+          (Move (Call c [(Const 2)]) (tm/temp 4))
+          (Call p [(Temp (tm/temp 4))])
+          ]))))

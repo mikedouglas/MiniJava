@@ -416,4 +416,4 @@
         (trace (concat (rest after) before)
                (conj sorted (first blks) (first after)))
         (trace before (conj sorted (first blks)))))
-    sorted))
+    (flatten sorted)))
