@@ -147,7 +147,8 @@
             (pushl arg2)
             (pushl arg1)
             (call function)
-            (movl (tm/temp :eax)(tm/temp 4)))))))
+            (movl (tm/temp :EAX) (tm/temp 4))
+            (addl (CONST 8) (tm/temp :ESP)))))))
 
 ;; if we optimize conditional, this test will have to change
 (deftest test-Simple

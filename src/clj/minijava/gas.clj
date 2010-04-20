@@ -3,6 +3,13 @@
   (:use (minijava ir))
   (:require [minijava.temp :as tm]))
 
+(defn- p
+  "Print registers."
+  [x]
+  (if (keyword? x)
+    (str "%" (name x))
+    (str x)))
+
 ;;this is NOT an x86 instruction - it is a constant argument to an
 ;;instruction (ie addl $2 %eax)
 (deftype CONST [value]
@@ -29,20 +36,20 @@
 (deftype movl [src dst]
   clojure.lang.IPersistentMap
   Object
-  (toString [] (str "movl " src "," dst)))
+  (toString [] (str "movl " (p src) "," (p dst))))
 
 ;;Adds the first operand to the second, storing the result in the second
 (deftype addl [src dst]
   clojure.lang.IPersistentMap
   Object
-  (toString [] (str "addl " src "," dst)))
+  (toString [] (str "addl " (p src) "," (p dst))))
 
 ;;Subtract the two operands. This subtracts the first operand from
 ;;the second, and stores the result in the second operand.
 (deftype subl [src dst]
   clojure.lang.IPersistentMap
   Object
-  (toString [] (str "subl " src "," dst)))
+  (toString [] (str "subl " (p src) "," (p dst))))
 
 ;;Performs signed multiplication and stores the result in the second
 ;;operand.  If the second operand is left out, it is assumed to be
@@ -50,7 +57,7 @@
 (deftype imull [src dst]
   clojure.lang.IPersistentMap
   Object
-  (toString [] (str "imull " src "," dst)))
+  (toString [] (str "imull " (p src) "," (p dst))))
 
 ;;This pushes what would be the next value for %eip onto the stack,
 ;;and jumps to the destination address. Used for function calls.
@@ -69,7 +76,7 @@
 (deftype pushl [val]
   clojure.lang.IPersistentMap
   Object
-  (toString [] (str "pushl " val)))
+  (toString [] (str "pushl " (p val))))
 
 ;;Compares two integers. It does this by subtracting the first operand
 ;;from the second.  It discards the results, but sets the flags
@@ -77,7 +84,7 @@
 (deftype cmpl [a b]
   clojure.lang.IPersistentMap
   Object
-  (toString [] (str "cmpl " a "," b)))
+  (toString [] (str "cmpl " (p a) "," (p b))))
 
 
 (deftype testl [a b]
@@ -139,7 +146,8 @@
     :minijava.gas/addl  (extract-use-both instr :src :dst)
     :minijava.gas/subl  (extract-use-both instr :src :dst)
     :minijava.gas/imull (extract-use-both instr :src :dst)
-    (throw )))
+    :minijava.gas/pushl (extract-use-both instr :val)
+    (throw)))
 
 ;; precondition: instr is a cmpl/imull/subl/addl/movl
 (defn extract-def-temps [instr]
@@ -160,6 +168,7 @@
     :minijava.gas/subl  (extract-use-temps instr)
     :minijava.gas/addl  (extract-use-temps instr)
     :minijava.gas/movl  (extract-use-temps instr)
+    :minijava.gas/pushl (extract-use-temps instr)
     #{})) ;;catch LABEL, MEMORY, CONST
 
 ;;the set of temps defined by this instruction
