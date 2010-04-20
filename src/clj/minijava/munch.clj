@@ -245,7 +245,8 @@
    :minijava.exp/expression :minijava.ir/Name :minijava.ir/Name]
   [exp op rand1 rand2 then else]
   (let [t2 (munch rand2)]
-    (emit (cmpl (CONST (:val rand1)) t2))
+		(if (= op :&&)    (emit (testl (CONST (:val rand1)) t2))
+		    (emit (cmpl (CONST (:val rand1)) t2)))
     (emit (jcc op (munch then)))
     (emit (jmp (munch else)))))
 
@@ -266,8 +267,10 @@
                 :<= :=>
                 :>= :<=
                 := :=
-                :!= :!=)]
-    (emit (cmpl (CONST (:val rand2)) t1))
+                :!= :!=
+								:&&	:&&)]
+		(if (= op :&&)    (emit (testl (CONST (:val rand2)) t1))
+				 (emit (cmpl (CONST (:val rand2)) t1)) )
     (emit (jcc negop (munch then)))
     (emit (jmp (munch else)))))
 
@@ -285,7 +288,8 @@
               :>= (if (>= v1 v2) then else)
               :<= (if (<= v1 v2) then else)
               := (if (= v1 v2) then else)
-              :!= (if (not (= v1 v2)) then else))]
+              :!= (if (not (= v1 v2)) then else)
+							:&& (if (and v1 v2) then else))]
     (emit (jmp (munch dst)))))
 
 ;; Statement

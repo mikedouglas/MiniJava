@@ -79,6 +79,12 @@
   Object
   (toString [] (str "cmpl " a "," b)))
 
+
+(deftype testl [a b]
+  clojure.lang.IPersistentMap
+  Object
+  (toString [] (str "testl " a "," b)))
+
 ;;Conditional branch. cc is the condition code. Jumps to the given
 ;;address if the condition code is true (set from the previous
 ;;instruction, probably a comparison). Otherwise, goes to the next
@@ -97,7 +103,22 @@
 (deftype jcc [cc dst]
  clojure.lang.IPersistentMap
  Object
- (toString [] (str "jcc " dst))) ;; TODO: properly consider cc in toString
+ (toString [] 
+(cond
+;;Conditional keywords in use in minijava:  :!= :< :>  :&& := :==
+	(= cc :!=)
+		 (str "Jne" dst)
+	(or (= cc :=) (= cc :==))
+		 (str "Je" dst)
+	(= cc :<)
+ 		 (str "Jl" dst)
+	(or (= cc :<=)(= cc :=<))
+ 		 (str "Jle" dst)
+	(= cc :>)
+ 		 (str "Jg" dst)
+	(or (= cc :>=) (= cc :=>))
+ 		 (str "Jz" dst) ;;zero flag is set if testl is true.
+))) ;; TODO: properly consider cc in toString
 
 ;;Pops a value off of the stack and then sets %eip to that value. Used
 ;;to return from function calls.
