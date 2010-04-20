@@ -133,7 +133,7 @@
   nil)
 
 ;; Call
-(defmethod munchMap [:minijava.ir/Call :minijava.ir/Name clojure.lang.IPersistentList]
+(defmethod munchMap [:minijava.ir/Call :minijava.ir/Name java.util.List]
   [x label args]
   ;; munch the arguments into temps.
   (let [formals (map munch args)
@@ -161,7 +161,6 @@
     ;; convention that return values always go in eax, so we can
     ;; pre-color the temp above.
     ret))
-
 
 (defn getCmd [op]
   (case op

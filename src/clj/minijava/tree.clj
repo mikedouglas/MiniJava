@@ -10,7 +10,7 @@
 (def *methods* (atom (hash-map)))
 
 (defn addMethod [name method frame]
-		(reset! *methods* (assoc @*methods* name {:ir method :frame frame}))
+  (reset! *methods* (assoc @*methods* name {:ir method :frame frame}))
 )
 
 (defn binop
@@ -20,8 +20,8 @@
             (-> x .e2 (tree frame) unEx)))
 
 (defn apply-tree [prog]
-	(tree prog nil)
-		@*methods*	
+  (tree prog nil)
+  @*methods*	
 )
 
 (defn tree-prog
@@ -96,9 +96,9 @@
    (let [obj (new-obj (for [v ($ (.vars x))] (.name v)))]
      (into {} (for [i ($ (.methods x))]
           (let [args (map #(. % name) (-> i .formals $ reverse))
-						frame (new-x86 0 (cons "obj" args) obj)
-						name (str (.name x) "_" (.name i))
-					ir (Seq (cons (Label name) (tree i frame)))]
+                frame (new-x86 0 (cons "obj" args) obj)
+                name (str (.name x) "_" (.name i))
+                ir (Seq (cons (Label name) (tree i frame)))]
 (addMethod name ir frame)
 ))))})
 
