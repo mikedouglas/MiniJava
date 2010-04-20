@@ -1,4 +1,4 @@
-(ns minijava.munch
+=(ns minijava.munch
   (:use (minijava exp ir gas))
   (:require [minijava.temp :as tm]))
 
@@ -105,6 +105,10 @@
 (defmethod munchMap [:minijava.ir/Temp :minijava.temp/Temp]
   [exp temp]
   temp) ;; Unwrap the temp
+
+(defmethod munchMap [:minijava.ir/Temp clojure.lang.Keyword]
+  [exp key]
+  (tm/temp key))
 
 (defmethod munchMap [:minijava.ir/Label :minijava.temp/Label]
   [exp lbl]
