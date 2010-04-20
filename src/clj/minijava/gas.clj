@@ -78,6 +78,14 @@
   Object
   (toString [] (str "pushl " (p val))))
 
+;; equiv to
+;; movl (%esp), %REG
+;; %esp += 4
+(deftype popl [val]
+  clojure.lang.IPersistentMap
+  Object
+  (toString [] (str "popl " (p val))))
+
 ;;Compares two integers. It does this by subtracting the first operand
 ;;from the second.  It discards the results, but sets the flags
 ;;accordingly. Usually used before a conditional jump.
