@@ -83,14 +83,14 @@
 
 (deftest tests-special-call
   (let [val (parse-stm "System.out.println(3);")
-        res (Call (Name (tm/label "print")) [(Const 3)])]
+        res (Call (Name (tm/label "_mj_println")) [(Const 3)])]
     (is (= res (last (tree-prog val))))))
 
 (deftest tests-new-array
   (tm/reset-num!)
   (let [val (parse-stm "int[] a; a = new int[5];")
         res (list (NoOp)
-                  (Move (Call (Name (tm/label "newArray")) [(Const 5)])
+                  (Move (Call (Name (tm/label "_mj_new_array")) [(Const 5)])
                         (Temp (tm/temp))))]
     (tm/reset-num!)
     (is (= res (tree-prog val)))))
@@ -124,10 +124,3 @@ a[1] = a[0];")
     (is (= res1 (last (butlast (butlast (tree-prog val))))))
     (is (= res2 (last (butlast (tree-prog val)))))
     (is (= res3 (last (tree-prog val))))))
-
-(deftest tests-files-convert-without-exception
-  (let [filter (proxy [java.io.FilenameFilter] []
-                 (accept [_ name] (not (nil? (re-find #"java$" name)))))
-        files (-> "resources/sample" java.io.File. (.listFiles filter))]
-    (doseq [f files]
-      (is (doall (tree (parse f) nil)) (str "Converting " f)))))
