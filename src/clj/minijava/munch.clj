@@ -1,5 +1,5 @@
 =(ns minijava.munch
-  (:use (minijava exp ir gas))
+  (:use (minijava exp ir gas alloc))
   (:require [minijava.temp :as tm])
   (:import clojure.lang.Keyword))
 
@@ -161,16 +161,20 @@
         ;; itself.
         ret  (tm/temp)]
     ;; Call-save hack: push these registers
-    ;;(doseq [r (disj regs :EAX)]
-    ;;  (emit (pushl r)))
+    (doseq [r (seq (disj regs :EAX))]
+      (emit (pushl r)))
+    ;; Push arguments onto stack
     (doseq [f (reverse formals)]
       (emit (pushl f)))
+    ;; Make the call
     (emit (call (munch label)))
-    (emit (movl (tm/temp :EAX) ret))
-    ;; Call-save hack: pop these registers
-    ;;(doseq [r (disj regs :EAX)]
-    ;;  (emit (popl r)))
+    ;; Pop arguments off of stack
     (emit (addl (CONST (* (count formals) 4)) (tm/temp :ESP)))
+    ;; Call-save hack: pop these registers
+    (doseq [r (reverse (seq (disj regs :EAX)))]
+      (emit (popl r)))
+    ;; Get return value
+    (emit (movl (tm/temp :EAX) ret))
     ;; want to return the return value as a temp from this function.
     ;; liveness analysis will probably remove this movl instruction
     ;; later, but for now, thats what we'll do.  this depends upon the
