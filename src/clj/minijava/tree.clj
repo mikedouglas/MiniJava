@@ -97,7 +97,7 @@
           (let [args (map #(. % name) (-> i .formals $ reverse))
                 frame (new-x86 0 (cons "obj" args) obj)
                 name (.name i)
-                ir (Seq (cons (Label (tm/label name)) (tree i frame)))]
+                ir (Seq (cons (Label (tm/label name true)) (tree i frame)))]
             (addMethod name ir frame)))))})
 
 (deftree minijava.ast.IdentifierExp

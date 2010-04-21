@@ -64,8 +64,10 @@
       (let [name (first pair)
             code (second pair)]
         (if (= name "main")
-          (println ".globl mj_main
+          (do (println ".globl mj_main
 	.type	mj_main, @function
-mj_main:"))
+mj_main:")
+              (println "pushl %ebp")
+              (println "movl %esp, %ebp")))
         (doseq [block code]
           (println block))))))

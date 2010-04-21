@@ -116,7 +116,11 @@
 
 (defmethod munchMap [:minijava.ir/Label :minijava.temp/Label]
   [exp lbl]
-  (emit (LABEL lbl)))
+  (if (:isMethod lbl)
+      (do (emit (LABEL lbl))
+          (emit (pushl :EBP))
+          (emit (movl :ESP :EBP)))
+      (emit (LABEL lbl))))
 ;; Emit a label marker. Note (important for stage 5 or 6) This code
 ;; 'defines' a label, but results in no x86 code directly.
 
@@ -155,10 +159,16 @@
         ;; between these temps and the equivelent temps in the function
         ;; itself.
         ret  (tm/temp)]
+    ;; Call-save hack: push these registers
+    ;;(doseq [r (disj regs :EAX)]
+    ;;  (emit (pushl r)))
     (doseq [f (reverse formals)]
       (emit (pushl f)))
     (emit (call (munch label)))
     (emit (movl (tm/temp :EAX) ret))
+    ;; Call-save hack: pop these registers
+    ;;(doseq [r (disj regs :EAX)]
+    ;;  (emit (popl r)))
     (emit (addl (CONST (* (count formals) 4)) (tm/temp :ESP)))
     ;; want to return the return value as a temp from this function.
     ;; liveness analysis will probably remove this movl instruction
@@ -313,7 +323,8 @@
   [stm dst]
 	(if (= (:id dst) :done) 
 				;;special case: this is actual a return statement.
-	(emit (ret)) ;;GAS ret code.
+	(do (emit (popl :EBP))
+            (emit (ret))) ;;GAS ret code.
 		;;else
   (emit (jmp dst))))
 
