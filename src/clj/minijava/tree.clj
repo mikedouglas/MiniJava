@@ -97,7 +97,7 @@
           (let [args (map #(. % name) (-> i .formals $ reverse))
                 frame (new-x86 0 (cons "obj" args) obj)
                 name (.name i)
-                ir (Seq (cons (Label (tm/label name true)) (tree i frame)))]
+                ir (Seq (vector (Label (tm/label name true)) (tree i frame)))]
             (addMethod name ir frame)))))})
 
 (deftree minijava.ast.IdentifierExp
@@ -133,7 +133,7 @@
 (deftree minijava.ast.MethodDecl
   [x frame]
   (doseq [v (-> x .vars $)] (allocLocal frame (.name v) false))
-  (map #(tree % frame) (-> x .statements $)))
+(ExpSeq  (vec (map #(tree % frame) (-> x .statements $))) (Move (tree (.returnExp x) frame) (Temp (tm/temp :EAX)))))
 
 (deftree minijava.ast.Minus
   [x frame]

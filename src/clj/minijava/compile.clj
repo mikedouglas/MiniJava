@@ -45,7 +45,8 @@
        (map-method basic-blocks)
        (map-method #(trace % nil))
        (map-method #(flatten (map select %)))
-       (map-method (comp fill vec)))))
+       (map-method (comp fill vec))
+)))
 
 ;; convert all GAS instructions to strings
 (defn extract-program-text [program]
