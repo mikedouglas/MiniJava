@@ -116,7 +116,11 @@
 
 (defmethod munchMap [:minijava.ir/Label :minijava.temp/Label]
   [exp lbl]
-  (emit (LABEL lbl)))
+  (if (:isMethod lbl)
+      (do (emit (LABEL lbl))
+          (emit (pushl :EBP))
+          (emit (movl :ESP :EBP)))
+      (emit (LABEL lbl))))
 ;; Emit a label marker. Note (important for stage 5 or 6) This code
 ;; 'defines' a label, but results in no x86 code directly.
 
@@ -319,7 +323,8 @@
   [stm dst]
 	(if (= (:id dst) :done) 
 				;;special case: this is actual a return statement.
-	(emit (ret)) ;;GAS ret code.
+	(do (emit (popl :EBP))
+            (emit (ret))) ;;GAS ret code.
 		;;else
   (emit (jmp dst))))
 

@@ -15,10 +15,11 @@
   ([id] (Temp id)))
 
 ;; LABELS
-(deftype Label [id]
+(deftype Label [id isMethod]
   Object
   (toString [] (str (if (number? id) (str "lbl_" id) id))))
 
 (defn label
-  ([] (Label (swap! *num* inc)))
-  ([str] (Label str)))
+  ([] (Label (swap! *num* inc) false))
+  ([str] (Label str false))
+  ([str isMethod] (Label str isMethod)))
