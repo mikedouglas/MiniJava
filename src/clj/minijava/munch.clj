@@ -116,6 +116,7 @@
 
 (defmethod munchMap [:minijava.ir/Label :minijava.temp/Label]
   [exp lbl]
+  ;; If this is a method label, emit frame pointer init code
   (if (:isMethod lbl)
       (do (emit (LABEL lbl))
           (emit (pushl :EBP))
@@ -315,7 +316,8 @@
   [stm dst]
 	(if (= (:id (:lbl dst)) :done )
 				;;special case: this is actual a return statement.
-	(emit (ret)) ;;GAS ret code.
+        (do (emit (popl :EBP))
+	    (emit (ret))) ;;GAS ret code.
 ;else
   (emit (jmp (munch dst)))))
 
