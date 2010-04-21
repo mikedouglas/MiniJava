@@ -118,22 +118,22 @@
 (deftype jcc [cc dst]
  clojure.lang.IPersistentMap
  Object
- (toString [] 
-(cond
-;;Conditional keywords in use in minijava:  :!= :< :>  :&& := :==
-	(= cc :!=)
-		 (str "Jne " dst)
-	(or (= cc :=) (= cc :==))
-		 (str "Je " dst)
-	(= cc :<)
- 		 (str "Jg " dst)
-	(or (= cc :<=)(= cc :=<))
- 		 (str "Jge " dst)
-	(= cc :>)
- 		 (str "Jl " dst)
-	(or (= cc :>=) (= cc :=>))
- 		 (str "Jz " dst) ;;zero flag is set if testl is true.
-))) ;; TODO: properly consider cc in toString
+ (toString []
+   (cond
+    ;;Conditional keywords in use in minijava:  :!= :< :>  :&& := :==
+    (= cc :!=)
+      (str "jne " dst)
+    (or (= cc :=) (= cc :==))
+      (str "je " dst)
+    (= cc :<)
+      (str "jg " dst)
+    (or (= cc :<=)(= cc :=<))
+      (str "jge " dst)
+    (= cc :>)
+      (str "jl " dst)
+    (or (= cc :>=) (= cc :=>))
+      (str "jz " dst) ;;zero flag is set if testl is true.
+)))
 
 ;;Pops a value off of the stack and then sets %eip to that value. Used
 ;;to return from function calls.
