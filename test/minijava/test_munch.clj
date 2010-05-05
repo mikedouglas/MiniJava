@@ -144,11 +144,21 @@
         args (vector (Temp arg1) (Temp arg2))]
     (is (= (select (Call (Name function) args))
            (list
+            (pushl (tm/temp :ECX))
+            (pushl (tm/temp :EDI))
+            (pushl (tm/temp :ESI))
+            (pushl (tm/temp :EBX))
+            (pushl (tm/temp :EDX))
             (pushl arg2)
             (pushl arg1)
             (call function)
-            (movl (tm/temp :EAX) (tm/temp 4))
-            (addl (CONST 8) (tm/temp :ESP)))))))
+            (addl (CONST 8) (tm/temp :ESP))
+            (popl (tm/temp :EDX))
+            (popl (tm/temp :EBX))
+            (popl (tm/temp :ESI))
+            (popl (tm/temp :EDI))
+            (popl (tm/temp :ECX))
+            (movl (tm/temp :EAX) (tm/temp 4)))))))
 
 ;; if we optimize conditional, this test will have to change
 (deftest test-Simple

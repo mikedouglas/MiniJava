@@ -9,4 +9,4 @@
                  (accept [_ name] (not (nil? (re-find #"java$" name)))))
         files (-> "resources/sample" java.io.File. (.listFiles filter))]
     (doseq [f files]
-      (print-program-text (compile-program f)))))
+      (compile-program f))))
