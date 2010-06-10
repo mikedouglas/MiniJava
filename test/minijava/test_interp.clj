@@ -1,10 +1,13 @@
-(ns minijava.test-interp
+(comment
+  (ns minijava.test-interp
   (:use clojure.test
         clojure.contrib.def
         minijava.x86.frame
-        (minijava interp obj tree typechecker utility))
+        [minijava interp obj tree typechecker utility])
   (:require [minijava.ir :as ir]
-            [minijava.temp :as tm]))
+            [minijava.temp :as tm])
+  (:import [minijava.ir Move Temp Const Label Jump Temp Name BinaryOp
+            Conditional]))
 
 (import-ast-classes)
 
@@ -24,51 +27,51 @@
 
 (deftest test-temp
   (let [tmp (tm/temp)
-        prog (list (ir/Move (ir/Const 5) (ir/Temp tmp))
-                   (ir/Temp tmp))]
+        prog (list (Move. (Const. 5) (Temp. tmp))
+                   (Temp. tmp))]
     (is (= 5 (eval-prog prog)))))
 
 (deftest test-labels
    (let [t (tm/label)
-         prog (list (ir/Const 7)
-                    (ir/Label t)
-                    (ir/Const 5))]
+         prog (list (Const. 7)
+                    (Label. t)
+                    (Const. 5))]
      (is (= (build-label-map prog (hash-map))
-            (hash-map t (list (ir/Const 5)))))))
+            (hash-map t (list (Const. 5)))))))
 
 (deftest test-jump
    (let [t (tm/label)
          tmp (tm/temp)
-         prog (list (ir/Move (ir/Const 0) (ir/Temp tmp))
-                    (ir/Jump t)
-                    (ir/Move (ir/Const 5) (ir/Temp tmp))
-                    (ir/Label t)
-                    (ir/Temp tmp))]
+         prog (list (Move. (Const. 0) (Temp. tmp))
+                    (Jump. t)
+                    (Move. (Const. 5) (Temp. tmp))
+                    (Label. t)
+                    (Temp. tmp))]
      (is (= 0 (eval-prog prog)))
      (is (= (build-label-map prog (hash-map))
-            (hash-map t (list (ir/Temp tmp)))))))
+            (hash-map t (list (Temp. tmp)))))))
 
 (deftest test-cond
   (let [t (tm/label)
         f (tm/label)
         d (tm/label)
         tmp (tm/temp)
-        prog1 (list (ir/Conditional := (ir/Const 10) (ir/Const 10)
-                       (ir/Name t) (ir/Name f))
-                   (ir/Label t)
-                   (ir/Move (ir/Const 1) (ir/Temp tmp))
-                   (ir/Jump d)
-                   (ir/Label f)
-                   (ir/Move (ir/Const 2) (ir/Temp tmp))
-                   (ir/Label d)
-                   (ir/Temp tmp))
-        prog2 (list (ir/Conditional :!= (ir/Const 10) (ir/Const 10)
-                       (ir/Name t) (ir/Name f))
-                   (ir/Label t)
-                   (ir/Move (ir/Const 1) (ir/Temp tmp))
-                   (ir/Label f)
-                   (ir/Move (ir/Const 2) (ir/Temp tmp))
-                   (ir/Temp tmp))]
+        prog1 (list (Conditional. := (Const. 10) (Const. 10)
+                                  (Name. t) (Name. f))
+                    (Label. t)
+                    (Move. (Const. 1) (Temp. tmp))
+                    (Jump. d)
+                    (Label. f)
+                    (Move. (Const. 2) (Temp. tmp))
+                    (Label. d)
+                    (Temp. tmp))
+        prog2 (list (Conditional. :!= (Const. 10) (Const. 10)
+                                  (Name. t) (Name. f))
+                    (Label. t)
+                    (Move. (Const. 1) (Temp. tmp))
+                    (Label. f)
+                    (Move. (Const. 2) (Temp. tmp))
+                    (Temp. tmp))]
     (is (= 1 (eval-prog prog1)))
     (is (= 2 (eval-prog prog2)))))
 
@@ -77,35 +80,35 @@
         f (tm/label)
         s (tm/label)
         tmp (tm/temp)
-        prog (list (ir/Move (ir/Const 0) (ir/Temp tmp))
-                   (ir/Label s)
-                   (ir/Conditional :< (ir/Temp tmp) (ir/Const 10)
-                       (ir/Name t) (ir/Name f))
-                   (ir/Label t)
-                   (ir/Move (ir/BinaryOp :+ (ir/Temp tmp) (ir/Const 1))
-                            (ir/Temp tmp))
-                   (ir/Jump s)
-                   (ir/Label f)
-                   (ir/Temp tmp))]
+        prog (list (Move. (Const. 0) (Temp. tmp))
+                   (Label. s)
+                   (Conditional. :< (Temp. tmp) (Const. 10)
+                                 (Name. t) (Name. f))
+                   (Label. t)
+                   (Move. (BinaryOp. :+ (Temp. tmp) (Const. 1))
+                            (Temp. tmp))
+                   (Jump. s)
+                   (Label. f)
+                   (Temp. tmp))]
     (is (= 10 (eval-prog prog)))
     (is (= (build-label-map prog {})
            (hash-map s
-             (list (ir/Conditional :< (ir/Temp tmp) (ir/Const 10)
-                       (ir/Name t) (ir/Name f))
-                   (ir/Label t)
-                   (ir/Move (ir/BinaryOp :+ (ir/Temp tmp) (ir/Const 1))
-                            (ir/Temp tmp))
-                   (ir/Jump s)
-                   (ir/Label f)
-                   (ir/Temp tmp))
+             (list (Conditional. :< (Temp. tmp) (Const. 10)
+                                 (Name. t) (Name. f))
+                   (Label. t)
+                   (Move. (BinaryOp. :+ (Temp. tmp) (Const. 1))
+                            (Temp. tmp))
+                   (Jump. s)
+                   (Label. f)
+                   (Temp. tmp))
              t
-             (list (ir/Move (ir/BinaryOp :+ (ir/Temp tmp) (ir/Const 1))
-                            (ir/Temp tmp))
-                   (ir/Jump s)
-                   (ir/Label f)
-                   (ir/Temp tmp))
+             (list (Move. (BinaryOp. :+ (Temp. tmp) (Const. 1))
+                            (Temp. tmp))
+                   (Jump. s)
+                   (Label. f)
+                   (Temp. tmp))
              f
-             (list (ir/Temp tmp)))))))
+             (list (Temp. tmp)))))))
 
 ;; (deftest test-classes
 ;;   (let [prog (tree (minijava.ast.ClassDecl.
@@ -118,11 +121,11 @@
 ;;                                     return 5;
 ;;                                    }")])
 ;;                    nil)
-;;         entry-point (list (ir/Call (ir/Name "hello_func") []))]
+;;         entry-point (list (minijava.ir.Call. (Name. "hello_func") []))]
 ;;     (is (= 5 (eval-prog entry-point (get prog "hello"))))))
 
 (deftest test-print
-  (let [prog (ir/Call (ir/Name "print") [(ir/Const 5)])]
+  (let [prog (minijava.ir.Call. (Name. "print") [(Const. 5)])]
     (is (= (with-out-str
              (eval-prog prog))
            "5\n"))))
@@ -130,8 +133,9 @@
 ;; sanity checks
 (deftest test-label
   (let [t (tm/label)
-        prog (list (ir/Label t))]
-    (is (= (ir/Label t)
+        prog (list (Label. t))]
+    (is (= (Label. t)
            (first prog)))
     (is (= (hash-map t 5)
            (hash-map (:lbl (first prog)) 5)))))
+)

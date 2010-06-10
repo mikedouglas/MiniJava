@@ -1,7 +1,9 @@
 =(ns minijava.munch
-  (:use (minijava exp ir gas alloc))
+  (:use [minijava exp ir gas alloc])
   (:require [minijava.temp :as tm])
-  (:import clojure.lang.Keyword))
+  (:import clojure.lang.Keyword
+           [minijava.gas movl pushl call addl subl imull popl cmpl jcc jmp
+            testl ret MEMORY LABEL CONST]))
 
 
 ;; helper method to do instanceof
@@ -59,94 +61,94 @@
 ;; up to Move (Expression Expression)
 
 (defmethod munchMap
-  [:minijava.ir/Move :minijava.exp/expression :minijava.ir/Mem]
+  [minijava.ir.Move :minijava.exp/expression minijava.ir.Mem]
   [x src dst]
   (cond
    ;; Move(e2 Mem(Binop(Plus(Const(i),e1))) -> movl e2  $i[e1]
-   (and (isit? (:adr dst) :minijava.ir/BinaryOp) (= (:op (:adr dst)) :+)
-        (isit? (:exp1 (:adr dst)) :minijava.ir/Const))
+   (and (isit? (:adr dst) minijava.ir.BinaryOp) (= (:op (:adr dst)) :+)
+        (isit? (:exp1 (:adr dst)) minijava.ir.Const))
      (let [offset (:val (:exp1 (:adr dst)))
            e1 (munch (:exp2 (:adr dst)))
-           e2 (munch src) ]
-       (emit (movl  e2 (MEMORY e1 offset))))
+           e2 (munch src)]
+       (emit (movl. e2 (MEMORY. e1 offset))))
        ;; AFTER munching these two statements, emit the code.
        ;; Move(e2 Mem(Binop(Plus(e1, Const(i)))) -> movl e2  $i[e1]
-   (and (isit? (:adr dst) :minijava.ir/BinaryOp) (= (:op (:adr dst)) :+)
-        (isit? (:exp2 (:adr dst)) :minijava.ir/Const))
+   (and (isit? (:adr dst) minijava.ir.BinaryOp) (= (:op (:adr dst)) :+)
+        (isit? (:exp2 (:adr dst)) minijava.ir.Const))
      (let [offset (:val (:exp2 (:adr dst)))
            e1 (munch (:exp1 (:adr dst)))
            e2 (munch src) ]
-       (emit  (movl  e2 (MEMORY e1 offset))))
+       (emit  (movl. e2 (MEMORY. e1 offset))))
        ;; AFTER munching these two statements, emit the code.
        ;; Move(Mem(e1),e2) -> movl e2 [e1]
 
    :else
      (let [adr (munch (:adr dst))
            e2 (munch src) ]
-       (emit (movl e2 (MEMORY adr 0))))))
+       (emit (movl. e2 (MEMORY. adr 0))))))
 
 ;; Default Move pattern: just use Movl
 (defmethod munchMap
-  [:minijava.ir/Move :minijava.exp/expression :minijava.exp/expression]
+  [minijava.ir.Move :minijava.exp/expression :minijava.exp/expression]
   [x src dst]
   ;; Move(e1,e2) -> Movl e1 e2
   (let [s (munch src)
         d (munch dst)]
-    (emit (movl s d))))
+    (emit (movl. s d))))
 ;; AFTER munching these two statements, emit Movl.
 
 ;; Default Mem pattern: Invent a new temporary, and move the memory at
 ;; this address into that temporary.  Since Mem is an expression,
 ;; return that temporary.
-(defmethod munchMap [:minijava.ir/Mem :minijava.exp/expression]
+(defmethod munchMap [minijava.ir.Mem :minijava.exp/expression]
   [x adr]
   ;; Mem(addr) -> Movl [adr] Temp
   (let [d  (tm/temp)
         s (munch adr)]
-    (emit (movl (MEMORY s 0) d))
+    (emit (movl. (MEMORY. s 0) d))
     d)) ;; Since Mem is an expression, it returns a temp.
 
-(defmethod munchMap [:minijava.ir/Temp :minijava.temp/Temp]
+(defmethod munchMap [minijava.ir.Temp minijava.temp.Temp]
   [exp temp]
   temp) ;; Unwrap the temp
 
-(defmethod munchMap [:minijava.ir/Temp clojure.lang.Keyword]
+(defmethod munchMap [minijava.ir.Temp clojure.lang.Keyword]
   [exp key]
   (tm/temp key))
 
-(defmethod munchMap [:minijava.ir/Label :minijava.temp/Label]
+(defmethod munchMap [minijava.ir.Label minijava.temp.Label]
   [exp lbl]
   ;; If this is a method label, emit frame pointer init code
   (if (:isMethod lbl)
-      (do (emit (LABEL lbl))
-          (emit (pushl :EBP))
-          (emit (movl :ESP :EBP)))
-      (emit (LABEL lbl))))
+      (do (emit (LABEL. lbl))
+          (emit (pushl. :EBP))
+          (emit (movl. :ESP :EBP)))
+      (emit (LABEL. lbl))))
 ;; Emit a label marker. Note (important for stage 5 or 6) This code
 ;; 'defines' a label, but results in no x86 code directly.
 
-(defmethod munchMap [:minijava.ir/Name :minijava.temp/Label]
+(defmethod munchMap [minijava.ir.Name minijava.temp.Label]
   [exp lbl]
   lbl) ;; unwrap the label (out of the name)
 
-(defmethod munchMap [:minijava.ir/Const java.lang.Integer]
+(defmethod munchMap [minijava.ir.Const java.lang.Integer]
   [x value]
   ;; Const(i) -> Movl $i Temp
-  (let [d  (tm/temp)]
-    (emit (movl (CONST value) d))
+  (let [d (tm/temp)]
+    (emit (movl. (CONST. value) d))
     d)) ;; Since Const is an expression, it returns a temp.
 
 ;; emit nothing for NoOp
-(defmethod munchMap [:minijava.ir/NoOp]
+(defmethod munchMap [minijava.ir.NoOp]
   [x value]
   nil)
 
 ;; Call
-(defmethod munchMap [:minijava.ir/Call :minijava.ir/Name java.util.List]
+(defmethod munchMap [minijava.ir.Call minijava.ir.Name java.util.List]
   [x label args]
   ;; munch the arguments into temps.
   (let [formals (map munch args)
-        ;; where do the temps from these formals end up?  According to
+        ;; where do the temps from these formals end up? According to
         ;; the book, we aren't going to use these temps explicitly here
         ;; (in any emited x86). But register allocation will later
         ;; determine which ones to put into registers and which to put
@@ -162,19 +164,19 @@
         ret  (tm/temp)]
     ;; Call-save hack: push these registers
     (doseq [r (seq (disj regs :EAX))]
-      (emit (pushl (tm/temp r))))
+      (emit (pushl. (tm/temp r))))
     ;; Push arguments onto stack
     (doseq [f (reverse formals)]
-      (emit (pushl f)))
+      (emit (pushl. f)))
     ;; Make the call
-    (emit (call (munch label)))
+    (emit (call. (munch label)))
     ;; Pop arguments off of stack
-    (emit (addl (CONST (* (count formals) 4)) (tm/temp :ESP)))
+    (emit (addl. (CONST. (* (count formals) 4)) (tm/temp :ESP)))
     ;; Call-save hack: pop these registers
     (doseq [r (reverse (seq (disj regs :EAX)))]
-      (emit (popl (tm/temp r))))
+      (emit (popl. (tm/temp r))))
     ;; Get return value
-    (emit (movl (tm/temp :EAX) ret))
+    (emit (movl. (tm/temp :EAX) ret))
     ;; want to return the return value as a temp from this function.
     ;; liveness analysis will probably remove this movl instruction
     ;; later, but for now, thats what we'll do.  this depends upon the
@@ -182,56 +184,53 @@
     ;; pre-color the temp above.
     ret))
 
-(defn getCmd [op]
+(defn newCmd [op rand2 t]
   (case op
-        :+ addl
-        :- subl
-        :* imull))
+    :+ (addl. rand2 t)
+    :- (subl. rand2 t)
+    :* (imull. rand2 t)))
 
 ;; Constant operands can be compiled out into a CONST
 (defmethod munchMap
-  [:minijava.ir/BinaryOp Keyword :minijava.ir/Const :minijava.ir/Const]
+  [minijava.ir.BinaryOp Keyword minijava.ir.Const minijava.ir.Const]
   [exp op rand1 rand2]
   (case op
-    :+  (emit (CONST (+ (:val rand1) (:val rand2))))
-    :- (emit (CONST (- (:val rand1) (:val rand2))))
-    :* (emit (CONST (* (:val rand1) (:val rand2))))))
+    :+ (emit (CONST. (+ (:val rand1) (:val rand2))))
+    :- (emit (CONST. (- (:val rand1) (:val rand2))))
+    :* (emit (CONST. (* (:val rand1) (:val rand2))))))
 
 ;; Subtraction
 (defmethod munchMap
-  [:minijava.ir/BinaryOp Keyword :minijava.ir/Const :minijava.exp/expression]
+  [minijava.ir.BinaryOp Keyword minijava.ir.Const :minijava.exp/expression]
   ;; first exp - second exp
   [exp op rand1 rand2]
-  (let [cmd (getCmd op)
-        d  (tm/temp)]
-    (emit (movl (CONST (:val rand1)) d))
-    (emit (cmd  (munch rand2) d))
+  (let [d (tm/temp)]
+    (emit (movl. (CONST. (:val rand1)) d))
+    (emit (newCmd op (munch rand2) d))
     d))
 
 (defmethod munchMap
-  [:minijava.ir/BinaryOp clojure.lang.Keyword :minijava.exp/expression
-   :minijava.ir/Const]
+  [minijava.ir.BinaryOp clojure.lang.Keyword :minijava.exp/expression
+   minijava.ir.Const]
   ;; first exp - second exp
   [exp op rand1 rand2]
-  (let [cmd (getCmd op)
-        d  (tm/temp)]
-    (emit (movl (munch rand1) d))
-    (emit (cmd  (CONST (:val rand2)) d))
+  (let [d (tm/temp)]
+    (emit (movl. (munch rand1) d))
+    (emit (newCmd op (CONST. (:val rand2)) d))
     ;; note: the ordering here matters, and is different than above,
     ;; because subtraction is not commutative
     d))
 
  (defmethod munchMap
-   [:minijava.ir/BinaryOp clojure.lang.Keyword :minijava.exp/expression
+   [minijava.ir.BinaryOp clojure.lang.Keyword :minijava.exp/expression
     :minijava.exp/expression]
    ;; first exp - second exp
    [x op exp1 exp2]
-   (let [cmd (getCmd op)
-         e1 (munch exp1)
+   (let [e1 (munch exp1)
          e2 (munch exp2)
          d  (tm/temp)]
-     (emit (movl e2 d))
-     (emit (cmd e1 d))
+     (emit (movl. e2 d))
+     (emit (newCmd op e1 d))
      d))
 
 ;; Note - there are some optimizations we can make here. If either
@@ -245,94 +244,96 @@
 ;; is munched, or directly in the ir in advance (then it would be
 ;; implemented in canon)).  Conditional
 (defmethod munchMap
-  [:minijava.ir/Conditional clojure.lang.Keyword :minijava.exp/expression
-   :minijava.exp/expression :minijava.ir/Name :minijava.ir/Name]
+  [minijava.ir.Conditional clojure.lang.Keyword :minijava.exp/expression
+   :minijava.exp/expression minijava.ir.Name minijava.ir.Name]
   [exp op rand1 rand2 then else]
   (let [t1 (munch rand1)
         t2 (munch rand2)]
-    (emit (cmpl t1 t2))
-    (emit (jcc op (munch then)))
-    (emit (jmp (munch else)))))
+    (emit (cmpl. t1 t2))
+    (emit (jcc. op (munch then)))
+    (emit (jmp. (munch else)))))
 
 ;; (Conditional op (Const i) e2 true false)
 ;; -> movl e2 t2, cmpl $i t2, jcc op true, jmp false
 (defmethod munchMap
-  [:minijava.ir/Conditional clojure.lang.Keyword :minijava.ir/Const
-   :minijava.exp/expression :minijava.ir/Name :minijava.ir/Name]
+  [minijava.ir.Conditional clojure.lang.Keyword minijava.ir.Const
+   :minijava.exp/expression minijava.ir.Name minijava.ir.Name]
   [exp op rand1 rand2 then else]
   (let [t2 (munch rand2)]
-		(if (= op :&&)    (emit (testl (CONST (:val rand1)) t2))
-		    (emit (cmpl (CONST (:val rand1)) t2)))
-    (emit (jcc op (munch then)))
-    (emit (jmp (munch else)))))
+    (if (= op :&&)
+      (emit (testl. (CONST. (:val rand1)) t2))
+      (emit (cmpl. (CONST. (:val rand1)) t2)))
+    (emit (jcc. op (munch then)))
+    (emit (jmp. (munch else)))))
 
 
 ;; (Conditional op e1 (Const i) true false)
 ;; -> movl e2 t2, cmpl $i t2, jcc (negated op) true, jmp false
 (defmethod munchMap
-  [:minijava.ir/Conditional clojure.lang.Keyword :minijava.exp/expression
-   :minijava.ir/Const :minijava.ir/Name :minijava.ir/Name]
+  [minijava.ir.Conditional clojure.lang.Keyword :minijava.exp/expression
+   minijava.ir.Const minijava.ir.Name minijava.ir.Name]
   [exp op rand1 rand2 then else]
   (let [t1 (munch rand1)
         ;; since we're switching the order of the comparison (because
         ;; cmpl can only take a constant in the first argument), we
         ;; need to change the comparison accordingly
         negop (case op
-                :> :<
-                :< :>
+                :>  :<
+                :<  :>
                 :<= :=>
                 :>= :<=
-                := :=
+                :=  :=
                 :!= :!=
-								:&&	:&&)]
-		(if (= op :&&)    (emit (testl (CONST (:val rand2)) t1))
-				 (emit (cmpl (CONST (:val rand2)) t1)) )
-    (emit (jcc negop (munch then)))
-    (emit (jmp (munch else)))))
+                :&& :&&)]
+    (if (= op :&&)
+      (emit (testl. (CONST. (:val rand2)) t1))
+      (emit (cmpl. (CONST. (:val rand2)) t1)))
+    (emit (jcc. negop (munch then)))
+    (emit (jmp. (munch else)))))
 
 ;; Statically resolve the conditional
 ;; (Conditional op (Const i) (Const g) true false) ->  jmp (true or false)
 (defmethod munchMap
-  [:minijava.ir/Conditional clojure.lang.Keyword :minijava.ir/Const
-   :minijava.ir/Const :minijava.ir/Name :minijava.ir/Name]
+  [minijava.ir.Conditional clojure.lang.Keyword minijava.ir.Const
+   minijava.ir.Const minijava.ir.Name minijava.ir.Name]
   [exp op rand1 rand2 then else]
   (let [v1 (:val rand1)
         v2 (:val rand2)
         dst (case op
-              :> (if (> v1 v2) then else)
-              :< (if (< v1 v2) then else)
+              :>  (if (> v1 v2) then else)
+              :<  (if (< v1 v2) then else)
               :>= (if (>= v1 v2) then else)
               :<= (if (<= v1 v2) then else)
-              := (if (= v1 v2) then else)
+              :=  (if (= v1 v2) then else)
               :!= (if (not (= v1 v2)) then else)
-							:&& (if (and v1 v2) then else))]
-    (emit (jmp (munch dst)))))
+              :&& (if (and v1 v2) then else))]
+    (emit (jmp. (munch dst)))))
 
 ;; Statement
-(defmethod munchMap [:minijava.ir/Statement :minijava.exp/expression]
+(defmethod munchMap [minijava.ir.Statement :minijava.exp/expression]
   [stm exp]
   (do
     (munch exp)
     nil)) ;;return nothing from a Statement
 
 
-(defmethod munchMap [:minijava.ir/Jump :minijava.ir/Name]
+(defmethod munchMap [minijava.ir.Jump minijava.ir.Name]
   [stm dst]
-	(if (= (:id (:lbl dst)) :done )
-				;;special case: this is actual a return statement.
-        (do (emit (popl :EBP))
-	    (emit (ret))) ;;GAS ret code.
+  (if (= (:id (:lbl dst)) :done)
+    ;;special case: this is actual a return statement.
+    (do (emit (popl. :EBP))
+        (emit (ret.))) ;;GAS ret code.
 ;else
-  (emit (jmp (munch dst)))))
+  (emit (jmp. (munch dst)))))
 
-(defmethod munchMap [:minijava.ir/Jump :minijava.temp/Label]
+(defmethod munchMap [minijava.ir.Jump minijava.temp.Label]
   [stm dst]
-	(if (= (:id dst) :done) 
-				;;special case: this is actual a return statement.
-	(do (emit (popl :EBP))
-            (emit (ret))) ;;GAS ret code.
-		;;else
-  (emit (jmp dst))))
+  (if (= (:id dst) :done)
+    ;;special case: this is actual a return statement.
+    (do (emit (popl. :EBP))
+        (emit (ret.))) ;;GAS ret code.
+    ;;else
+    (emit (jmp. dst))))
 
 ;; pass strings through
 (defmethod munchMap [java.lang.String]

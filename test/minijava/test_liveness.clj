@@ -1,6 +1,7 @@
 (ns minijava.test-liveness
-  (:use (minijava gas liveness) clojure.test)
-  (:require [minijava.temp :as tm]))
+  (:use [minijava gas liveness] clojure.test)
+  (:require [minijava.temp :as tm])
+  (:import [minijava.gas cmpl jmp jcc addl movl LABEL CONST]))
 
 (deftest test-liveness-1
   (tm/reset-num!)
@@ -10,13 +11,13 @@
         b (tm/temp "b")
         other (tm/label)
         prog  (vector
-               (LABEL other)
-               (cmpl a b)
-               (jcc := t)
-               (jmp f)
-               (LABEL t)
-               (jmp other)
-               (LABEL f))]
+               (LABEL. other)
+               (cmpl. a b)
+               (jcc. := t)
+               (jmp. f)
+               (LABEL. t)
+               (jmp. other)
+               (LABEL. f))]
   (is (= (live prog)
          [#{a b} #{a b} #{a b} #{} #{a b} #{a b} #{}]))))
 
@@ -28,12 +29,12 @@
         b (tm/temp "b")
         c (tm/temp "c")
         prog  (vector
-               (LABEL l1)
-               (addl (CONST 3) c)
-               (addl (CONST 5) b)
-               (addl b c)
-               (movl c a)
-               (jmp l1))]
+               (LABEL. l1)
+               (addl. (CONST. 3) c)
+               (addl. (CONST. 5) b)
+               (addl. b c)
+               (movl. c a)
+               (jmp. l1))]
   (is (= (live prog)
          [#{c b} #{c b} #{c b} #{c b} #{c b a} #{c b}]))))
 
@@ -44,12 +45,12 @@
         b (tm/temp)
         c (tm/temp)
         prog  (vector
-               (LABEL l1)
-               (addl (CONST 3) c)
-               (addl (CONST 5) b)
-               (addl b c)
-               (movl c a)
-               (jmp l1))]
+               (LABEL. l1)
+               (addl. (CONST. 3) c)
+               (addl. (CONST. 5) b)
+               (addl. b c)
+               (movl. c a)
+               (jmp. l1))]
    (is (= (into #{} (convert (live prog)))
           #{{:id a, :start 4, :end 4, :reg nil}
             {:id b, :start 0, :end 5, :reg nil}
@@ -63,13 +64,13 @@
         b (tm/temp "b")
         other (tm/label)
         prog  (vector
-               (LABEL other)
-               (cmpl a b)
-               (jcc := t)
-               (jmp f)
-               (LABEL t)
-               (jmp other)
-               (LABEL f))]
+               (LABEL. other)
+               (cmpl. a b)
+               (jcc. := t)
+               (jmp. f)
+               (LABEL. t)
+               (jmp. other)
+               (LABEL. f))]
   (is (= (convert (live prog))
          [{:id a, :start 0, :end 5, :reg nil}
           {:id b, :start 0, :end 5, :reg nil}]))))

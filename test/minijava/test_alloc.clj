@@ -1,6 +1,7 @@
 (ns minijava.test-alloc
   (:use (minijava alloc liveness gas temp)
-        clojure.test))
+        clojure.test)
+  (:import [minijava.gas LABEL CONST movl addl jmp]))
 
 (deftest tests-no-spilled-no-dead
   (let [val [{:start 0, :end 3}
@@ -59,19 +60,19 @@
         b (temp :EBX)
         c (temp :ECX)
         val (vector
-             (LABEL l1)
-             (addl (CONST 3) c)
-             (addl (CONST 5) b)
-             (addl b c)
-             (movl c a)
-             (jmp l1))
+             (LABEL. l1)
+             (addl. (CONST. 3) c)
+             (addl. (CONST. 5) b)
+             (addl. b c)
+             (movl. c a)
+             (jmp. l1))
         res (vector
-             (LABEL l1)
-             (addl (CONST 3) :ECX)
-             (addl (CONST 5) :EBX)
-             (addl :EBX :ECX)
-             (movl :ECX :EAX)
-             (jmp l1))]
+             (LABEL. l1)
+             (addl. (CONST. 3) :ECX)
+             (addl. (CONST. 5) :EBX)
+             (addl. :EBX :ECX)
+             (movl. :ECX :EAX)
+             (jmp. l1))]
     (is (= (fill val) res))))
 
 (deftest pipeline-unique
@@ -80,12 +81,12 @@
         b (temp)
         c (temp)
         val (vector
-             (LABEL l1)
-             (addl (CONST 3) c)
-             (addl (CONST 5) b)
-             (addl b c)
-             (movl c a)
-             (jmp l1))]
+             (LABEL. l1)
+             (addl. (CONST. 3) c)
+             (addl. (CONST. 5) b)
+             (addl. b c)
+             (movl. c a)
+             (jmp. l1))]
     (is (distinct? (:dst (val 1)) (:dst (val 2)) (:dst (val 4))))))
 
 

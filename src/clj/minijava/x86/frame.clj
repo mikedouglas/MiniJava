@@ -1,34 +1,33 @@
 (ns minijava.x86.frame
-  (:use clojure.contrib.str-utils
-        (minijava access ir))
+  (:use [minijava access ir])
+  (:import [minijava.access InFrame InReg])
   (:require [minijava.temp :as tm]))
 
 (defprotocol Frame
   (allocLocal [x sym escapes?])
-  (obj [x])
-  (fp [x])
-  (rv [x])
-  (formals [x])
-  (word-size [x]))
+  (obj [x] "Location of object.")
+  (fp [x] "Frame pointer.")
+  (rv [x] "Return value.")
+  (formals [x] "Arguments.")
+  (word-size [x] "Size of word in CPU."))
 
 ;; don't create directly, use (new-x86)
-(deftype X86 [fp locals formals syms word object]
-  :as this
+(defrecord X86 [fp locals formals syms word object]
   Frame
-  (allocLocal [sym escapes?]
+  (allocLocal [x sym escapes?]
     (let [loc (if escapes?
-                (InFrame (swap! fp - 4))
-                (InReg (tm/temp)))]
+                (InFrame. (swap! fp - 4))
+                (InReg. (tm/temp)))]
       (swap! locals conj loc)
       (swap! syms assoc sym loc)
       loc))
-  (obj [] (first formals))
-  (fp [] (deref fp))
-  (rv [] (InFrame (- (:offset (obj this)) 4)))
-  (formals [] formals)
-  (word-size [] word)
+  (obj [x] (first formals))
+  (fp [x] (deref fp))
+  (rv [x] (InFrame. (- (:offset (obj x)) 4)))
+  (formals [x] formals)
+  (word-size [x] word)
   Lookupable
-  (lookup [sym] (or (get @syms sym) (lookup object sym))))
+  (lookup [x sym] (or (get @syms sym) (lookup object sym))))
 
 ;; (new-x86 fp ["obj" ...])
 (defn new-x86 [prev-fp args obj]
@@ -36,6 +35,6 @@
         fp      (atom prev-fp)
         locals  (atom [])
         formals (for [i (range (count args))]
-                  (InFrame (-> i (+ 2) (* word))))
+                  (InFrame. (-> i (+ 2) (* word))))
         syms    (atom (zipmap args formals))]
-    (X86 fp locals formals syms word obj)))
+    (X86. fp locals formals syms word obj)))

@@ -2,7 +2,8 @@
   (:use clojure.test
         minijava.access
         minijava.obj
-        minijava.x86.frame))
+        minijava.x86.frame)
+  (:import [minijava.access InFrame]))
 
 (deftest tests-uni-no-formals
   (let [frame (new-x86 0 [] (new-obj []))
@@ -31,8 +32,8 @@
 
 (deftest tests-location-of-fp-and-rv
   (let [frame (new-x86 0 ["obj"] (new-obj []))]
-    (is (= (InFrame 4) (rv frame)) "Return address correct")
-    (is (= (InFrame 8) (obj frame)) "Object address correct")
+    (is (= (InFrame. 4) (rv frame)) "Return address correct")
+    (is (= (InFrame. 8) (obj frame)) "Object address correct")
     (is (= 0 (fp frame)) "Frame pointer correct w/o alloc")
     (allocLocal frame "temp" true)
     (is (= -4 (fp frame)) "Frame pointer correct w/ alloc")))
@@ -40,7 +41,7 @@
 (deftest tests-lookup-of-formal
   (let [frame (new-x86 0 ["obj" "arg1"] (new-obj []))]
     (is (= (obj frame) (lookup frame "obj")) "Object lookup correct")
-    (is (= (InFrame 12) (lookup frame "arg1")) "Argument lookup correct")))
+    (is (= (InFrame. 12) (lookup frame "arg1")) "Argument lookup correct")))
 
 (deftest tests-lookup-of-local
   (let [frame (new-x86 0 ["obj"] (new-obj []))

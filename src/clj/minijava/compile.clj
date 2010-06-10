@@ -1,9 +1,8 @@
 (ns minijava.compile
   "Implementation of the canon-localicalization algorithms for IR."
   (:use minijava.x86.frame
-        clojure.contrib.seq-utils
-        (minijava alloc ir obj tree typechecker utility gas munch
-                  liveness canon))
+        [minijava alloc ir obj tree typechecker utility gas munch
+         liveness canon])
   (:require [minijava.temp :as tm]))
 
 

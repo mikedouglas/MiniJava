@@ -6,20 +6,20 @@
   (reset! *num* 0))
 
 ;; TEMPS
-(deftype Temp [id]
+(defrecord Temp [id]
   Object
-  (toString [] (str id)))
+  (toString [x] (str id)))
 
 (defn temp
-  ([] (Temp (swap! *num* inc)))
-  ([id] (Temp id)))
+  ([] (Temp. (swap! *num* inc)))
+  ([id] (Temp. id)))
 
 ;; LABELS
-(deftype Label [id isMethod]
+(defrecord Label [id isMethod]
   Object
-  (toString [] (str (if (number? id) (str "lbl_" id) id))))
+  (toString [x] (str (if (number? id) (str "lbl_" id) id))))
 
 (defn label
-  ([] (Label (swap! *num* inc) false))
-  ([str] (Label str false))
-  ([str isMethod] (Label str isMethod)))
+  ([] (Label. (swap! *num* inc) false))
+  ([str] (Label. str false))
+  ([str isMethod] (Label. str isMethod)))

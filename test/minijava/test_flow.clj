@@ -1,6 +1,7 @@
 (ns minijava.test-flow
-  (:use (minijava gas flow) clojure.test)
-  (:require [minijava.temp :as tm]))
+  (:use [minijava gas flow] clojure.test)
+  (:require [minijava.temp :as tm])
+  (:import [minijava.gas cmpl jcc jmp LABEL]))
 
 (deftest test-lookup-lbl
   (tm/reset-num!)
@@ -11,13 +12,13 @@
         other (tm/label)
         done (tm/label "done")
         prog (vector
-              (LABEL other)
-              (cmpl a b)
-              (jcc := t)
-              (jmp f)
-              (LABEL t)
-              (jmp other)
-              (LABEL f))]
+              (LABEL. other)
+              (cmpl. a b)
+              (jcc. := t)
+              (jmp. f)
+              (LABEL. t)
+              (jmp. other)
+              (LABEL. f))]
     (is (= (lookup-lbl prog)
            (do
              (tm/reset-num!)
@@ -31,12 +32,12 @@
         b (tm/temp)
         other (tm/label)
         prog (vector
-              (LABEL other)
-              (cmpl a b)
-              (jcc := t)
-              (jmp f)
-              (LABEL t)
-              (jmp other)
-              (LABEL f))]
+              (LABEL. other)
+              (cmpl. a b)
+              (jcc. := t)
+              (jmp. f)
+              (LABEL. t)
+              (jmp. other)
+              (LABEL. f))]
     (is (= (flow prog)
            [[1] [2] [3 4] [6] [5] [0] [7]]))))

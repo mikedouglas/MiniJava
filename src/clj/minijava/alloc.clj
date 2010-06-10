@@ -2,6 +2,7 @@
   "Register allocation, using a linear scan algorithm.
    See Poletto and Sarkar[1999]"
   (:use [minijava flow liveness gas])
+  (:import minijava.gas.MEMORY)
   (:require [clojure.set :as set]))
 
 (declare expire spill)
@@ -53,11 +54,11 @@ memory. Returns allocated intervals."
   (apply merge x
          (for [k keys]
            (cond
-            (= (type (k x)) :minijava.temp/Temp)
+            (= (type (k x)) minijava.temp.Temp)
               [k (get-in info [(k x) :reg])]
-            (and (= (type (k x)) :minijava.gas/MEMORY)
-                 (= (type (:adr (k x))) :minijava.temp/Temp))
-              [k (MEMORY (get-in info [(:adr (k x)) :reg]) (:offset (k x)))]
+            (and (= (type (k x)) minijava.gas.MEMORY)
+                 (= (type (:adr (k x))) minijava.temp.Temp))
+              [k (MEMORY. (get-in info [(:adr (k x)) :reg]) (:offset (k x)))]
             :else [k (k x)]))))
 
 (def replace-strings identity) ;; TODO
@@ -71,16 +72,16 @@ memory. Returns allocated intervals."
   [asm]
   (let [temps (-> asm live convert scan pull-temps)
         replace-temps (partial replace-temps temps)]
-    (remove #(and (= (type %) :minijava.gas/movl) (= (:dst %) (:src %)))
+    (remove #(and (= (type %) minijava.gas.movl) (= (:dst %) (:src %)))
      (for [a asm]
-       (case (type a)
-         :minijava.gas/call (replace-strings a)
-         :minijava.gas/addl (replace-temps a [:src :dst])
-         :minijava.gas/cmpl (replace-temps a [:a :b])
-         :minijava.gas/imull (replace-temps a [:src :dst])
-         :minijava.gas/subl (replace-temps a [:src :dst])
-         :minijava.gas/movl (replace-temps a [:src :dst])
-         :minijava.gas/pushl (replace-temps a [:val])
+       (condp = (type a)
+         minijava.gas.call (replace-strings a)
+         minijava.gas.addl (replace-temps a [:src :dst])
+         minijava.gas.cmpl (replace-temps a [:a :b])
+         minijava.gas.imull (replace-temps a [:src :dst])
+         minijava.gas.subl (replace-temps a [:src :dst])
+         minijava.gas.movl (replace-temps a [:src :dst])
+         minijava.gas.pushl (replace-temps a [:val])
          a)))))
 
 (defn- expire

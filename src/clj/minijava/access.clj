@@ -1,25 +1,26 @@
 (ns minijava.access
   "Datatypes for accessing registers and memory addresses."
   (:use minijava.ir)
+  (:import [minijava.ir Mem Temp Const BinaryOp])
   (:require [minijava.temp :as tm]))
-
-(defprotocol Access
-  (exp [x]))
 
 (defprotocol Lookupable
   (lookup [x sym]))
 
-(deftype InFrame [offset]
-  Access
-  (exp [] (Mem (BinaryOp :+ (Temp (tm/temp :EBP)) (Const offset)))))
+(defprotocol Access
+  (exp [x]))
 
-(deftype InReg [temp]
+(defrecord InFrame [offset]
   Access
-  (exp [] (Temp temp)))
+  (exp [x] (Mem. (BinaryOp. :+ (Temp. (tm/temp :EBP)) (Const. offset)))))
+
+(defrecord InReg [temp]
+  Access
+  (exp [x] (Temp. temp)))
 
 ;; location of object whose method is currently being called.
-(def obj-loc (InFrame 8))
+(def obj-loc (InFrame. 8))
 
-(deftype InField [offset]
+(defrecord InField [offset]
   Access
-  (exp [] (Mem (BinaryOp :+ (exp obj-loc) (Const offset)))))
+  (exp [x] (Mem. (BinaryOp. :+ (exp obj-loc) (Const. offset)))))

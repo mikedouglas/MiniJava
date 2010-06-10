@@ -1,6 +1,8 @@
 (ns minijava.exp
   "Mixins that define basic IR usage."
-  (:use [minijava.ir :only [Exp Conditional Statement Const]]))
+  (:use [minijava.ir :only [Exp]])
+  (:import [minijava.ir Call Conditional Statement Const Mem Temp ExpSeq
+            Jump Label Move NoOp Seq BinaryOp]))
 
 ;;; IR Hierarchy
 ;; :minijava.exp/expression -> BinaryOp, Const, Mem, Temp, ExpSeq
@@ -12,23 +14,23 @@
   [expType]
   (extend-type expType
     Exp
-     (unEx [this]     this)
-     (unNx [this]     (Statement this))
-     (unCx [this t f] (Conditional :!= this (Const 0) t f))))
+    (unEx [x]     x)
+    (unNx [x]     (Statement. x))
+    (unCx [x t f] (Conditional. :!= x (Const. 0) t f))))
 
 (defn addNx!
   "Adds methods for a statement."
   [stmType]
   (extend-type stmType
     Exp
-     (unEx [this]     (throw (Exception. "Statement used as expression.")))
-     (unNx [this]     this)
-     (unCx [this t f] (throw (Exception. "Statement used as conditional.")))))
+    (unEx [x]     (throw (Exception. "Statement used as expression.")))
+    (unNx [x]     x)
+    (unCx [x t f] (throw (Exception. "Statement used as conditional.")))))
 
-(doseq [t ["Call" "Const" "Mem" "Temp" "ExpSeq"]]
-  (addEx! (keyword "minijava.ir" t))
-  (derive (keyword "minijava.ir" t) ::expression))
+(doseq [t [Call Const Temp Mem ExpSeq]]
+  (addEx! t)
+  (derive t ::expression))
 
-(doseq [t ["Jump" "Label" "Move" "NoOp" "Seq" "Statement"]]
-  (addNx! (keyword "minijava.ir" t))
-  (derive (keyword "minijava.ir" t) ::statement))
+(doseq [t [Jump Label Move NoOp Seq Statement]]
+  (addNx! t)
+  (derive t ::statement))
